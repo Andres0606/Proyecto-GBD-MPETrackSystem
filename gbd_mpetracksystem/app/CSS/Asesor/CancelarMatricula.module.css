@@ -1,0 +1,524 @@
+/* ═══════════════════════════════════════════════════════
+   CancelarMatricula.module.css — TransMeta · Asesor · Cancelar Matrícula
+═══════════════════════════════════════════════════════ */
+
+.container {
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  overflow-x: hidden;
+  background: #f4f7fb;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+}
+
+.inner {
+  position: relative; z-index: 2;
+  max-width: 640px; margin: 0 auto;
+}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+  padding: 1rem 1.4rem;
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+.headerLeft { display: flex; align-items: center; gap: .7rem; }
+
+.logoMark {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #42A5F5, #1565C0);
+  display: grid; place-items: center; color: #fff; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.35);
+}
+.logoMark svg { width: 17px; height: 17px; }
+
+.logoText {
+  font-family: var(--ff, 'Sora', sans-serif);
+  font-size: 1rem; font-weight: 600; color: #1a2b45;
+}
+.logoText strong { font-weight: 800; color: #1565C0; }
+
+.badgeAsesor {
+  font-size: .75rem; font-weight: 700; color: #2E7D32;
+  background: rgba(46, 125, 50, 0.09); border: 1px solid rgba(46, 125, 50, 0.2);
+  border-radius: 8px; padding: .28rem .7rem;
+}
+
+.backButton {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .5rem 1rem; border-radius: 10px;
+  border: 1.5px solid rgba(21, 101, 192, 0.2); background: rgba(21, 101, 192, 0.07);
+  color: #1565C0; font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.backButton svg { width: 14px; height: 14px; }
+.backButton:hover:not(:disabled) {
+  background: rgba(21, 101, 192, 0.11);
+  border-color: rgba(21, 101, 192, 0.28);
+  transform: none;
+}
+.backButton:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ══════════════════════════════════════
+   PAGE TITLE
+══════════════════════════════════════ */
+.pageTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.pageIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(198, 40, 40, 0.10);
+  color: #9f2f2f;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: none;
+}
+
+.pageIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pageTitle {
+  font-family: var(--ff, 'Sora', sans-serif);
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: #0d1f36;
+  margin: 0;
+}
+
+.pageSub {
+  font-size: .83rem;
+  color: #7a92ae;
+  margin: .1rem 0 0;
+}
+
+/* ══════════════════════════════════════
+   ALERTS
+══════════════════════════════════════ */
+.errorAlert {
+  background: rgba(229, 57, 53, 0.1);
+  border: 1px solid rgba(229, 57, 53, 0.25);
+  color: #c62828;
+  padding: .9rem 1.2rem;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+.successAlert {
+  background: rgba(46, 125, 50, 0.1);
+  border: 1px solid rgba(46, 125, 50, 0.25);
+  color: #2E7D32;
+  padding: .9rem 1.2rem;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════
+   FORM CARD
+══════════════════════════════════════ */
+.formCard {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.formCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(198, 40, 40, 0.65);
+  border-radius: 16px 16px 0 0;
+}
+
+/* ══════════════════════════════════════
+   INFO BOXES
+══════════════════════════════════════ */
+.infoBox {
+  background: rgba(198, 40, 40, 0.045);
+  border-left: 3px solid rgba(198, 40, 40, 0.55);
+  padding: 1rem 1.1rem;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 1.2rem;
+}
+
+.infoBox h3 {
+  margin: 0 0 .5rem;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .9rem;
+  font-weight: 800;
+  color: #9f2f2f;
+}
+
+.infoBox p {
+  font-size: .82rem;
+  color: #374151;
+  margin: .25rem 0;
+  line-height: 1.5;
+}
+
+.vehicleInfo {
+  background: rgba(21, 101, 192, 0.06);
+  border-left: 3px solid #1565C0;
+  padding: 1rem 1.1rem;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 1.2rem;
+}
+
+.vehicleInfo h3 {
+  margin: 0 0 .5rem;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .9rem;
+  font-weight: 800;
+  color: #1565C0;
+}
+
+.vehicleInfo p {
+  font-size: .82rem;
+  color: #2a3a52;
+  margin: .25rem 0;
+}
+
+.vehicleInfo strong {
+  color: #1565C0;
+}
+
+/* ══════════════════════════════════════
+   ACTION BOX
+══════════════════════════════════════ */
+.actionBox {
+  background: rgba(198, 40, 40, 0.035);
+  border: 1.5px solid rgba(198, 40, 40, 0.12);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.actionBoxHeader {
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .78rem;
+  font-weight: 800;
+  color: #9f2f2f;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+
+.actionBox p {
+  font-size: .82rem;
+  color: #3a5068;
+  line-height: 1.5;
+  margin: 0 0 .9rem;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  border-radius: 11px;
+  border: 1.5px solid rgba(21, 101, 192, 0.14);
+  background: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .2s, background .2s;
+}
+
+.checkRowActive {
+  border-color: rgba(198, 40, 40, 0.24);
+  background: rgba(198, 40, 40, 0.045);
+}
+
+.checkBox {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 7px;
+  border: 2px solid rgba(21, 101, 192, 0.24);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: .9rem;
+  color: transparent;
+  background: #fff;
+}
+
+.checkBoxActive {
+  background: rgba(198, 40, 40, 0.12);
+  color: #9f2f2f;
+  border-color: rgba(198, 40, 40, 0.28);
+}
+
+.checkLabel {
+  flex: 1;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .84rem;
+  font-weight: 600;
+  color: #2a3a52;
+}
+
+.checkStatusBadge {
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .68rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: .25rem .65rem;
+  white-space: nowrap;
+}
+
+.checkStatusPending {
+  background: rgba(21, 101, 192, 0.08);
+  color: #1565C0;
+}
+
+.checkStatusDone {
+  background: rgba(198, 40, 40, 0.10);
+  color: #9f2f2f;
+  border: none;
+}
+
+/* ══════════════════════════════════════
+   BUTTON GROUP
+══════════════════════════════════════ */
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: .8rem;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(21, 101, 192, 0.08);
+}
+
+.backButtonForm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .65rem 1.3rem;
+  border-radius: 11px;
+  border: none;
+  background: rgba(21, 101, 192, 0.08);
+  color: #1565C0;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+.backButtonForm:hover:not(:disabled) {
+  background: rgba(21, 101, 192, 0.14);
+  color: #0D47A1;
+  transform: none;
+}
+
+.backButtonForm:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .65rem 1.5rem;
+  border-radius: 11px;
+  border: none;
+  background: rgba(198, 40, 40, 0.10);
+  color: #9f2f2f;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background .2s ease, color .2s ease;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: rgba(198, 40, 40, 0.16);
+  color: #7f1d1d;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.cancelButton:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+
+.buttonDisabled {
+  opacity: .5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 31, 54, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modalBox {
+  width: min(440px, 100%);
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 18px 45px rgba(13, 31, 54, 0.22);
+  text-align: center;
+}
+
+.modalIcon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 1rem;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(198, 40, 40, 0.10);
+  color: #9f2f2f;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.modalBox h3 {
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0d1f36;
+  margin: 0 0 .6rem;
+}
+
+.modalBox p {
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .84rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modalActions {
+  display: flex;
+  gap: .8rem;
+  margin-top: 1.4rem;
+}
+
+.btnModalCancelar {
+  flex: 1;
+  border: none;
+  background: rgba(21, 101, 192, 0.08);
+  color: #1565C0;
+  border-radius: 11px;
+  padding: .7rem;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+.btnModalCancelar:hover {
+  background: rgba(21, 101, 192, 0.14);
+  color: #0D47A1;
+  transform: none;
+}
+
+.btnModalConfirmar {
+  flex: 1;
+  border: none;
+  background: rgba(198, 40, 40, 0.10);
+  color: #9f2f2f;
+  border-radius: 11px;
+  padding: .7rem;
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background .2s ease, color .2s ease;
+}
+
+.btnModalConfirmar:hover {
+  background: rgba(198, 40, 40, 0.16);
+  color: #7f1d1d;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 520px) {
+  .container {
+    padding: 1.2rem;
+  }
+
+  .formCard {
+    padding: 1.3rem;
+  }
+
+  .buttonGroup,
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .backButtonForm,
+  .btnModalCancelar,
+  .btnModalConfirmar {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .checkRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .checkStatusBadge {
+    margin-left: 36px;
+  }
+}
+

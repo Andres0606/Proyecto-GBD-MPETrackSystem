@@ -1,0 +1,286 @@
+/* ═══════════════════════════════════════════════════════
+   Footer.module.css — TransMeta
+   Paleta: azul institucional oscuro, coherente con Header
+═══════════════════════════════════════════════════════ */
+
+/* ── Base ── */
+.footer {
+  background: #0D47A1;  /* azul muy oscuro institucional */
+  color: rgba(255,255,255,0.9);
+  font-size: 0.875rem;
+  line-height: 1.6;
+
+  
+}
+
+/* ── Línea decorativa superior ── */
+.accentLine {
+  height: 4px;
+  background: linear-gradient(90deg, #1565C0 0%, #1976D2 45%, #2E7D32 100%);
+}
+
+/* ── Trust strip ── */
+.trustStrip {
+  background: rgba(0,0,0,0.18);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0.9rem 2.5rem;
+}
+.trustInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.72);
+  letter-spacing: 0.02em;
+}
+.trustIco {
+  display: grid;
+  place-items: center;
+  color: #2E7D32;
+}
+.trustIco svg {
+  width: 15px;
+  height: 15px;
+}
+.trustDivider {
+  flex: 1;
+}
+.socialRow {
+  display: flex;
+  gap: 0.5rem;
+}
+.socialBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.socialBtn svg {
+  width: 16px;
+  height: 16px;
+}
+.socialBtn:hover {
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* ── Main grid ── */
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3.5rem 2.5rem 2.5rem;
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 3rem;
+}
+
+/* ── Columna marca ── */
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  width: fit-content;
+}
+.logoMark {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.logoMark svg {
+  width: 20px;
+  height: 20px;
+}
+.logoText {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+}
+.logoText strong {
+  font-weight: 800;
+  color: #fff;
+}
+
+.tagline {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.85);
+  max-width: 280px;
+}
+
+/* Lista de contacto */
+.contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.contact li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+.contactIco {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  display: grid;
+  place-items: center;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.contactIco svg {
+  width: 14px;
+  height: 14px;
+}
+.contactLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.75);
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+.contactVal {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+}
+
+/* ── Columnas de navegación ── */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.colTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,1);
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.colList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.colLink {
+  font-size: 0.855rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  padding: 0.2rem 0;
+  display: inline-block;
+  transition: color 0.18s ease, padding-left 0.18s ease;
+}
+.colLink:hover {
+  color: #fff;
+  padding-left: 4px;
+}
+
+/* ── Barra inferior ── */
+.bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 1.25rem 2.5rem;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.copy {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.bottomLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.bottomLink {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+.bottomLink:hover {
+  color: rgba(255,255,255,0.75);
+}
+.bottomDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 1000px) {
+  .inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .inner {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 1.5rem 2rem;
+  }
+  .trustStrip { padding: 0.9rem 1.5rem; }
+  .trustDivider { display: none; }
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem 1.5rem;
+  }
+}
