@@ -237,19 +237,34 @@
 
 /* Stats */
 .statsRow {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(21, 101, 192, 0.08);
 }
-.statItem { text-align:center; }
-.statNumber {
-  font-family:var(--ff,'Sora',sans-serif);
-  font-size:1.65rem; font-weight:800; letter-spacing:-0.04em;
-  color:#0d1f36; line-height:1;
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
-.statNumber span {
-  background:linear-gradient(90deg,#1565C0,#42A5F5);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+.statVal {
+  font-family: var(--ff, 'Sora', sans-serif);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1565C0;
+  line-height: 1;
 }
-.statLabel { font-size:0.74rem; color:#7a92ae; margin-top:0.22rem; font-weight:500; }
+.statLab {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7a92ae;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 0.4rem;
+}
 
 /* ══════════════════════════════════════
    MÓDULOS

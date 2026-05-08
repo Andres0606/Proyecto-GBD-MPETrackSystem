@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ try {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Root path
 app.get('/', (req, res) => {

@@ -74,19 +74,121 @@ class AuthService {
       throw new Error('Credenciales inválidas');
     }
 
-    // Determine role (simplified for now)
-    // Check if in ADMIN, ASESOR, or CLIENTE table
-    let role = '1'; // Default to Cliente
-    // ... logic to check other tables ...
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      const nDocumento = persona.NDOCUMENTO;
+      let rol = '1'; // Default: Cliente
 
-    return {
-      status: 'OK',
-      data: {
+      // Check if Admin
+      const adminRes = await connection.execute(
+        'SELECT nDocumento FROM ADMIN WHERE nDocumento = :1',
+        [nDocumento]
+      );
+      if (adminRes.rows.length > 0) {
+        rol = '3';
+      } else {
+        // Check if Asesor
+        const asesorRes = await connection.execute(
+          'SELECT nDocumento FROM ASESOR WHERE nDocumento = :1',
+          [nDocumento]
+        );
+        if (asesorRes.rows.length > 0) {
+          rol = '2';
+        }
+      }
+
+      return {
+        status: 'OK',
         cedula: persona.NDOCUMENTO,
         nombres: persona.NOMBRES,
-        rol: role // This should be dynamic
+        apellido: persona.APELLIDOS,
+        correo: persona.CORREO,
+        rol: rol
+      };
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async getPerfil(cedula) {
+    const persona = await personaRepository.findByDocumento(cedula);
+    if (!persona) {
+      throw new Error('Perfil no encontrado');
+    }
+
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // Intentar obtener licencia si es cliente
+      const clienteRes = await connection.execute(
+        'SELECT LicenciaConduccion FROM CLIENTE WHERE nDocumento = :1',
+        [cedula],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      return {
+        status: 'OK',
+        cedula: persona.NDOCUMENTO,
+        nombres: persona.NOMBRES,
+        apellido: persona.APELLIDOS,
+        correo: persona.CORREO,
+        telefono: persona.TELEFONO,
+        fechaNacimiento: persona.FECHANACIMIENTO ? new Date(persona.FECHANACIMIENTO).toLocaleDateString('es-ES') : '',
+        licenciaConduccion: clienteRes.rows.length > 0 ? clienteRes.rows[0].LICENCIACONDUCCION : 'N'
+      };
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async updatePerfil(data) {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // 1. Actualizar PERSONA
+      const personaSql = `
+        UPDATE PERSONA SET 
+          nombres = :nombres,
+          apellidos = :apellido,
+          correo = :correo,
+          telefono = :telefono,
+          fechaNacimiento = TO_DATE(:fechaNacimiento, 'DD/MM/YYYY')
+          ${data.contrasena ? ', contrasena = :contrasena' : ''}
+        WHERE nDocumento = :cedula
+      `;
+
+      const personaParams = {
+        nombres: data.nombres,
+        apellido: data.apellido,
+        correo: data.correo,
+        telefono: data.telefono,
+        fechaNacimiento: data.fechaNacimiento,
+        cedula: data.numeroDocumento
+      };
+      if (data.contrasena) personaParams.contrasena = data.contrasena;
+
+      await connection.execute(personaSql, personaParams);
+
+      // 2. Actualizar CLIENTE (solo si viene licenciaConduccion)
+      if (data.licenciaConduccion !== undefined) {
+        await connection.execute(
+          'UPDATE CLIENTE SET LicenciaConduccion = :1 WHERE nDocumento = :2',
+          [data.licenciaConduccion, data.numeroDocumento]
+        );
       }
-    };
+
+      await connection.commit();
+      return { status: 'OK', mensaje: 'Perfil actualizado exitosamente' };
+
+    } catch (err) {
+      if (connection) await connection.rollback();
+      throw err;
+    } finally {
+      if (connection) await connection.close();
+    }
   }
 }
 
