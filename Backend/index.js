@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const vehicleRoutes = require('./routes/vehicleRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const tramiteRoutes = require('./routes/tramiteRoutes');
 
 dotenv.config();
 
@@ -32,6 +35,9 @@ try {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/vehiculos', vehicleRoutes);
+app.use('/api/citas', appointmentRoutes);
+app.use('/api/tipo-tramite', tramiteRoutes);
 
 // Root path
 app.get('/', (req, res) => {
