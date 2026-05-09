@@ -7,5 +7,9 @@ router.post('/login', authController.login);
 router.get('/perfil/:cedula', authController.getPerfil);
 router.put('/perfil', authController.updatePerfil);
 router.post('/asesor', authController.registerAsesor);
+router.get('/asesores', authController.listAsesores);
+router.get('/asesores/:cedula', authController.getAsesor);
+router.put('/asesores/:cedula', authController.updateAsesor);
+router.delete('/asesores/:cedula', authController.deleteAsesor);
 
 module.exports = router;

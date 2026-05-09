@@ -247,6 +247,145 @@ class AuthService {
       if (connection) await connection.close();
     }
   }
+
+  async listAsesores() {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      const sql = `
+        SELECT 
+          p.nDocumento as "cedula", 
+          p.nombres as "nombres", 
+          p.apellidos as "apellido", 
+          p.correo as "correo", 
+          a.especialidadTramite as "especialidad", 
+          a.sueldo as "sueldo"
+        FROM PERSONA p
+        JOIN ASESOR a ON p.nDocumento = a.nDocumento
+      `;
+      
+      const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      
+      // Mapear para asegurar que tipoUsuario sea 2 (Asesor) para el badge del frontend
+      const asesores = result.rows.map(row => ({
+        cedula: row.cedula,
+        nombres: row.nombres,
+        apellido: row.apellido,
+        correo: row.correo,
+        especialidad: row.especialidad,
+        sueldo: row.sueldo,
+        tipoUsuario: 2 
+      }));
+
+      return { status: 'OK', asesores };
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async deleteAsesor(cedula) {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // 1. Eliminar de ASESOR primero (por FK)
+      await connection.execute(
+        'DELETE FROM ASESOR WHERE nDocumento = :1',
+        [cedula]
+      );
+
+      // 2. Eliminar de PERSONA
+      await connection.execute(
+        'DELETE FROM PERSONA WHERE nDocumento = :1',
+        [cedula]
+      );
+
+      await connection.commit();
+      return { status: 'OK', mensaje: 'Asesor eliminado correctamente' };
+    } catch (err) {
+      if (connection) await connection.rollback();
+      throw err;
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async getAsesor(cedula) {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      const sql = `
+        SELECT 
+          p.nombres as "nombres", 
+          p.apellidos as "apellido", 
+          p.correo as "correo", 
+          p.telefono as "telefono",
+          a.especialidadTramite as "especialidad", 
+          a.sueldo as "sueldo"
+        FROM PERSONA p
+        JOIN ASESOR a ON p.nDocumento = a.nDocumento
+        WHERE p.nDocumento = :1
+      `;
+      
+      const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+      
+      if (result.rows.length === 0) {
+        throw new Error('Asesor no encontrado');
+      }
+
+      return { status: 'OK', ...result.rows[0] };
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async updateAsesor(cedula, data) {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // 1. Actualizar PERSONA
+      const personaSql = `
+        UPDATE PERSONA SET 
+          nombres = :nombres,
+          apellidos = :apellido,
+          correo = :correo,
+          telefono = :telefono
+        WHERE nDocumento = :cedula
+      `;
+      
+      await connection.execute(personaSql, {
+        nombres: data.nombres,
+        apellido: data.apellido,
+        correo: data.correo,
+        telefono: data.telefono,
+        cedula: cedula
+      });
+
+      // 2. Actualizar ASESOR
+      const asesorSql = `
+        UPDATE ASESOR SET 
+          especialidadTramite = :especialidad,
+          sueldo = :sueldo
+        WHERE nDocumento = :cedula
+      `;
+      
+      await connection.execute(asesorSql, {
+        especialidad: data.especialidad,
+        sueldo: data.sueldo,
+        cedula: cedula
+      });
+
+      await connection.commit();
+      return { status: 'OK', mensaje: 'Asesor actualizado correctamente' };
+
+    } catch (err) {
+      if (connection) await connection.rollback();
+      throw err;
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
 }
 
 module.exports = new AuthService();
