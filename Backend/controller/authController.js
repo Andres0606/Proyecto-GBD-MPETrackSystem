@@ -39,6 +39,15 @@ class AuthController {
       res.status(400).json({ status: 'ERROR', mensaje: err.message });
     }
   }
+
+  async registerAsesor(req, res) {
+    try {
+      const result = await authService.registerAsesor(req.body);
+      res.json(result);
+    } catch (err) {
+      res.status(400).json({ status: 'ERROR', mensaje: err.message });
+    }
+  }
 }
 
 module.exports = new AuthController();

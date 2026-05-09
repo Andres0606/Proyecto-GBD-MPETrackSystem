@@ -190,6 +190,63 @@ class AuthService {
       if (connection) await connection.close();
     }
   }
+
+  async registerAsesor(data) {
+    const existingPersona = await personaRepository.findByDocumento(data.cedula);
+    if (existingPersona) {
+      throw new Error('El usuario ya existe con ese número de documento');
+    }
+
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // 1. Insertar PERSONA
+      const personaSql = `
+        INSERT INTO PERSONA (
+          nDocumento, tipoDocumento, nombres, apellidos, 
+          correo, contrasena, fechaNacimiento, telefono
+        ) VALUES (
+          :nDocumento, 1, :nombres, :apellidos, 
+          :correo, :contrasena, TO_DATE(:fechaNacimiento, 'DD/MM/YYYY'), :telefono
+        )
+      `;
+      
+      await connection.execute(personaSql, {
+        nDocumento: data.cedula,
+        nombres: data.nombres,
+        apellidos: data.apellido,
+        correo: data.correo,
+        contrasena: data.contrasena,
+        fechaNacimiento: data.fechaNacimiento,
+        telefono: data.telefono
+      });
+
+      // 2. Insertar ASESOR
+      const asesorSql = `
+        INSERT INTO ASESOR (
+          idAsesor, nDocumento, especialidadTramite, estado, sueldo
+        ) VALUES (
+          seq_asesor.NEXTVAL, :nDocumento, :especialidad, 'Activo', :sueldo
+        )
+      `;
+      
+      await connection.execute(asesorSql, {
+        nDocumento: data.cedula,
+        especialidad: data.especialidadTramite,
+        sueldo: data.sueldo
+      });
+
+      await connection.commit();
+      return { status: 'OK', mensaje: 'Asesor registrado correctamente' };
+
+    } catch (err) {
+      if (connection) await connection.rollback();
+      throw err;
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
 }
 
 module.exports = new AuthService();

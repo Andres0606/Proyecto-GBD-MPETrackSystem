@@ -42,6 +42,42 @@ class DashboardService {
       if (connection) await connection.close();
     }
   }
+
+  async getAdminStats() {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      // 1. Contar asesores
+      const asesoresRes = await connection.execute(
+        'SELECT COUNT(*) as TOTAL FROM ASESOR',
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      // 2. Contar citas totales activas
+      const citasRes = await connection.execute(
+        "SELECT COUNT(*) as TOTAL FROM CITA WHERE estadoCita IN ('Agendada', 'PENDIENTE')",
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      // 3. Contar total de personas (usuarios)
+      const usuariosRes = await connection.execute(
+        'SELECT COUNT(*) as TOTAL FROM PERSONA',
+        [],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      return {
+        asesores: asesoresRes.rows[0].TOTAL,
+        citas: citasRes.rows[0].TOTAL,
+        usuarios: usuariosRes.rows[0].TOTAL
+      };
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
 }
 
 module.exports = new DashboardService();
