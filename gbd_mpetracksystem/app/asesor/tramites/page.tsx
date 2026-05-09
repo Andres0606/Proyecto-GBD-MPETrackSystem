@@ -63,6 +63,12 @@ interface Tramite {
   estadoTramite: string;
   fechaCreacion: string;
   fechaCita: string;
+  // 👇 Soporte para Traspaso
+  esElDueno?: string;
+  nombreDestino?: string;
+  cedulaDestino?: string;
+  telefonoDestino?: string;
+  correoDestino?: string;
 }
 
 export default function AsesorTramitesPage() {
@@ -248,7 +254,8 @@ export default function AsesorTramitesPage() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Cliente</th>
+                  <th>Solicitante</th>
+                  <th>Destinatario</th>
                   <th>Trámite</th>
                   <th>Vehículo</th>
                   <th>Valor Total</th>
@@ -269,10 +276,20 @@ export default function AsesorTramitesPage() {
                         <small>{tramite.telefono}</small>
                       </div>
                     </td>
+                    <td>
+                      {tramite.nombreDestino ? (
+                        <div className={styles.clienteInfo}>
+                          <strong>{tramite.nombreDestino}</strong>
+                          <small>C.C. {tramite.cedulaDestino}</small>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#adb5bd', fontSize: '0.8rem' }}>No aplica</span>
+                      )}
+                    </td>
                     <td style={{ fontWeight: 600 }}>{tramite.tipoTramite}</td>
-                    <td style={{ color: '#3a5068' }}>{tramite.vehiculo}</td>
+                    <td style={{ color: '#3a5068', fontWeight: 600 }}>{tramite.vehiculo || '---'}</td>
                     <td className={styles.valorTotal}>
-                      ${(tramite.valorTramite + tramite.valorOtrosConceptos).toLocaleString('es-CO')}
+                      ${((tramite.valorTramite || 0) + (tramite.valorOtrosConceptos || 0)).toLocaleString('es-CO')}
                     </td>
                     <td>
                       <span className={`${styles.estadoBadge} ${getEstadoClass(tramite.estadoTramite)}`}>

@@ -18,15 +18,29 @@ router.post('/solicitar', async (req, res) => {
     if (clientRes.rows.length === 0) throw new Error('Cliente no encontrado');
     const realIdCliente = clientRes.rows[0].IDCLIENTE;
 
+    // Buscar ID del cliente destino si se proporcionó
+    let realIdDestino = null;
+    if (data.cedulaDestino) {
+      const destRes = await connection.execute(
+        'SELECT idCliente FROM CLIENTE WHERE nDocumento = :1',
+        [data.cedulaDestino],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      if (destRes.rows.length > 0) {
+        realIdDestino = destRes.rows[0].IDCLIENTE;
+      }
+    }
+
     const asesorRes = await connection.execute('SELECT idAsesor FROM ASESOR WHERE ROWNUM = 1');
     const idAsesor = asesorRes.rows.length > 0 ? asesorRes.rows[0][0] : 1;
 
     const sql = `
       INSERT INTO CITA (
-        idCita, idCliente, idAsesor, placaVehiculo, tipoTramite, estadoCita, FECHAHORAPROGRAMADA
+        idCita, idCliente, idAsesor, placaVehiculo, tipoTramite, estadoCita, 
+        FECHAHORAPROGRAMADA, idClienteDestino, esElDueno
       ) VALUES (
         seq_cita.NEXTVAL, :idCliente, :idAsesor, :placaVehiculo, :tipoTramite, 'PENDIENTE', 
-        CURRENT_TIMESTAMP + INTERVAL '1' DAY
+        CURRENT_TIMESTAMP + INTERVAL '1' DAY, :idDestino, :esDueno
       )
     `;
     
@@ -34,7 +48,9 @@ router.post('/solicitar', async (req, res) => {
       idCliente: realIdCliente,
       idAsesor: idAsesor,
       placaVehiculo: data.idVehiculo || null,
-      tipoTramite: data.idTipoTramite
+      tipoTramite: data.idTipoTramite,
+      idDestino: realIdDestino,
+      esDueno: data.esDueno || 'S'
     });
     
     await connection.commit();
@@ -62,10 +78,14 @@ router.get('/pendientes/:cedula', async (req, res) => {
         tt.nombre as "tipoTramite",
         tt.valorBase as "valorBase",
         c.fechaHoraSolicitud as "fechaSolicitud",
-        CASE WHEN tt.nombre = a.especialidadTramite THEN 1 ELSE 0 END as "esSuEspecialidad"
+        CASE WHEN tt.nombre = a.especialidadTramite THEN 1 ELSE 0 END as "esSuEspecialidad",
+        pd.nombres || ' ' || pd.apellidos as "nombreDestinatario",
+        pd.nDocumento as "cedulaDestinatario"
       FROM CITA c
       JOIN CLIENTE cl ON c.idCliente = cl.idCliente
       JOIN PERSONA p ON cl.nDocumento = p.nDocumento
+      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
+      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
       LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
       JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
       CROSS JOIN ASESOR a 
@@ -93,11 +113,14 @@ router.get('/agendadas/:cedula', async (req, res) => {
         v.Placa || ' (' || v.Marca || ')' as "vehiculo",
         tt.nombre as "tipoTramite",
         tt.valorBase as "valorBase",
-        c.fechaHoraProgramada as "fechaProgramada"
+        c.fechaHoraProgramada as "fechaProgramada",
+        pd.nombres || ' ' || pd.apellidos as "nombreDestinatario"
       FROM CITA c
       JOIN ASESOR a ON c.idAsesor = a.idAsesor
       JOIN CLIENTE cl ON c.idCliente = cl.idCliente
       JOIN PERSONA p ON cl.nDocumento = p.nDocumento
+      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
+      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
       LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
       JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
       WHERE a.nDocumento = :1 AND c.estadoCita = 'Agendada'

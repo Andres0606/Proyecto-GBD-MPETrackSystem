@@ -70,6 +70,11 @@ export default function TraspasoPage() {
   const nombreDuenioActual = searchParams.get('nombreDuenioActual') || '';
   const apellidoDuenioActual = searchParams.get('apellidoDuenioActual') || '';
   const cedulaClienteSolicitante = searchParams.get('idCliente') || '';
+  // 👇 Datos del destinatario pre-vinculado
+  const cedulaDestino = searchParams.get('cedulaDestino') || '';
+  const nombreDestino = searchParams.get('nombreDestino') || '';
+  const telefonoDestino = searchParams.get('telefonoDestino') || '';
+  const correoDestino = searchParams.get('correoDestino') || '';
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -88,6 +93,18 @@ export default function TraspasoPage() {
     const rol = sessionStorage.getItem('userRol');
     if (!isLoggedIn || rol !== '2') { router.push('/login'); return; }
     if (esDuenioRegistrado === 'N') setMostrarFormularioVehiculo(true);
+
+    // 👇 Si ya viene un destinatario vinculado, lo cargamos de una vez
+    if (cedulaDestino) {
+      setNuevoPropietario({
+        cedula: cedulaDestino,
+        nombre: nombreDestino,
+        apellido: '', // El nombre ya viene completo
+        telefono: telefonoDestino,
+        correo: correoDestino
+      });
+      setClienteEncontrado(true);
+    }
   }, []);
 
   const buscarCliente = async () => {

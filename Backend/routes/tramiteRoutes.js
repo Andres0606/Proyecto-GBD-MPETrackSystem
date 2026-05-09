@@ -13,7 +13,6 @@ router.get('/list', async (req, res) => {
     );
     res.json({ status: 'OK', tiposTramite: result.rows });
   } catch (err) {
-    console.error('Error fetching tramites:', err);
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {
     if (connection) await connection.close();
@@ -31,18 +30,24 @@ router.get('/asesor/:cedula', async (req, res) => {
         p.nombres || ' ' || p.apellidos as "cliente",
         p.telefono as "telefono",
         p.correo as "correo",
-        v.Placa || ' (' || v.Marca || ')' as "vehiculo",
+        v.Placa as "vehiculo",
         tt.nombre as "tipoTramite",
-        tt.valorBase as "valorTramite",
-        t.valorOtroConceptos as "valorOtrosConceptos",
+        NVL(tt.valorBase, 0) as "valorTramite",
+        NVL(t.valorOtroConceptos, 0) as "valorOtrosConceptos",
         t.estadoTramite as "estadoTramite",
         c.fechaHoraSolicitud as "fechaCreacion",
-        c.fechaHoraProgramada as "fechaCita"
+        c.fechaHoraProgramada as "fechaCita",
+        c.esElDueno as "esElDueno",
+        -- Info del Destinatario
+        pd.nombres || ' ' || pd.apellidos as "nombreDestino",
+        pd.nDocumento as "cedulaDestino"
       FROM TRAMITE t
       JOIN CITA c ON t.idCita = c.idCita
       JOIN ASESOR a ON c.idAsesor = a.idAsesor
       JOIN CLIENTE cl ON c.idCliente = cl.idCliente
       JOIN PERSONA p ON cl.nDocumento = p.nDocumento
+      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
+      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
       LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
       JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
       WHERE a.nDocumento = :1
@@ -85,7 +90,6 @@ router.post('/register', async (req, res) => {
       idTramite: result.outBinds.id[0] 
     });
   } catch (err) {
-    console.error('Error registering tramite:', err);
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {

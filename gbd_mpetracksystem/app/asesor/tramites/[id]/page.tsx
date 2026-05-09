@@ -53,7 +53,13 @@ interface TramiteDetalle {
   estadoTramite: string;
   fechaCreacion: string;
   fechaCita: string;
-  // 👇 Nuevos campos para traspaso
+  esElDueno?: string;
+  // 👇 Datos del Destinatario (Caso 1: Registrados)
+  nombreDestino?: string;
+  cedulaDestino?: string;
+  telefonoDestino?: string;
+  correoDestino?: string;
+  // 👇 Datos para externos (Casos 2 y 3)
   esDuenioRegistrado?: string;
   cedulaDuenioActual?: number;
   nombreDuenioActual?: string;
@@ -220,7 +226,14 @@ case 'Traspaso':
       const apellidoDuenio = tramite.apellidoDuenioActual || '';
       const esRegistrado = tramite.esDuenioRegistrado || 'S';
       
-      return `/asesor/tramites/${tramite.idTramite}/traspaso?placa=${tramite.vehiculo}&cedulaActual=${cedulaDuenioActual}&esDuenioRegistrado=${esRegistrado}&nombreDuenioActual=${nombreDuenio}&apellidoDuenioActual=${apellidoDuenio}&idCliente=${tramite.idCliente}`;
+      let href = `/asesor/tramites/${tramite.idTramite}/traspaso?placa=${tramite.vehiculo}&cedulaActual=${cedulaDuenioActual}&esDuenioRegistrado=${esRegistrado}&nombreDuenioActual=${nombreDuenio}&apellidoDuenioActual=${apellidoDuenio}&idCliente=${tramite.idCliente}`;
+      
+      // Si hay un destinatario registrado (Caso 1), pasamos sus datos
+      if (tramite.nombreDestino) {
+        href += `&cedulaDestino=${tramite.cedulaDestino}&nombreDestino=${encodeURIComponent(tramite.nombreDestino)}&telefonoDestino=${tramite.telefonoDestino}&correoDestino=${tramite.correoDestino}`;
+      }
+      
+      return href;
       case 'Matrícula/Registro':
         return `/asesor/tramites/${tramite.idTramite}/registrar-vehiculo?idCliente=${tramite.idCliente}&idTramite=${tramite.idTramite}`;
       case 'Cancelación Matrícula':
@@ -373,8 +386,33 @@ case 'Traspaso':
           </div>
         </div>
 
-        {/* 👇 Información adicional para Traspaso */}
-        {tramite.tipoTramite === 'Traspaso' && tramite.esDuenioRegistrado === 'N' && (
+        {/* 👇 Información de la Contraparte (Caso 1: Registrado) */}
+        {tramite.tipoTramite === 'Traspaso' && tramite.nombreDestino && (
+          <div className={styles.detalleCard}>
+            <h2>Información de la Contraparte ({tramite.esElDueno === 'S' ? 'Comprador' : 'Vendedor'})</h2>
+            <div className={styles.infoGrid}>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Cédula</span>
+                <span className={styles.infoValue}>{tramite.cedulaDestino}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Nombre Completo</span>
+                <span className={styles.infoValue}>{tramite.nombreDestino}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Teléfono</span>
+                <span className={styles.infoValue}>{tramite.telefonoDestino}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>Correo</span>
+                <span className={styles.infoValue}>{tramite.correoDestino}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 👇 Información para Traspaso Externo (Casos 2 y 3) */}
+        {tramite.tipoTramite === 'Traspaso' && !tramite.nombreDestino && tramite.esDuenioRegistrado === 'N' && (
           <div className={styles.detalleCard}>
             <h2>Información del Dueño Actual</h2>
             <div className={styles.infoGrid}>

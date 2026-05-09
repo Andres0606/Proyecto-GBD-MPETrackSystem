@@ -71,7 +71,8 @@ const [validandoLicencia, setValidandoLicencia] = useState(false);
   
   const [formData, setFormData] = useState({
     idVehiculo: '',
-    idTipoTramite: ''
+    idTipoTramite: '',
+    cedulaDestino: ''
   });
 
   const idCliente = typeof window !== 'undefined' ? sessionStorage.getItem('userCedula') : null;
@@ -303,20 +304,17 @@ const citaData: any = {
       ? esDuenioRegistrado ? 'S' : 'N'
       : null,
 
-  cedulaDuenioActual:
-    tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
-      ? parseInt(duenioActual.cedula)
-      : null,
-
-  nombreDuenioActual:
-    tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
-      ? duenioActual.nombres
-      : null,
-
   apellidoDuenioActual:
     tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
       ? duenioActual.apellido
-      : null
+      : null,
+  
+  cedulaDestino:
+    tipoTramiteSeleccionado === 'Traspaso'
+      ? formData.cedulaDestino || (esDuenioRegistrado ? null : duenioActual.cedula)
+      : null,
+  
+  esDueno: tipoTramiteSeleccionado === 'Traspaso' ? (esDuenioRegistrado ? 'S' : 'N') : 'S'
 };
 
     let citaCreada = false;
@@ -658,6 +656,19 @@ const bloquearDuplicadoLicencia =
             No tiene vehículos registrados. Debe registrar un vehículo primero.
           </small>
         )}
+
+        <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
+          <label>Cédula del Comprador (Si ya está registrado) *</label>
+          <input
+            type="text"
+            name="cedulaDestino"
+            value={formData.cedulaDestino}
+            onChange={(e) => setFormData(prev => ({ ...prev, cedulaDestino: e.target.value }))}
+            placeholder="Número de cédula del comprador"
+            required={esDuenioRegistrado}
+          />
+          <small className={styles.infoText}>Si el comprador no está registrado, se gestionará en la oficina.</small>
+        </div>
       </div>
     )}
 
