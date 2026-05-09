@@ -38,6 +38,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vehiculos', vehicleRoutes);
 app.use('/api/citas', appointmentRoutes);
 app.use('/api/tipo-tramite', tramiteRoutes);
+app.use('/api/tramite', tramiteRoutes);
 
 // Root path
 app.get('/', (req, res) => {
