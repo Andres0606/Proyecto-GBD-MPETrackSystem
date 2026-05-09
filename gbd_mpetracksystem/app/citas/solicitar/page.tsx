@@ -62,9 +62,15 @@ const [validandoLicencia, setValidandoLicencia] = useState(false);
   const [tipoTramiteSeleccionado, setTipoTramiteSeleccionado] = useState<string>('');
 
     const [esDuenioRegistrado, setEsDuenioRegistrado] = useState<boolean>(true);
+    const [esDestinatarioRegistrado, setEsDestinatarioRegistrado] = useState<boolean>(true);
 
     const [duenioActual, setDuenioActual] = useState({
       cedula: '',
+      nombres: '',
+      apellido: ''
+    });
+
+    const [compradorExterno, setCompradorExterno] = useState({
       nombres: '',
       apellido: ''
     });
@@ -307,6 +313,17 @@ const citaData: any = {
   apellidoDuenioActual:
     tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
       ? duenioActual.apellido
+      : null,
+  
+  // Datos para receptor externo (Caso 3)
+  nombreReceptorExterno:
+    tipoTramiteSeleccionado === 'Traspaso' && esDuenioRegistrado && !esDestinatarioRegistrado
+      ? compradorExterno.nombres
+      : null,
+  
+  apellidoReceptorExterno:
+    tipoTramiteSeleccionado === 'Traspaso' && esDuenioRegistrado && !esDestinatarioRegistrado
+      ? compradorExterno.apellido
       : null,
   
   cedulaDestino:
@@ -658,7 +675,7 @@ const bloquearDuplicadoLicencia =
         )}
 
         <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
-          <label>Cédula del Comprador (Si ya está registrado) *</label>
+          <label>Cédula del Comprador *</label>
           <input
             type="text"
             name="cedulaDestino"
@@ -667,8 +684,43 @@ const bloquearDuplicadoLicencia =
             placeholder="Número de cédula del comprador"
             required={esDuenioRegistrado}
           />
-          <small className={styles.infoText}>Si el comprador no está registrado, se gestionará en la oficina.</small>
+          
+          <div className={styles.checkboxGroup} style={{ marginTop: '10px' }}>
+             <label className={styles.checkboxLabel}>
+                <input 
+                  type="checkbox" 
+                  checked={!esDestinatarioRegistrado} 
+                  onChange={(e) => setEsDestinatarioRegistrado(!e.target.checked)}
+                />
+                El comprador no está registrado en el sistema
+             </label>
+          </div>
         </div>
+
+        {!esDestinatarioRegistrado && (
+          <div className={styles.formGrid}>
+             <div className={styles.formGroup}>
+                <label>Nombres del Comprador *</label>
+                <input
+                  type="text"
+                  value={compradorExterno.nombres}
+                  onChange={(e) => setCompradorExterno(prev => ({ ...prev, nombres: e.target.value }))}
+                  placeholder="Nombres del comprador"
+                  required
+                />
+             </div>
+             <div className={styles.formGroup}>
+                <label>Apellidos del Comprador *</label>
+                <input
+                  type="text"
+                  value={compradorExterno.apellido}
+                  onChange={(e) => setCompradorExterno(prev => ({ ...prev, apellido: e.target.value }))}
+                  placeholder="Apellidos del comprador"
+                  required
+                />
+             </div>
+          </div>
+        )}
       </div>
     )}
 

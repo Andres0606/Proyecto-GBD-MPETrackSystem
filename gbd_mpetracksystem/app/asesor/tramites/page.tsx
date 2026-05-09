@@ -69,6 +69,7 @@ interface Tramite {
   cedulaDestino?: string;
   telefonoDestino?: string;
   correoDestino?: string;
+  esExterno?: boolean;
 }
 
 export default function AsesorTramitesPage() {
@@ -277,9 +278,14 @@ export default function AsesorTramitesPage() {
                       </div>
                     </td>
                     <td>
-                      {tramite.nombreDestino ? (
+                      {tramite.tipoTramite === 'Traspaso' && tramite.nombreDestino && tramite.nombreDestino.trim() !== '' ? (
                         <div className={styles.clienteInfo}>
-                          <strong>{tramite.nombreDestino}</strong>
+                          <strong>
+                            {tramite.nombreDestino}
+                            {!tramite.correoDestino && (
+                              <span className={styles.externoBadge}>Externo</span>
+                            )}
+                          </strong>
                           <small>C.C. {tramite.cedulaDestino}</small>
                         </div>
                       ) : (

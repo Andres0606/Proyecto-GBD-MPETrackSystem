@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { oracledb } = require('../config/db');
 
+// RUTA RESTAURADA: Listar tipos de trámite para solicitud de citas
 router.get('/list', async (req, res) => {
   let connection;
   try {
@@ -19,6 +20,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
+// Obtener trámites del asesor (con lógica de destinatarios unificada)
 router.get('/asesor/:cedula', async (req, res) => {
   let connection;
   try {
@@ -38,9 +40,17 @@ router.get('/asesor/:cedula', async (req, res) => {
         c.fechaHoraSolicitud as "fechaCreacion",
         c.fechaHoraProgramada as "fechaCita",
         c.esElDueno as "esElDueno",
-        -- Info del Destinatario
-        pd.nombres || ' ' || pd.apellidos as "nombreDestino",
-        pd.nDocumento as "cedulaDestino"
+        -- Info del Destinatario (Solo si es Traspaso)
+        CASE 
+          WHEN tt.nombre = 'Traspaso' THEN NVL(TRIM(pd.nombres || ' ' || pd.apellidos), TRIM(ce.nombres || ' ' || ce.apellido))
+          ELSE NULL 
+        END as "nombreDestino",
+        CASE 
+          WHEN tt.nombre = 'Traspaso' THEN NVL(pd.nDocumento, ce.cedula)
+          ELSE NULL 
+        END as "cedulaDestino",
+        pd.telefono as "telefonoDestino",
+        pd.correo as "correoDestino"
       FROM TRAMITE t
       JOIN CITA c ON t.idCita = c.idCita
       JOIN ASESOR a ON c.idAsesor = a.idAsesor
@@ -48,6 +58,7 @@ router.get('/asesor/:cedula', async (req, res) => {
       JOIN PERSONA p ON cl.nDocumento = p.nDocumento
       LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
       LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
+      LEFT JOIN CLIENTEEXTERNO ce ON c.idClienteExterno = ce.idExterno
       LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
       JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
       WHERE a.nDocumento = :1
@@ -57,7 +68,6 @@ router.get('/asesor/:cedula', async (req, res) => {
     const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', tramites: result.rows });
   } catch (err) {
-    console.error('Error fetching advisor tramites:', err);
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {
     if (connection) await connection.close();
@@ -70,25 +80,18 @@ router.post('/register', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const { idCita, valorOtrosConceptos } = req.body;
-    
     const sql = `
       INSERT INTO TRAMITE (IDTRAMITE, IDCITA, ESTADOTRAMITE, VALOROTROCONCEPTOS)
       VALUES (seq_tramite.NEXTVAL, :idCita, 'Activo', :otros)
       RETURNING IDTRAMITE INTO :id
     `;
-    
     const result = await connection.execute(sql, {
       idCita: idCita,
       otros: valorOtrosConceptos || 0,
       id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     });
-    
     await connection.commit();
-    res.json({ 
-      status: 'OK', 
-      mensaje: 'Trámite registrado correctamente', 
-      idTramite: result.outBinds.id[0] 
-    });
+    res.json({ status: 'OK', mensaje: 'Trámite registrado', idTramite: result.outBinds.id[0] });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
@@ -97,20 +100,15 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Actualizar Estado del Trámite
+// Actualizar Estado
 router.put('/estado', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
     const { idTramite, estado } = req.body;
-    
-    await connection.execute(
-      "UPDATE TRAMITE SET ESTADOTRAMITE = :1 WHERE IDTRAMITE = :2",
-      [estado, idTramite]
-    );
-    
+    await connection.execute("UPDATE TRAMITE SET ESTADOTRAMITE = :1 WHERE IDTRAMITE = :2", [estado, idTramite]);
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Estado actualizado correctamente' });
+    res.json({ status: 'OK', mensaje: 'Estado actualizado' });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });

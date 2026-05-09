@@ -99,11 +99,36 @@ export default function TraspasoPage() {
       setNuevoPropietario({
         cedula: cedulaDestino,
         nombre: nombreDestino,
-        apellido: '', // El nombre ya viene completo
+        apellido: '', 
         telefono: telefonoDestino,
         correo: correoDestino
       });
       setClienteEncontrado(true);
+    } 
+    // 👇 CASO 2: El solicitante es el COMPRADOR (él mismo es el nuevo dueño)
+    else if (esDuenioRegistrado === 'N') {
+      setNuevoPropietario({
+        cedula: cedulaClienteSolicitante,
+        nombre: 'Cargando...', // Se podría buscar el nombre del solicitante si es necesario
+        apellido: '',
+        telefono: '',
+        correo: ''
+      });
+      // Opcional: Podríamos hacer un fetch rápido para traer el nombre del solicitante
+      fetch(`${BACKEND_URL}/api/auth/perfil/${cedulaClienteSolicitante}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'OK') {
+            setNuevoPropietario(prev => ({
+              ...prev,
+              nombre: data.nombres,
+              apellido: data.apellido,
+              telefono: data.telefono,
+              correo: data.correo
+            }));
+            setClienteEncontrado(true);
+          }
+        });
     }
   }, []);
 

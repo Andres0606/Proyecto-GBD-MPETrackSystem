@@ -42,7 +42,7 @@ router.get('/tipos-servicio', async (req, res) => {
   finally { if (connection) await connection.close(); }
 });
 
-// OBTENER VEHÍCULOS (Lógica de Último Propietario)
+// OBTENER VEHÍCULOS (Lógica de Propietario con soporte para Externos)
 router.get('/cliente/:cedula', async (req, res) => {
   let connection;
   try {
@@ -58,26 +58,30 @@ router.get('/cliente/:cedula', async (req, res) => {
       LEFT JOIN COLOR col ON v.COLOR = col.IDCOLOR
       LEFT JOIN COMBUSTIBLE comb ON v.COMBUSTIBLE = comb.IDCOMBUSTIBLE
       WHERE v.PLACA IN (
-          -- Solo placas donde el ÚLTIMO trámite finalizado pertenece a este cliente como COMPRADOR/DUEÑO
-          SELECT PLACA_HIST
-          FROM (
-              SELECT 
-                ci.PLACAVEHICULO as PLACA_HIST,
-                ci.IDCLIENTE as ID_SOL,
-                ci.IDCLIENTEDESTINO as ID_DEST,
-                ci.ESELDUENO as ES_DUE,
-                ROW_NUMBER() OVER (PARTITION BY ci.PLACAVEHICULO ORDER BY ci.IDCITA DESC) as RN
-              FROM CITA ci
-              JOIN TRAMITE tr ON ci.IDCITA = tr.IDCITA
-              WHERE UPPER(tr.ESTADOTRAMITE) = 'FINALIZADO'
-          ) h
-          JOIN CLIENTE cl_actual ON (h.ID_SOL = cl_actual.IDCLIENTE OR h.ID_DEST = cl_actual.IDCLIENTE)
-          WHERE h.RN = 1 -- Solo el registro más reciente de cada placa
-          AND cl_actual.NDOCUMENTO = :1
+          SELECT ci.PLACAVEHICULO
+          FROM CITA ci
+          JOIN TRAMITE tr ON ci.IDCITA = tr.IDCITA
+          JOIN CLIENTE cl ON (ci.IDCLIENTE = cl.IDCLIENTE OR ci.IDCLIENTEDESTINO = cl.IDCLIENTE)
+          WHERE cl.NDOCUMENTO = :1
+          AND UPPER(tr.ESTADOTRAMITE) = 'FINALIZADO'
+          -- CRÍTICO: La última cita finalizada es la que manda
+          AND ci.IDCITA = (
+              SELECT MAX(ci3.IDCITA)
+              FROM CITA ci3
+              JOIN TRAMITE tr3 ON ci3.IDCITA = tr3.IDCITA
+              WHERE ci3.PLACAVEHICULO = v.PLACA
+              AND UPPER(tr3.ESTADOTRAMITE) = 'FINALIZADO'
+          )
+          -- REGLAS DE PROPIEDAD ACTUALIZADAS:
           AND (
-            (h.ID_SOL = cl_actual.IDCLIENTE AND h.ES_DUE = 'N') -- El cliente compró
-            OR (h.ID_DEST = cl_actual.IDCLIENTE AND h.ES_DUE = 'S') -- El cliente recibió traspaso
-            OR (h.ID_SOL = cl_actual.IDCLIENTE AND h.ES_DUE = 'S' AND h.ID_DEST IS NULL) -- Es dueño único (Matrícula)
+            -- 1. Soy el solicitante y soy el COMPRADOR (Caso 2)
+            (ci.IDCLIENTE = cl.IDCLIENTE AND UPPER(ci.ESELDUENO) = 'N')
+            OR
+            -- 2. Soy el destinatario y el solicitante era el VENDEDOR (Caso 1)
+            (ci.IDCLIENTEDESTINO = cl.IDCLIENTE AND UPPER(ci.ESELDUENO) = 'S')
+            OR
+            -- 3. Soy el solicitante, no hay destinatario NI externo (Matrícula inicial)
+            (ci.IDCLIENTE = cl.IDCLIENTE AND ci.IDCLIENTEDESTINO IS NULL AND ci.IDCLIENTEEXTERNO IS NULL)
           )
       )
     `;
