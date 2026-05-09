@@ -119,6 +119,7 @@ export default function RegistrarVehiculoPage() {
           ...vehiculo,
           placa: vehiculo.placa.toUpperCase(),
           idCliente: parseInt(idCliente),
+          idTramite: parseInt(idTramite),
           modelo: parseInt(vehiculo.modelo),
           color: parseInt(vehiculo.color),
           combustible: parseInt(vehiculo.combustible),
