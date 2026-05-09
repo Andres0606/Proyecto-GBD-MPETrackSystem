@@ -13,14 +13,12 @@ const ArrowLeftIcon = () => (
     <polyline points="12 19 5 12 12 5"/>
   </svg>
 );
-
 const CheckCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
     <polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 );
-
 const AlertCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/>
@@ -29,13 +27,10 @@ const AlertCircleIcon = () => (
   </svg>
 );
 
-const CarIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v10a2 2 0 0 1-2 2h-2"/>
-    <circle cx="7" cy="17" r="2"/>
-    <circle cx="17" cy="17" r="2"/>
-  </svg>
-);
+interface ReferenceItem {
+  id: number;
+  nombre: string;
+}
 
 export default function RegistrarVehiculoPage() {
   const router = useRouter();
@@ -48,6 +43,12 @@ export default function RegistrarVehiculoPage() {
   const enviandoRef = useRef(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Listas de referencia
+  const [colores, setColores] = useState<ReferenceItem[]>([]);
+  const [combustibles, setCombustibles] = useState<ReferenceItem[]>([]);
+  const [tiposServicio, setTiposServicio] = useState<ReferenceItem[]>([]);
+
   const [vehiculo, setVehiculo] = useState({
     placa: '',
     marca: '',
@@ -74,105 +75,84 @@ export default function RegistrarVehiculoPage() {
     if (!idCliente) {
       setError('Falta información del cliente');
     }
+
+    cargarListas();
   }, []);
+
+  const cargarListas = async () => {
+    try {
+      const [resCol, resComb, resServ] = await Promise.all([
+        fetch(`${BACKEND_URL}/api/vehiculos/colores`),
+        fetch(`${BACKEND_URL}/api/vehiculos/combustibles`),
+        fetch(`${BACKEND_URL}/api/vehiculos/tipos-servicio`),
+      ]);
+
+      const dataCol = await resCol.json();
+      const dataComb = await resComb.json();
+      const dataServ = await resServ.json();
+
+      if (dataCol.status === 'OK') setColores(dataCol.data);
+      if (dataComb.status === 'OK') setCombustibles(dataComb.data);
+      if (dataServ.status === 'OK') setTiposServicio(dataServ.data);
+    } catch (err) {
+      console.error('Error cargando listas:', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setVehiculo({ ...vehiculo, [e.target.name]: e.target.value });
   };
 
-  const desbloquearEnvio = () => {
-  enviandoRef.current = false;
-  setSubmitting(false);
-};
-
-const finalizarTramite = async () => {
-  const response = await fetch(`${BACKEND_URL}/api/tramite/estado`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      idTramite: parseInt(idTramite),
-      estado: 'Finalizado'
-    }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || data.status !== 'OK') {
-    throw new Error(data.mensaje || 'No se pudo finalizar el trámite');
-  }
-};
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (enviandoRef.current) return;
-
-  enviandoRef.current = true;
-  setSubmitting(true);
-  setError('');
-  setSuccess('');
-
-    const vehiculoData = {
-      placa: vehiculo.placa.toUpperCase(),
-      idCliente: parseInt(idCliente),
-      marca: vehiculo.marca,
-      linea: vehiculo.linea,
-      modelo: parseInt(vehiculo.modelo),
-      clase: vehiculo.clase,
-      tipoServicio: vehiculo.tipoServicio,
-      numMotor: vehiculo.numMotor,
-      numChasis: vehiculo.numChasis,
-      color: vehiculo.color,
-      numeroVin: vehiculo.numeroVin,
-      combustible: vehiculo.combustible,
-    };
-
-let vehiculoRegistrado = false;
-
-try {
-  const response = await fetch(`${BACKEND_URL}/api/vehiculos/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(vehiculoData),
-  });
-
-  const data = await response.json();
-
-  if (response.ok && data.status === 'OK') {
-    vehiculoRegistrado = true;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (enviandoRef.current) return;
+    enviandoRef.current = true;
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
 
     try {
-      await finalizarTramite();
+      const response = await fetch(`${BACKEND_URL}/api/vehiculos/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...vehiculo,
+          placa: vehiculo.placa.toUpperCase(),
+          idCliente: parseInt(idCliente),
+          modelo: parseInt(vehiculo.modelo),
+          color: parseInt(vehiculo.color),
+          combustible: parseInt(vehiculo.combustible),
+          tipoServicio: parseInt(vehiculo.tipoServicio)
+        }),
+      });
 
-      setSuccess(
-        `Vehículo ${vehiculo.placa.toUpperCase()} registrado exitosamente. Trámite finalizado correctamente.`
-      );
-    } catch (error) {
-      setSuccess(
-        `Vehículo ${vehiculo.placa.toUpperCase()} registrado exitosamente, pero no se pudo finalizar automáticamente el trámite.`
-      );
+      const data = await response.json();
+
+      if (response.ok && data.status === 'OK') {
+        // Finalizar trámite
+        await fetch(`${BACKEND_URL}/api/tramite/estado`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idTramite: parseInt(idTramite), estado: 'Finalizado' }),
+        });
+
+        setSuccess(`Vehículo registrado y trámite finalizado correctamente.`);
+        setTimeout(() => router.push(`/asesor/tramites/${idTramite}`), 2000);
+      } else {
+        setError(data.mensaje || 'Error al registrar vehículo');
+        enviandoRef.current = false;
+        setSubmitting(false);
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor');
+      enviandoRef.current = false;
+      setSubmitting(false);
     }
+  };
 
-    setTimeout(() => {
-      router.push(`/asesor/tramites/${idTramite}`);
-    }, 2000);
-  } else {
-    setError(data.mensaje || 'Error al registrar vehículo');
-  }
-} catch (err) {
-  setError('Error de conexión con el servidor');
-} finally {
-  if (!vehiculoRegistrado) {
-    desbloquearEnvio();
-  }
-}
-};
-
-return (
+  return (
     <div className={styles.container}>
       <div className={styles.inner}>
-
-        {/* Header */}
         <div className={styles.header}>
           <Link href={`/asesor/tramites/${idTramite}`} className={styles.backButton}>
             <ArrowLeftIcon /> Volver al Trámite
@@ -180,100 +160,77 @@ return (
           <h1>Registrar Vehículo — <span>Matrícula</span></h1>
         </div>
 
-        {/* Alertas */}
-        {error && (
-          <div className={styles.errorAlert}>
-            <AlertCircleIcon /> {error}
-          </div>
-        )}
-        {success && (
-          <div className={styles.successAlert}>
-            <CheckCircleIcon /> {success}
-          </div>
-        )}
+        {error && <div className={styles.errorAlert}><AlertCircleIcon /> {error}</div>}
+        {success && <div className={styles.successAlert}><CheckCircleIcon /> {success}</div>}
 
-        {/* Card principal */}
         <div className={styles.formCard}>
-
-          {/* Info del trámite */}
           <div className={styles.infoBox}>
             <h3>Información del Trámite</h3>
             <p><strong>ID Trámite:</strong> #{idTramite}</p>
-            <p><strong>ID Cliente:</strong> {idCliente}</p>
+            <p><strong>Cédula Cliente:</strong> {idCliente}</p>
           </div>
 
-          <p className={styles.sectionTitle}> Datos del Vehículo</p>
+          <p className={styles.sectionTitle}>Datos Técnicos del Vehículo</p>
 
           <form onSubmit={handleSubmit}>
             <div className={styles.formGrid}>
-
               <div className={styles.formGroup}>
                 <label>Placa *</label>
-                <input
-                  type="text"
-                  name="placa"
-                  value={vehiculo.placa}
-                  onChange={handleChange}
-                  placeholder="Ej: ABC123"
-                  required
-                  maxLength={10}
-                />
+                <input type="text" name="placa" value={vehiculo.placa} onChange={handleChange} placeholder="ABC123" required maxLength={10} />
               </div>
-
               <div className={styles.formGroup}>
                 <label>Marca *</label>
-                <input
-                  type="text"
-                  name="marca"
-                  value={vehiculo.marca}
-                  onChange={handleChange}
-                  placeholder="Ej: Chevrolet, Renault, Mazda"
-                  required
-                />
+                <input type="text" name="marca" value={vehiculo.marca} onChange={handleChange} required />
               </div>
-
               <div className={styles.formGroup}>
                 <label>Línea *</label>
-                <input
-                  type="text"
-                  name="linea"
-                  value={vehiculo.linea}
-                  onChange={handleChange}
-                  placeholder="Ej: Spark, Logan, 3"
-                  required
-                />
+                <input type="text" name="linea" value={vehiculo.linea} onChange={handleChange} required />
               </div>
-
               <div className={styles.formGroup}>
-                <label>Modelo *</label>
-                <input
-                  type="number"
-                  name="modelo"
-                  value={vehiculo.modelo}
-                  onChange={handleChange}
-                  placeholder="Ej: 2020"
-                  required
-                  min="1900"
-                  max="2026"
-                />
+                <label>Modelo (Año) *</label>
+                <input type="number" name="modelo" value={vehiculo.modelo} onChange={handleChange} required min="1900" max="2026" />
               </div>
 
               <div className={styles.formGroup}>
                 <label>Color *</label>
-                <input
-                  type="text"
-                  name="color"
-                  value={vehiculo.color}
-                  onChange={handleChange}
-                  placeholder="Ej: Rojo, Azul, Negro"
-                  required
-                />
+                <select name="color" value={vehiculo.color} onChange={handleChange} required>
+                  <option value="">Seleccionar Color</option>
+                  {colores.map((c: any, i) => (
+                    <option key={c.id || c.ID || i} value={c.id || c.ID}>
+                      {c.nombre || c.NOMBRE}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Tipo de Servicio *</label>
+                <select name="tipoServicio" value={vehiculo.tipoServicio} onChange={handleChange} required>
+                  <option value="">Seleccionar Servicio</option>
+                  {tiposServicio.map((s: any, i) => (
+                    <option key={s.id || s.ID || i} value={s.id || s.ID}>
+                      {s.nombre || s.NOMBRE}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Combustible *</label>
+                <select name="combustible" value={vehiculo.combustible} onChange={handleChange} required>
+                  <option value="">Seleccionar Combustible</option>
+                  {combustibles.map((c: any, i) => (
+                    <option key={c.id || c.ID || i} value={c.id || c.ID}>
+                      {c.nombre || c.NOMBRE}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.formGroup}>
                 <label>Clase *</label>
                 <select name="clase" value={vehiculo.clase} onChange={handleChange} required>
-                  <option value="">Seleccionar</option>
+                  <option value="">Seleccionar Clase</option>
                   <option value="Automóvil">Automóvil</option>
                   <option value="Camioneta">Camioneta</option>
                   <option value="Motocicleta">Motocicleta</option>
@@ -282,88 +239,27 @@ return (
               </div>
 
               <div className={styles.formGroup}>
-                <label>Tipo de Servicio *</label>
-                <select name="tipoServicio" value={vehiculo.tipoServicio} onChange={handleChange} required>
-                  <option value="">Seleccionar</option>
-                  <option value="Particular">Particular</option>
-                  <option value="Público">Público</option>
-                  <option value="Diplomático">Diplomático</option>
-                  <option value="Oficial">Oficial</option>
-                  <option value="Especial">Especial</option>
-
-
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-              <label>Tipo de Combustible</label>
-              <select
-                name="combustible"
-                value={vehiculo.combustible}
-                onChange={handleChange}
-              >
-                <option value="">Seleccionar</option>
-                <option value="Gasolina">Gasolina</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Gas">Gas</option>
-                <option value="Mixto">Mixto</option>
-                <option value="Electrico">Eléctrico</option>
-                <option value="Hidrogeno">Hidrógeno</option>
-                <option value="Etanol">Etanol</option>
-                <option value="Biodiesel">Biodiesel</option>
-              </select>
-            </div>
-
-              <div className={styles.formGroup}>
                 <label>Número de Motor</label>
-                <input
-                  type="text"
-                  name="numMotor"
-                  value={vehiculo.numMotor}
-                  onChange={handleChange}
-                  placeholder="Número de motor"
-                />
+                <input type="text" name="numMotor" value={vehiculo.numMotor} onChange={handleChange} />
               </div>
-
               <div className={styles.formGroup}>
                 <label>Número de Chasis</label>
-                <input
-                  type="text"
-                  name="numChasis"
-                  value={vehiculo.numChasis}
-                  onChange={handleChange}
-                  placeholder="Número de chasis"
-                />
+                <input type="text" name="numChasis" value={vehiculo.numChasis} onChange={handleChange} />
               </div>
-
               <div className={styles.formGroup}>
-              <label>Número de VIN</label>
-              <input
-                type="text"
-                name="numeroVin"
-                value={vehiculo.numeroVin}
-                onChange={handleChange}
-                placeholder="Número de identificación vehicular"
-              />
+                <label>Número de VIN</label>
+                <input type="text" name="numeroVin" value={vehiculo.numeroVin} onChange={handleChange} />
+              </div>
             </div>
 
-              
-
-            </div>
-
-            {/* Botones */}
             <div className={styles.buttonGroup}>
-              <Link href={`/asesor/tramites/${idTramite}`} className={styles.cancelButton}>
-                Cancelar
-              </Link>
+              <Link href={`/asesor/tramites/${idTramite}`} className={styles.cancelButton}>Cancelar</Link>
               <button type="submit" disabled={submitting} className={styles.saveButton}>
                 {submitting ? 'Registrando...' : 'Registrar Vehículo'}
               </button>
             </div>
-
           </form>
         </div>
-
       </div>
     </div>
   );
