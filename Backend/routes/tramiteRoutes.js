@@ -68,7 +68,7 @@ router.post('/register', async (req, res) => {
     
     const sql = `
       INSERT INTO TRAMITE (IDTRAMITE, IDCITA, ESTADOTRAMITE, VALOROTROCONCEPTOS)
-      VALUES (seq_tramite.NEXTVAL, :idCita, 'Finalizado', :otros)
+      VALUES (seq_tramite.NEXTVAL, :idCita, 'Activo', :otros)
       RETURNING IDTRAMITE INTO :id
     `;
     
@@ -86,6 +86,28 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Error registering tramite:', err);
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// Actualizar Estado del Trámite
+router.put('/estado', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const { idTramite, estado } = req.body;
+    
+    await connection.execute(
+      "UPDATE TRAMITE SET ESTADOTRAMITE = :1 WHERE IDTRAMITE = :2",
+      [estado, idTramite]
+    );
+    
+    await connection.commit();
+    res.json({ status: 'OK', mensaje: 'Estado actualizado correctamente' });
+  } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {
