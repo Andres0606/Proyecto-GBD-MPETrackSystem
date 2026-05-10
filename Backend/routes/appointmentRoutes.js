@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { oracledb } = require('../config/db');
 
-// 1. Solicitar Cita (Con soporte para Clientes Externos y Destinatarios)
+// 1. Solicitar Cita
 router.post('/solicitar', async (req, res) => {
   let connection;
   try {
@@ -10,7 +10,7 @@ router.post('/solicitar', async (req, res) => {
     const data = req.body; 
     
     const clientRes = await connection.execute(
-      'SELECT idCliente FROM CLIENTE WHERE nDocumento = :1',
+      'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
       [data.idCliente],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
@@ -20,36 +20,42 @@ router.post('/solicitar', async (req, res) => {
     let realIdDestino = null;
     let realIdExterno = null;
 
-    if (data.cedulaDestino) {
+    const cedulaContraparte = data.cedulaDestino || data.cedulaDuenioActual;
+    
+    if (cedulaContraparte) {
       const destRes = await connection.execute(
-        'SELECT idCliente FROM CLIENTE WHERE nDocumento = :1',
-        [data.cedulaDestino],
+        'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
+        [cedulaContraparte],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
+
       if (destRes.rows.length > 0) {
         realIdDestino = destRes.rows[0].IDCLIENTE;
       } else {
-        const cedulaExt = data.cedulaDestino || data.cedulaDuenioActual;
         const nombreExt = data.nombreReceptorExterno || data.nombreDuenioActual;
         const apellidoExt = data.apellidoReceptorExterno || data.apellidoDuenioActual;
 
-        if (cedulaExt && nombreExt) {
+        if (nombreExt) {
           const extExistRes = await connection.execute(
-            'SELECT idExterno FROM CLIENTEEXTERNO WHERE cedula = :1',
-            [cedulaExt.toString()],
+            'SELECT IDEXTERNO FROM CLIENTEEXTERNO WHERE CEDULA = :1',
+            [cedulaContraparte.toString()],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
           );
 
           if (extExistRes.rows.length > 0) {
             realIdExterno = extExistRes.rows[0].IDEXTERNO;
+            await connection.execute(
+              'UPDATE CLIENTEEXTERNO SET NOMBRES = :1, APELLIDO = :2 WHERE IDEXTERNO = :3',
+              [nombreExt, apellidoExt || '', realIdExterno]
+            );
           } else {
             const sqlExt = `
-              INSERT INTO CLIENTEEXTERNO (idExterno, cedula, nombres, apellido)
+              INSERT INTO CLIENTEEXTERNO (IDEXTERNO, CEDULA, NOMBRES, APELLIDO)
               VALUES (seq_externo.NEXTVAL, :cedula, :nombres, :apellido)
-              RETURNING idExterno INTO :id
+              RETURNING IDEXTERNO INTO :id
             `;
             const extInsertRes = await connection.execute(sqlExt, {
-              cedula: cedulaExt.toString(),
+              cedula: cedulaContraparte.toString(),
               nombres: nombreExt,
               apellido: apellidoExt || '',
               id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
@@ -60,13 +66,13 @@ router.post('/solicitar', async (req, res) => {
       }
     }
 
-    const asesorRes = await connection.execute('SELECT idAsesor FROM ASESOR WHERE ROWNUM = 1');
+    const asesorRes = await connection.execute('SELECT IDASESOR FROM ASESOR WHERE ROWNUM = 1');
     const idAsesor = asesorRes.rows.length > 0 ? asesorRes.rows[0][0] : 1;
 
     const sql = `
       INSERT INTO CITA (
-        idCita, idCliente, idAsesor, placaVehiculo, tipoTramite, estadoCita, 
-        FECHAHORAPROGRAMADA, idClienteDestino, idClienteExterno, esElDueno
+        IDCITA, IDCLIENTE, IDASESOR, PLACAVEHICULO, TIPOTRAMITE, ESTADOCITA, 
+        FECHAHORAPROGRAMADA, IDCLIENTEDESTINO, IDCLIENTEEXTERNO, ESELDUENO
       ) VALUES (
         seq_cita.NEXTVAL, :idCliente, :idAsesor, :placa, :tipo, 'PENDIENTE', 
         CURRENT_TIMESTAMP + INTERVAL '1' DAY, :idDestino, :idExterno, :esDueno
@@ -100,28 +106,28 @@ router.get('/pendientes/:cedula', async (req, res) => {
     connection = await oracledb.getConnection();
     const sql = `
       SELECT 
-        c.idCita as "idCita",
-        p.nombres || ' ' || p.apellidos as "cliente",
-        p.telefono as "telefono",
-        p.correo as "correo",
-        v.Placa || ' (' || v.Marca || ')' as "vehiculo",
-        tt.nombre as "tipoTramite",
-        tt.valorBase as "valorBase",
-        c.fechaHoraSolicitud as "fechaSolicitud",
-        NVL(pd.nombres || ' ' || pd.apellidos, ce.nombres || ' ' || ce.apellido) as "nombreDestinatario",
-        NVL(pd.nDocumento, ce.cedula) as "cedulaDestinatario"
+        c.IDCITA as "idCita",
+        p.NOMBRES || ' ' || p.APELLIDOS as "cliente",
+        p.TELEFONO as "telefono",
+        p.CORREO as "correo",
+        v.PLACA || ' (' || v.MARCA || ')' as "vehiculo",
+        tt.NOMBRE as "tipoTramite",
+        tt.VALORBASE as "valorBase",
+        c.FECHAHORASOLICITUD as "fechaSolicitud",
+        NVL(pd.NOMBRES || ' ' || pd.APELLIDOS, ce.NOMBRES || ' ' || ce.APELLIDO) as "nombreDestinatario",
+        NVL(pd.NDOCUMENTO, ce.CEDULA) as "cedulaDestinatario"
       FROM CITA c
-      JOIN CLIENTE cl ON c.idCliente = cl.idCliente
-      JOIN PERSONA p ON cl.nDocumento = p.nDocumento
-      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
-      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
-      LEFT JOIN CLIENTEEXTERNO ce ON c.idClienteExterno = ce.idExterno
-      LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
-      JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
-      CROSS JOIN ASESOR a 
-      WHERE a.nDocumento = :1 AND c.estadoCita = 'PENDIENTE'
+      JOIN CLIENTE cl ON c.IDCLIENTE = cl.IDCLIENTE
+      JOIN PERSONA p ON cl.NDOCUMENTO = p.NDOCUMENTO
+      LEFT JOIN CLIENTE cld ON c.IDCLIENTEDESTINO = cld.IDCLIENTE
+      LEFT JOIN PERSONA pd ON cld.NDOCUMENTO = pd.NDOCUMENTO
+      LEFT JOIN CLIENTEEXTERNO ce ON c.IDCLIENTEEXTERNO = ce.IDEXTERNO
+      LEFT JOIN VEHICULO v ON c.PLACAVEHICULO = v.PLACA
+      JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE
+      WHERE c.ESTADOCITA = 'PENDIENTE'
+      ORDER BY c.FECHAHORASOLICITUD DESC
     `;
-    const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
   } catch (err) {
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
@@ -137,25 +143,27 @@ router.get('/agendadas/:cedula', async (req, res) => {
     connection = await oracledb.getConnection();
     const sql = `
       SELECT 
-        c.idCita as "idCita",
-        p.nombres || ' ' || p.apellidos as "cliente",
-        p.telefono as "telefono",
-        p.correo as "correo",
-        v.Placa || ' (' || v.Marca || ')' as "vehiculo",
-        tt.nombre as "tipoTramite",
-        tt.valorBase as "valorBase",
-        c.fechaHoraProgramada as "fechaProgramada",
-        NVL(pd.nombres || ' ' || pd.apellidos, ce.nombres || ' ' || ce.apellido) as "nombreDestinatario"
+        c.IDCITA as "idCita",
+        p.NOMBRES || ' ' || p.APELLIDOS as "cliente",
+        p.TELEFONO as "telefono",
+        p.CORREO as "correo",
+        v.PLACA || ' (' || v.MARCA || ')' as "vehiculo",
+        tt.NOMBRE as "tipoTramite",
+        tt.VALORBASE as "valorBase",
+        c.FECHAHORAPROGRAMADA as "fechaProgramada",
+        NVL(pd.NOMBRES || ' ' || pd.APELLIDOS, ce.NOMBRES || ' ' || ce.APELLIDO) as "nombreDestinatario",
+        NVL(pd.NDOCUMENTO, ce.CEDULA) as "cedulaDestinatario"
       FROM CITA c
-      JOIN ASESOR a ON c.idAsesor = a.idAsesor
-      JOIN CLIENTE cl ON c.idCliente = cl.idCliente
-      JOIN PERSONA p ON cl.nDocumento = p.nDocumento
-      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
-      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
-      LEFT JOIN CLIENTEEXTERNO ce ON c.idClienteExterno = ce.idExterno
-      LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
-      JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
-      WHERE a.nDocumento = :1 AND c.estadoCita = 'Agendada'
+      JOIN ASESOR a ON c.IDASESOR = a.IDASESOR
+      JOIN CLIENTE cl ON c.IDCLIENTE = cl.IDCLIENTE
+      JOIN PERSONA p ON cl.NDOCUMENTO = p.NDOCUMENTO
+      LEFT JOIN CLIENTE cld ON c.IDCLIENTEDESTINO = cld.IDCLIENTE
+      LEFT JOIN PERSONA pd ON cld.NDOCUMENTO = pd.NDOCUMENTO
+      LEFT JOIN CLIENTEEXTERNO ce ON c.IDCLIENTEEXTERNO = ce.IDEXTERNO
+      LEFT JOIN VEHICULO v ON c.PLACAVEHICULO = v.PLACA
+      JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE
+      WHERE a.NDOCUMENTO = :1 AND c.ESTADOCITA = 'Agendada'
+      ORDER BY c.FECHAHORAPROGRAMADA ASC
     `;
     const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
@@ -166,46 +174,60 @@ router.get('/agendadas/:cedula', async (req, res) => {
   }
 });
 
-// 4. Cancelar Cita
-router.post('/cancelar', async (req, res) => {
-  let connection;
-  try {
-    connection = await oracledb.getConnection();
-    await connection.execute("UPDATE CITA SET estadoCita = 'Cancelada' WHERE idCita = :1", [req.body.idCita]);
-    await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Cita cancelada' });
-  } catch (err) { if (connection) await connection.rollback(); res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
-  finally { if (connection) await connection.close(); }
-});
-
-// 5. Atender/Agendar Cita
+// 4. Atender Cita
 router.post('/atender', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
     const { idCita, idAsesor, fechaProgramada } = req.body;
-    const asesorRes = await connection.execute('SELECT idAsesor FROM ASESOR WHERE nDocumento = :1', [idAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const asesorRes = await connection.execute("SELECT IDASESOR FROM ASESOR WHERE NDOCUMENTO = :1", [idAsesor]);
     if (asesorRes.rows.length === 0) throw new Error('Asesor no encontrado');
-    const realIdAsesor = asesorRes.rows[0].IDASESOR;
+    const realIdAsesor = asesorRes.rows[0][0];
 
-    const sql = `UPDATE CITA SET idAsesor = :idAsesor, estadoCita = 'Agendada', fechaHoraProgramada = TO_TIMESTAMP(:fecha, 'YYYY-MM-DD"T"HH24:MI') WHERE idCita = :idCita`;
-    await connection.execute(sql, { idAsesor: realIdAsesor, fecha: fechaProgramada, idCita: idCita });
+    const sql = `UPDATE CITA SET ESTADOCITA = 'Agendada', IDASESOR = :1, FECHAHORAPROGRAMADA = TO_TIMESTAMP(:2, 'YYYY-MM-DD"T"HH24:MI') WHERE IDCITA = :3`;
+    await connection.execute(sql, [realIdAsesor, fechaProgramada, idCita]);
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Cita agendada' });
-  } catch (err) { if (connection) await connection.rollback(); res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
-  finally { if (connection) await connection.close(); }
+    res.json({ status: 'OK', mensaje: 'Cita agendada exitosamente' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
 });
 
-// 6. Completar Cita
+// 5. Cancelar Cita (POST compatible con frontend)
+router.post('/cancelar', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const { idCita } = req.body;
+    await connection.execute("UPDATE CITA SET ESTADOCITA = 'Cancelada' WHERE IDCITA = :1", [idCita]);
+    await connection.commit();
+    res.json({ status: 'OK', mensaje: 'Cita cancelada' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// 6. Completar Cita (POST compatible con frontend)
 router.post('/completar', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
-    await connection.execute("UPDATE CITA SET estadoCita = 'Atendida' WHERE idCita = :1", [req.body.idCita]);
+    const { idCita } = req.body;
+    await connection.execute("UPDATE CITA SET ESTADOCITA = 'Atendida' WHERE IDCITA = :1", [idCita]);
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Cita atendida' });
-  } catch (err) { if (connection) await connection.rollback(); res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
-  finally { if (connection) await connection.close(); }
+    res.json({ status: 'OK', mensaje: 'Cita completada exitosamente' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
 });
 
 module.exports = router;

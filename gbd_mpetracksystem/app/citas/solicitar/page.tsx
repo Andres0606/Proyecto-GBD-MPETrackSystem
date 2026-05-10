@@ -310,6 +310,11 @@ const citaData: any = {
       ? esDuenioRegistrado ? 'S' : 'N'
       : null,
 
+  nombreDuenioActual:
+    tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
+      ? duenioActual.nombres
+      : null,
+
   apellidoDuenioActual:
     tipoTramiteSeleccionado === 'Traspaso' && !esDuenioRegistrado
       ? duenioActual.apellido

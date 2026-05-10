@@ -1,25 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../CSS/vehiculos/RegistrarVehiculo.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
 interface RegistrarVehiculoFormProps {
   idCliente: number;
+  idTramite?: number;
   onSuccess?: (placa: string) => void;
   onCancel?: () => void;
   buttonText?: string;
 }
 
+interface MasterData {
+  id: string | number;
+  nombre: string;
+}
+
 export default function RegistrarVehiculoForm({ 
   idCliente, 
+  idTramite,
   onSuccess, 
   onCancel, 
   buttonText = 'Registrar Vehículo' 
 }: RegistrarVehiculoFormProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [loadingLists, setLoadingLists] = useState(true);
   const [error, setError] = useState('');
   
+  // Listas dinámicas desde la DB
+  const [colores, setColores] = useState<MasterData[]>([]);
+  const [clases, setClases] = useState<MasterData[]>([]);
+  const [servicios, setServicios] = useState<MasterData[]>([]);
+  const [combustibles, setCombustibles] = useState<MasterData[]>([]);
+
   const [formData, setFormData] = useState({
     placa: '',
     marca: '',
@@ -31,8 +45,40 @@ export default function RegistrarVehiculoForm({
     numChasis: '',
     color: '',
     numeroVin: '',
-    combustible: ''
+    combustible: '',
+    prendado: 'N'
   });
+
+  useEffect(() => {
+    cargarListas();
+  }, []);
+
+  const cargarListas = async () => {
+    try {
+      setLoadingLists(true);
+      const [resCol, resComb, resServ, resClase] = await Promise.all([
+        fetch(`${BACKEND_URL}/api/vehiculos/colores`),
+        fetch(`${BACKEND_URL}/api/vehiculos/combustibles`),
+        fetch(`${BACKEND_URL}/api/vehiculos/tipos-servicio`),
+        fetch(`${BACKEND_URL}/api/vehiculos/clases`)
+      ]);
+
+      const [dataCol, dataComb, dataServ, dataClase] = await Promise.all([
+        resCol.json(), resComb.json(), resServ.json(), resClase.json()
+      ]);
+
+      if (dataCol.status === 'OK') setColores(dataCol.data);
+      if (dataComb.status === 'OK') setCombustibles(dataComb.data);
+      if (dataServ.status === 'OK') setServicios(dataServ.data);
+      if (dataClase.status === 'OK') setClases(dataClase.data);
+
+    } catch (err) {
+      console.error('Error cargando listas maestras:', err);
+      setError('Error al cargar opciones de la base de datos');
+    } finally {
+      setLoadingLists(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -54,17 +100,18 @@ export default function RegistrarVehiculoForm({
     const vehiculoData = {
       placa: formData.placa.toUpperCase(),
       idCliente: idCliente,
+      idTramite: idTramite, // Para vincularlo automáticamente
       marca: formData.marca,
       linea: formData.linea,
       modelo: formData.modelo ? parseInt(formData.modelo) : null,
       clase: formData.clase,
-      tipoServicio: formData.tipoServicio,
+      tipoServicio: formData.tipoServicio ? parseInt(formData.tipoServicio) : null,
       numMotor: formData.numMotor,
       numChasis: formData.numChasis,
-      color: formData.color,
+      color: formData.color ? parseInt(formData.color) : null,
       numeroVin: formData.numeroVin,
-      combustible: formData.combustible,
-      prendado: 'N'
+      combustible: formData.combustible ? parseInt(formData.combustible) : null,
+      prendado: formData.prendado
     };
 
     try {
@@ -84,76 +131,73 @@ export default function RegistrarVehiculoForm({
         setError(data.mensaje || 'Error al registrar vehículo');
       }
     } catch (err) {
-      console.error('Error:', err);
       setError('Error de conexión con el servidor');
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (loadingLists) {
+    return <div className={styles.loading}>Cargando opciones del sistema...</div>;
+  }
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className={styles.formContainer}>
       {error && <div className={styles.errorAlert}>{error}</div>}
       
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
           <label>Placa *</label>
-          <input type="text" name="placa" value={formData.placa} onChange={handleChange} required />
+          <input type="text" name="placa" value={formData.placa} onChange={handleChange} required placeholder="ABC123" />
         </div>
         <div className={styles.formGroup}>
           <label>Marca</label>
-          <input type="text" name="marca" value={formData.marca} onChange={handleChange} />
+          <input type="text" name="marca" value={formData.marca} onChange={handleChange} placeholder="Ej: Chevrolet" />
         </div>
         <div className={styles.formGroup}>
           <label>Línea</label>
-          <input type="text" name="linea" value={formData.linea} onChange={handleChange} />
+          <input type="text" name="linea" value={formData.linea} onChange={handleChange} placeholder="Ej: Aveo" />
         </div>
         <div className={styles.formGroup}>
-          <label>Modelo</label>
-          <input type="number" name="modelo" value={formData.modelo} onChange={handleChange} />
+          <label>Modelo (Año)</label>
+          <input type="number" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej: 2024" />
         </div>
+
         <div className={styles.formGroup}>
-          <label>Clase</label>
+          <label>Clase de Vehículo</label>
           <select name="clase" value={formData.clase} onChange={handleChange}>
-            <option value="">Seleccionar</option>
-            <option value="Automóvil">Automóvil</option>
-            <option value="Camioneta">Camioneta</option>
-            <option value="Motocicleta">Motocicleta</option>
-            <option value="Camión">Camión</option>
+            <option value="">Seleccionar Clase</option>
+            {clases.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
           </select>
         </div>
+
         <div className={styles.formGroup}>
-          <label>Tipo Servicio</label>
+          <label>Tipo de Servicio</label>
           <select name="tipoServicio" value={formData.tipoServicio} onChange={handleChange}>
-            <option value="">Seleccionar</option>
-            <option value="Particular">Particular</option>
-            <option value="Público">Público</option>
-            <option value="Público">Diplomático</option>
-            <option value="Público">Oficial</option>
-            <option value="Público">Especial</option>
+            <option value="">Seleccionar Servicio</option>
+            {servicios.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
           </select>
         </div>
+
         <div className={styles.formGroup}>
           <label>Color</label>
-          <input type="text" name="color" value={formData.color} onChange={handleChange} />
+          <select name="color" value={formData.color} onChange={handleChange}>
+            <option value="">Seleccionar Color</option>
+            {colores.map(col => <option key={col.id} value={col.id}>{col.nombre}</option>)}
+          </select>
         </div>
-        <div className={styles.formGroup}>
-          <label>Número VIN</label>
-          <input type="text" name="numeroVin" value={formData.numeroVin} onChange={handleChange} />
-        </div>
+
         <div className={styles.formGroup}>
           <label>Combustible</label>
           <select name="combustible" value={formData.combustible} onChange={handleChange}>
-            <option value="">Seleccionar</option>
-            <option value="Gasolina">Gasolina</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Gas">Gas</option>
-            <option value="Mixto">Mixto</option>
-            <option value="Electrico">Eléctrico</option>
-            <option value="Hidrogeno">Hidrógeno</option>
-            <option value="Etanol">Etanol</option>
-            <option value="Biodiesel">Biodiesel</option>
+            <option value="">Seleccionar Combustible</option>
+            {combustibles.map(comb => <option key={comb.id} value={comb.id}>{comb.nombre}</option>)}
           </select>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Número VIN</label>
+          <input type="text" name="numeroVin" value={formData.numeroVin} onChange={handleChange} placeholder="17 caracteres" />
         </div>
         <div className={styles.formGroup}>
           <label>Número Motor</label>
@@ -162,6 +206,13 @@ export default function RegistrarVehiculoForm({
         <div className={styles.formGroup}>
           <label>Número Chasis</label>
           <input type="text" name="numChasis" value={formData.numChasis} onChange={handleChange} />
+        </div>
+        <div className={styles.formGroup}>
+          <label>¿Tiene Prenda?</label>
+          <select name="prendado" value={formData.prendado} onChange={handleChange}>
+            <option value="N">No</option>
+            <option value="S">Sí (Con Prenda)</option>
+          </select>
         </div>
       </div>
 

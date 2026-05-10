@@ -87,12 +87,20 @@ export default function TraspasoPage() {
   });
   const [clienteEncontrado, setClienteEncontrado] = useState(false);
   const [cargandoBusqueda, setCargandoBusqueda] = useState(false);
+  const [currentPlaca, setCurrentPlaca] = useState(placaParam);
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const rol = sessionStorage.getItem('userRol');
     if (!isLoggedIn || rol !== '2') { router.push('/login'); return; }
-    if (esDuenioRegistrado === 'N') setMostrarFormularioVehiculo(true);
+
+    // 👇 Validación robusta de la placa (6 caracteres alfanuméricos)
+    const placaLimpia = (placaParam || '').trim().toUpperCase();
+    const esPlacaValida = /^[A-Z0-9]{6}$/.test(placaLimpia);
+
+    if (!esPlacaValida || placaLimpia === 'NULL' || placaLimpia === 'UNDEFINED') {
+      setMostrarFormularioVehiculo(true);
+    }
 
     // 👇 Si ya viene un destinatario vinculado, lo cargamos de una vez
     if (cedulaDestino) {
@@ -177,7 +185,7 @@ export default function TraspasoPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          placa: placaParam,
+          placa: currentPlaca,
           cedulaAnterior: parseInt(cedulaActual),
           cedulaNueva: parseInt(nuevoPropietario.cedula),
           idTramite: parseInt(idTramite),
@@ -250,51 +258,25 @@ export default function TraspasoPage() {
             <div className={styles.infoBox}>
               <div className={styles.infoBoxHeader}>
                 <div className={styles.infoBoxIcon}><InfoIcon /></div>
-                <h3 className={styles.infoBoxTitle}>Información del Trámite</h3>
+                <h3 className={styles.infoBoxTitle}>Información del Vendedor</h3>
               </div>
               <div className={styles.infoBoxRow}>
-                <span className={styles.infoBoxLabel}>ID Trámite:</span>
-                <span>{idTramite}</span>
-              </div>
-              <div className={styles.infoBoxRow}>
-                <span className={styles.infoBoxLabel}>Propietario Actual:</span>
+                <span className={styles.infoBoxLabel}>Vendedor Actual:</span>
                 <span>{getTextoPropietarioActual()}</span>
-              </div>
-              <div className={styles.infoBoxRow}>
-                <span className={styles.infoBoxLabel}>Nuevo Propietario:</span>
-                <span>Cédula {cedulaClienteSolicitante}</span>
               </div>
             </div>
 
             <RegistrarVehiculoForm
-              idCliente={parseInt(cedulaClienteSolicitante)}
+              idCliente={parseInt(cedulaActual)}
+              idTramite={parseInt(idTramite)}
               onSuccess={async (placa) => {
-                setSubmitting(true);
-                try {
-                  const historialResponse = await fetch(`${BACKEND_URL}/api/vehiculos/historial`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      placa, cedulaAnterior: parseInt(cedulaActual),
-                      cedulaNueva: parseInt(cedulaClienteSolicitante),
-                      idTramite: parseInt(idTramite)
-                    }),
-                  });
-                  const historialData = await historialResponse.json();
-                  if (historialResponse.ok && historialData.status === 'OK') {
-                    setSuccess(`Vehículo ${placa} registrado exitosamente`);
-                    setTimeout(() => router.push(`/asesor/tramites/${idTramite}`), 2000);
-                  } else {
-                    setError(historialData.mensaje || 'Error al registrar historial');
-                  }
-                } catch {
-                  setError('Error de conexión con el servidor');
-                } finally {
-                  setSubmitting(false);
-                }
+                setSuccess(`Vehículo ${placa} registrado exitosamente. Ahora proceda con el nuevo dueño.`);
+                setCurrentPlaca(placa);
+                setMostrarFormularioVehiculo(false);
+                setTimeout(() => setSuccess(''), 3000);
               }}
               onCancel={() => router.push(`/asesor/tramites/${idTramite}`)}
-              buttonText="Registrar Vehículo"
+              buttonText="Registrar Vehículo y Continuar"
             />
           </div>
         </div>
@@ -358,6 +340,45 @@ export default function TraspasoPage() {
               <span>{getTextoPropietarioActual()}</span>
             </div>
           </div>
+
+          {/* Botón manual para registrar vehículo si no hay uno válido */}
+          {(!currentPlaca || currentPlaca.toUpperCase() === 'NULL') && !mostrarFormularioVehiculo && (
+            <div className={styles.warningBox} style={{ 
+              marginBottom: '20px', 
+              border: '1px solid #ffa000', 
+              padding: '20px', 
+              borderRadius: '12px', 
+              background: 'linear-gradient(135deg, #fff9c4 0%, #fffde7 100%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+              textAlign: 'center'
+            }}>
+              <p style={{ margin: 0, color: '#e65100', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                ⚠️ No se ha detectado un vehículo vinculado a este trámite.
+              </p>
+              <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
+                Para proceder con el traspaso, primero debe registrar la información del vehículo.
+              </p>
+              <button 
+                onClick={() => setMostrarFormularioVehiculo(true)}
+                style={{ 
+                  padding: '12px 24px', 
+                  background: '#ff9800', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  transition: 'transform 0.2s'
+                }}
+              >
+                + Registrar Vehículo Nuevo
+              </button>
+            </div>
+          )}
 
           {/* Búsqueda */}
           <div className={styles.searchSection}>
