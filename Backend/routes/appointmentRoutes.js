@@ -36,26 +36,12 @@ router.get('/cliente/:cedula', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT 
-        c.IDCITA as "idCita",
-        tt.NOMBRE as "tipoTramite",
-        c.PLACAVEHICULO as "placa",
-        c.FECHAHORAPROGRAMADA as "fechaCita",
-        c.FECHAHORASOLICITUD as "fechaSolicitud",
-        pa.NOMBRES || ' ' || pa.APELLIDOS as "asesor",
-        c.IDASESOR as "idAsesor"
-      FROM CITA c
-      JOIN CLIENTE cl ON c.IDCLIENTE = cl.IDCLIENTE
-      JOIN PERSONA p ON cl.NDOCUMENTO = p.NDOCUMENTO
-      JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE
-      LEFT JOIN ASESOR a ON c.IDASESOR = a.IDASESOR
-      LEFT JOIN PERSONA pa ON a.NDOCUMENTO = pa.NDOCUMENTO
-      WHERE p.NDOCUMENTO = :1
-      AND c.IDCITA NOT IN (SELECT IDCITA FROM TRAMITE) -- EXCLUIR CITAS YA COMPLETADAS/EN TRÁMITE
+      SELECT * FROM vw_mis_citas 
+      WHERE "cedula_cliente" = :1
       ORDER BY 
-        CASE WHEN c.FECHAHORAPROGRAMADA IS NULL THEN 2 ELSE 1 END,
-        c.FECHAHORAPROGRAMADA ASC,
-        c.FECHAHORASOLICITUD DESC
+        CASE WHEN "fechaCita" IS NULL THEN 2 ELSE 1 END,
+        "fechaCita" ASC,
+        "fechaSolicitud" DESC
     `;
     const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });

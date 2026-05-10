@@ -63,6 +63,7 @@ router.get('/clases', async (req, res) => {
 
 // --- Rutas de Vehículos ---
 
+// Obtener vehículos de un cliente (Solo los que posee actualmente)
 router.get('/cliente/:cedula', async (req, res) => {
   const { cedula } = req.params;
   if (!cedula || cedula === 'undefined' || cedula === 'null' || cedula === '') {
@@ -71,22 +72,26 @@ router.get('/cliente/:cedula', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
+    
+    // Esta consulta usa una subconsulta para encontrar el ÚLTIMO trámite de cada vehículo.
+    // Si el último trámite fue un traspaso, el dueño es el DESTINO.
+    // Si no, es el CLIENTE que solicitó el trámite original.
     const sql = `
-      SELECT 
-        v.PLACA as "placa", v.MARCA as "marca", v.LINEA as "linea", v.MODELO as "modelo",
-        v.CLASE as "clase", ts.NOMBRESERVICIO as "tipoServicio", v.NUMMOTOR as "numMotor",
-        v.NUMCHASIS as "numChasis", col.NOMBRECOLOR as "color", v.ESTADO as "estado",
-        v.PRENDADO as "prendado", v.NUMEROVIN as "numeroVin", comb.NOMBRECOMBUSTIBLE as "combustible"
-      FROM VEHICULO v
-      LEFT JOIN TIPOSERVICIO ts ON v.TIPOSERVICIO = ts.IDTIPOSERVICIO
-      LEFT JOIN COLOR col ON v.COLOR = col.IDCOLOR
-      LEFT JOIN COMBUSTIBLE comb ON v.COMBUSTIBLE = comb.IDCOMBUSTIBLE
-      WHERE v.PLACA IN (
-          SELECT ci.PLACAVEHICULO
-          FROM CITA ci
-          JOIN TRAMITE tr ON ci.IDCITA = tr.IDCITA
-          JOIN CLIENTE cl ON (ci.IDCLIENTE = cl.IDCLIENTE OR ci.IDCLIENTEDESTINO = cl.IDCLIENTE)
-          WHERE cl.NDOCUMENTO = :1
+      SELECT * FROM vw_detalle_vehiculos v
+      WHERE v."placa" IN (
+          SELECT PLACA
+          FROM (
+              SELECT 
+                ci.PLACAVEHICULO as PLACA,
+                NVL(ci.IDCLIENTEDESTINO, ci.IDCLIENTE) as ID_DUENIO_ACTUAL,
+                ROW_NUMBER() OVER (PARTITION BY ci.PLACAVEHICULO ORDER BY tr.IDTRAMITE DESC) as rn
+              FROM CITA ci
+              JOIN TRAMITE tr ON ci.IDCITA = tr.IDCITA
+              WHERE tr.ESTADOTRAMITE = 'Finalizado'
+          ) t
+          JOIN CLIENTE cl ON t.ID_DUENIO_ACTUAL = cl.IDCLIENTE
+          WHERE t.rn = 1 
+          AND cl.NDOCUMENTO = :1
       )
     `;
     const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
