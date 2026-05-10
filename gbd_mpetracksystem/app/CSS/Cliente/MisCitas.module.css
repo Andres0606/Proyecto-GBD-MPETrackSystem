@@ -1,0 +1,238 @@
+.container {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 40px 20px;
+  color: #1e293b;
+}
+
+.inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  margin-bottom: 40px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+}
+
+.backButton:hover {
+  color: #2563eb;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.iconBox {
+  width: 56px;
+  height: 56px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.iconBox svg {
+  width: 28px;
+  height: 28px;
+}
+
+.titleRow h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.titleRow p {
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* Grid */
+.citasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.citaCard {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.citaCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.cardStatus {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-bottom-left-radius: 12px;
+  letter-spacing: 0.05em;
+}
+
+.citaPendiente .cardStatus {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.cardHeader {
+  margin-bottom: 20px;
+}
+
+.citaId {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cardHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.infoItem svg {
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+}
+
+.infoItem small {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.infoItem p {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  color: #334155;
+}
+
+.cardFooter {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 24px;
+  border: 2px dashed #e2e8f0;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  margin: 0 0 12px;
+}
+
+.emptyState p {
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+.solicitarBtn {
+  background: #2563eb;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.solicitarBtn:hover {
+  background: #1d4ed8;
+}
+
+.errorAlert {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  border: 1px solid #fee2e2;
+}

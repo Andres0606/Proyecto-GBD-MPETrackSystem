@@ -29,7 +29,7 @@ router.get('/asesor/:cedula', async (req, res) => {
       SELECT 
         t.idTramite as "idTramite",
         t.idCita as "idCita",
-        p.nDocumento as "idCliente", -- Cédula del solicitante
+        p.nDocumento as "idCliente",
         p.nombres || ' ' || p.apellidos as "cliente",
         p.telefono as "telefono",
         p.correo as "correo",
@@ -41,12 +41,10 @@ router.get('/asesor/:cedula', async (req, res) => {
         c.fechaHoraSolicitud as "fechaCreacion",
         c.fechaHoraProgramada as "fechaCita",
         c.esElDueno as "esElDueno",
-        -- Info para externos (Caso 2 y 3)
         c.idClienteExterno as "idExterno",
         ce.nombres as "nombreDuenioActual",
         ce.apellido as "apellidoDuenioActual",
         ce.cedula as "cedulaDuenioActual",
-        -- Info del Destinatario (Caso 1)
         CASE 
           WHEN tt.nombre = 'Traspaso' THEN NVL(TRIM(pd.nombres || ' ' || pd.apellidos), TRIM(ce.nombres || ' ' || ce.apellido))
           ELSE NULL 
@@ -68,6 +66,44 @@ router.get('/asesor/:cedula', async (req, res) => {
       LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
       JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
       WHERE a.nDocumento = :1
+      ORDER BY t.idTramite DESC
+    `;
+    
+    const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    res.json({ status: 'OK', tramites: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// NUEVA RUTA: Obtener trámites de un cliente específico (Para "Mis Trámites")
+router.get('/cliente/:cedula', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const sql = `
+      SELECT 
+        t.idTramite as "idTramite",
+        t.idCita as "idCita",
+        v.Placa as "vehiculo",
+        tt.nombre as "tipoTramite",
+        NVL(tt.valorBase, 0) as "valorTramite",
+        NVL(t.valorOtroConceptos, 0) as "valorOtrosConceptos",
+        t.estadoTramite as "estadoTramite",
+        c.fechaHoraSolicitud as "fechaCreacion",
+        c.fechaHoraProgramada as "fechaCita",
+        pa.nombres || ' ' || pa.apellidos as "asesor"
+      FROM TRAMITE t
+      JOIN CITA c ON t.idCita = c.idCita
+      JOIN CLIENTE cl ON c.idCliente = cl.idCliente
+      JOIN PERSONA p ON cl.nDocumento = p.nDocumento
+      JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
+      LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
+      LEFT JOIN ASESOR a ON c.idAsesor = a.idAsesor
+      LEFT JOIN PERSONA pa ON a.nDocumento = pa.nDocumento
+      WHERE p.nDocumento = :1
       ORDER BY t.idTramite DESC
     `;
     
