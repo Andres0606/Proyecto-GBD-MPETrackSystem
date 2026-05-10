@@ -8,23 +8,63 @@ router.post('/solicitar', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const c = req.body;
+
+    // 1. Obtener el IDCLIENTE real a partir de la cédula (NDOCUMENTO)
+    const resCliente = await connection.execute(
+      'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
+      [c.idCliente],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (resCliente.rows.length === 0) {
+      return res.status(404).json({ status: 'ERROR', mensaje: 'No se encontró el cliente en la base de datos' });
+    }
+
+    const idClienteReal = resCliente.rows[0].IDCLIENTE;
+
+    // 2. Obtener el IDCLIENTEDESTINO real si se proporcionó una cédula
+    let idDestinoReal = null;
+    if (c.cedulaDestino) {
+      const resDestino = await connection.execute(
+        'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
+        [c.cedulaDestino],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      if (resDestino.rows.length > 0) {
+        idDestinoReal = resDestino.rows[0].IDCLIENTE;
+      }
+    }
+
+    // 3. Normalizar 'esDueno' para Oracle (S/N)
+    let esDuenoStr = 'S';
+    if (c.esDueno === false || c.esDueno === 'N') esDuenoStr = 'N';
+
     const sql = `
-      INSERT INTO CITA (IDCITA, IDCLIENTE, PLACAVEHICULO, TIPOTRAMITE, FECHAHORASOLICITUD, ESELDUENO, IDCLIENTEDESTINO, IDCLIENTEEXTERNO)
-      VALUES (seq_cita.NEXTVAL, :idCliente, :placa, :idTipo, CURRENT_TIMESTAMP, :esDueno, :idDestino, :idExterno)
+      INSERT INTO CITA (IDCITA, IDCLIENTE, PLACAVEHICULO, TIPOTRAMITE, ESTADOCITA, FECHAHORASOLICITUD, ESELDUENO, IDCLIENTEEXTERNO, IDCLIENTEDESTINO)
+      VALUES (seq_cita.NEXTVAL, :idCliente, :placa, :idTipo, 'PENDIENTE', CURRENT_TIMESTAMP, :esDueno, :idExterno, :idDestino)
     `;
+    
     await connection.execute(sql, {
-      idCliente: c.idCliente,
+      idCliente: idClienteReal,
       placa: c.idVehiculo || null,
       idTipo: c.idTipoTramite,
-      esDueno: c.esDueno || 'S',
-      idDestino: c.idDestino || null,
-      idExterno: c.idExterno || null
+      esDueno: esDuenoStr,
+      idExterno: c.idExterno || null,
+      idDestino: idDestinoReal
     });
+
     await connection.commit();
     res.json({ status: 'OK', mensaje: 'Cita solicitada correctamente' });
   } catch (err) {
     if (connection) await connection.rollback();
-    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+    console.error('Error en solicitar cita:', err.message);
+    
+    // Si el error viene de uno de nuestros triggers (RAISE_APPLICATION_ERROR)
+    const msg = err.message.includes('ORA-20') 
+      ? err.message.split('\n')[0].split(': ')[1] 
+      : 'Error interno al procesar la cita';
+      
+    res.status(500).json({ status: 'ERROR', mensaje: msg });
   } finally {
     if (connection) await connection.close();
   }
@@ -58,24 +98,9 @@ router.get('/pendientes/:cedulaAsesor', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT 
-        c.IDCITA as "idCita",
-        p.NOMBRES || ' ' || p.APELLIDOS as "cliente",
-        p.NDOCUMENTO as "cedulaCliente",
-        p.TELEFONO as "telefono",
-        p.CORREO as "correo",
-        tt.NOMBRE as "tipoTramite",
-        tt.VALORBASE as "valorBase",
-        c.PLACAVEHICULO as "vehiculo",
-        c.FECHAHORASOLICITUD as "fechaSolicitud",
-        1 as "esSuEspecialidad"
-      FROM CITA c
-      JOIN CLIENTE cl ON c.IDCLIENTE = cl.IDCLIENTE
-      JOIN PERSONA p ON cl.NDOCUMENTO = p.NDOCUMENTO
-      JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE
-      WHERE c.FECHAHORAPROGRAMADA IS NULL
-      AND c.IDCITA NOT IN (SELECT IDCITA FROM TRAMITE)
-      ORDER BY c.FECHAHORASOLICITUD ASC
+      SELECT * FROM vw_gestion_citas_asesor
+      WHERE "fechaProgramada" IS NULL
+      ORDER BY "fechaSolicitud" ASC
     `;
     const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
@@ -92,22 +117,10 @@ router.get('/agendadas/:cedulaAsesor', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT 
-        c.IDCITA as "idCita",
-        p.NOMBRES || ' ' || p.APELLIDOS as "cliente",
-        p.TELEFONO as "telefono",
-        c.PLACAVEHICULO as "vehiculo",
-        tt.NOMBRE as "tipoTramite",
-        c.FECHAHORAPROGRAMADA as "fechaProgramada"
-      FROM CITA c
-      JOIN CLIENTE cl ON c.IDCLIENTE = cl.IDCLIENTE
-      JOIN PERSONA p ON cl.NDOCUMENTO = p.NDOCUMENTO
-      JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE
-      JOIN ASESOR a ON c.IDASESOR = a.IDASESOR
-      WHERE a.NDOCUMENTO = :1
-      AND c.FECHAHORAPROGRAMADA IS NOT NULL
-      AND c.IDCITA NOT IN (SELECT IDCITA FROM TRAMITE)
-      ORDER BY c.FECHAHORAPROGRAMADA ASC
+      SELECT * FROM vw_gestion_citas_asesor
+      WHERE "cedula_asesor" = :1
+      AND "fechaProgramada" IS NOT NULL
+      ORDER BY "fechaProgramada" ASC
     `;
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
@@ -138,29 +151,68 @@ router.post('/cancelar', async (req, res) => {
   }
 });
 
-// Asignar fecha y hora a una cita (Agendar)
-router.put('/agendar', async (req, res) => {
+// Asignar fecha y hora a una cita (Agendar/Atender)
+router.post('/atender', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
-    const { idCita, fechaHora, idAsesor } = req.body;
+    const { idCita, fechaProgramada, idAsesor } = req.body;
 
-    let idAsesorReal = idAsesor;
-    if (idAsesor && idAsesor.toString().length > 5) {
-       const resAsesor = await connection.execute(
-         'SELECT IDASESOR FROM ASESOR WHERE NDOCUMENTO = :1',
-         [idAsesor],
-         { outFormat: oracledb.OUT_FORMAT_OBJECT }
-       );
-       if (resAsesor.rows.length > 0) idAsesorReal = resAsesor.rows[0].IDASESOR;
+    // 1. Obtener ID real del asesor a partir de la cédula
+    let idAsesorReal = null;
+    const resAsesor = await connection.execute(
+      'SELECT IDASESOR FROM ASESOR WHERE NDOCUMENTO = :1',
+      [idAsesor],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (resAsesor.rows.length === 0) {
+      return res.status(404).json({ status: 'ERROR', mensaje: 'El asesor con cédula ' + idAsesor + ' no existe en la tabla ASESOR.' });
     }
 
+    idAsesorReal = resAsesor.rows[0].IDASESOR;
+
+    // 2. Actualizar la cita
+    const sql = `
+      UPDATE CITA 
+      SET FECHAHORAPROGRAMADA = TO_TIMESTAMP(:1, 'YYYY-MM-DD"T"HH24:MI'), 
+          IDASESOR = :2,
+          ESTADOCITA = 'Agendada'
+      WHERE IDCITA = :3
+    `;
+    
+    await connection.execute(sql, [fechaProgramada, idAsesorReal, idCita]);
+    await connection.commit();
+    
+    res.json({ status: 'OK', mensaje: 'Cita agendada correctamente' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// Mantener /agendar por compatibilidad si es necesario
+router.put('/agendar', async (req, res) => {
+  // ... similar logic or redirect to the same handler
+  res.status(405).json({ status: 'ERROR', mensaje: 'Use POST /atender' });
+});
+
+// Marcar cita como completada/atendida
+router.post('/completar', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const { idCita } = req.body;
+    
     await connection.execute(
-      "UPDATE CITA SET FECHAHORAPROGRAMADA = TO_TIMESTAMP(:1, 'YYYY-MM-DD\"T\"HH24:MI'), IDASESOR = :2 WHERE IDCITA = :3",
-      [fechaHora, idAsesorReal, idCita]
+      "UPDATE CITA SET ESTADOCITA = 'Atendida' WHERE IDCITA = :1",
+      [idCita]
     );
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Cita agendada correctamente' });
+    
+    res.json({ status: 'OK', mensaje: 'Cita marcada como atendida' });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
