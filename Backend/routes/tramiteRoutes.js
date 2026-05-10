@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { oracledb } = require('../config/db');
 
-// RUTA RESTAURADA: Listar tipos de trámite para solicitud de citas
+// RUTA: Listar tipos de trámite para solicitud de citas
 router.get('/list', async (req, res) => {
   let connection;
   try {
@@ -20,7 +20,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-// Obtener trámites del asesor (con lógica de destinatarios unificada)
+// Obtener trámites del asesor
 router.get('/asesor/:cedula', async (req, res) => {
   let connection;
   try {
@@ -29,6 +29,7 @@ router.get('/asesor/:cedula', async (req, res) => {
       SELECT 
         t.idTramite as "idTramite",
         t.idCita as "idCita",
+        p.nDocumento as "idCliente", -- Cédula del solicitante
         p.nombres || ' ' || p.apellidos as "cliente",
         p.telefono as "telefono",
         p.correo as "correo",
@@ -40,7 +41,12 @@ router.get('/asesor/:cedula', async (req, res) => {
         c.fechaHoraSolicitud as "fechaCreacion",
         c.fechaHoraProgramada as "fechaCita",
         c.esElDueno as "esElDueno",
-        -- Info del Destinatario (Solo si es Traspaso)
+        -- Info para externos (Caso 2 y 3)
+        c.idClienteExterno as "idExterno",
+        ce.nombres as "nombreDuenioActual",
+        ce.apellido as "apellidoDuenioActual",
+        ce.cedula as "cedulaDuenioActual",
+        -- Info del Destinatario (Caso 1)
         CASE 
           WHEN tt.nombre = 'Traspaso' THEN NVL(TRIM(pd.nombres || ' ' || pd.apellidos), TRIM(ce.nombres || ' ' || ce.apellido))
           ELSE NULL 

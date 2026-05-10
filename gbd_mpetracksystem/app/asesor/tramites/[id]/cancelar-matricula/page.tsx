@@ -44,30 +44,37 @@ export default function CancelarMatriculaPage() {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const rol = sessionStorage.getItem('userRol');
     if (!isLoggedIn || rol !== '2') { router.push('/login'); return; }
-    if (!placa || !idCliente) { setError('Falta información del vehículo o cliente'); return; }
+    
+    const idLimpio = (idCliente || '').toString().trim().toLowerCase();
+    const placaLimpia = (placa || '').toString().trim().toUpperCase();
+
+    if (!placaLimpia || placaLimpia === 'NULL' || placaLimpia === 'UNDEFINED' || !idLimpio || idLimpio === 'UNDEFINED' || idLimpio === 'NULL') {
+      setError('Falta información válida del vehículo o cliente para este trámite.'); 
+      return; 
+    }
+    
     verificarPrenda();
   }, []);
 
-const verificarPrenda = async () => {
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/vehiculos/cliente/${idCliente}`);
-    const data = await response.json();
+  const verificarPrenda = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/vehiculos/cliente/${idCliente}`);
+      const data = await response.json();
 
-    if (data.status === 'OK' && data.vehiculos) {
-      const vehiculo = data.vehiculos.find((v: any) => v.placa === placa);
+      if (!response.ok) {
+        console.warn('No se pudo verificar prenda:', data.mensaje);
+        return;
+      }
 
-      const prendado =
-        vehiculo?.prendado ??
-        vehiculo?.PRENDADO ??
-        vehiculo?.Prendado ??
-        'N';
-
-      setVehiculoPrendado(prendado.toString().toUpperCase() === 'S');
+      if (data.status === 'OK' && data.vehiculos) {
+        const vehiculo = data.vehiculos.find((v: any) => v.placa === placa);
+        const prendado = vehiculo?.prendado ?? vehiculo?.PRENDADO ?? vehiculo?.Prendado ?? 'N';
+        setVehiculoPrendado(prendado.toString().toUpperCase() === 'S');
+      }
+    } catch (error) {
+      console.error('Error verificando prenda:', error);
     }
-  } catch (error) {
-    console.error('Error verificando prenda:', error);
-  }
-};
+  };
 
   const desbloquearEnvio = () => {
     enviandoRef.current = false;

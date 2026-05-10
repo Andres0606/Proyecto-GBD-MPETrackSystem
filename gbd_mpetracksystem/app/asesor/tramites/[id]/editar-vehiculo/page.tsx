@@ -123,13 +123,37 @@ const [updatePendiente, setUpdatePendiente] = useState<Record<string, string> | 
   const [regrabacionMotorRealizada, setRegrabacionMotorRealizada] = useState(false);
   const [regrabacionChasisRealizada, setRegrabacionChasisRealizada] = useState(false);
 
+  const [colores, setColores] = useState<{id: any, nombre: string}[]>([]);
+  const [servicios, setServicios] = useState<{id: any, nombre: string}[]>([]);
+  const [clases, setClases] = useState<{id: any, nombre: string}[]>([]);
+
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const rol = sessionStorage.getItem('userRol');
     if (!isLoggedIn || rol !== '2') { router.push('/login'); return; }
+    
     setCampos(camposParam.split(',').filter(c => c.trim() !== ''));
+    cargarListas();
     setLoading(false);
   }, []);
+
+  const cargarListas = async () => {
+    try {
+      const [resCol, resServ, resClase] = await Promise.all([
+        fetch(`${BACKEND_URL}/api/vehiculos/colores`),
+        fetch(`${BACKEND_URL}/api/vehiculos/tipos-servicio`),
+        fetch(`${BACKEND_URL}/api/vehiculos/clases`)
+      ]);
+      const [dataCol, dataServ, dataClase] = await Promise.all([
+        resCol.json(), resServ.json(), resClase.json()
+      ]);
+      if (dataCol.status === 'OK') setColores(dataCol.data);
+      if (dataServ.status === 'OK') setServicios(dataServ.data);
+      if (dataClase.status === 'OK') setClases(dataClase.data);
+    } catch (e) {
+      console.error('Error cargando listas:', e);
+    }
+  };
 
 const esRegrabarMotor = campos.includes('numMotor') && campos.length === 1;
 const esRegrabarChasis = campos.includes('numChasis') && campos.length === 1;
@@ -343,15 +367,19 @@ if (esRegrabacion) {
                     <span className={styles.fieldLabelIcon}><PaletteIcon /></span>
                     Nuevo Color
                   </label>
-                  <div className={styles.fieldInputWrap}>
-                    <input
-                      type="text"
+                  <div className={styles.fieldSelectWrap}>
+                    <select
                       value={nuevoColor}
                       onChange={e => setNuevoColor(e.target.value)}
-                      placeholder="Ej: Rojo, Azul, Negro"
-                      className={styles.fieldInput}
+                      className={styles.fieldSelect}
                       required
-                    />
+                    >
+                      <option value="">Seleccionar color...</option>
+                      {colores.map(c => (
+                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                      ))}
+                    </select>
+                    <span className={styles.selectChevron}><ChevronIcon /></span>
                   </div>
                 </div>
               )}
@@ -371,11 +399,9 @@ if (esRegrabacion) {
                       required
                     >
                       <option value="">Seleccionar...</option>
-                      <option value="Particular">Particular</option>
-                      <option value="Público">Público</option>
-                      <option value="Diplomático">Diplomático</option>
-                      <option value="Oficial">Oficial</option>
-                      <option value="Especial">Especial</option>
+                      {servicios.map(s => (
+                        <option key={s.id} value={s.id}>{s.nombre}</option>
+                      ))}
                     </select>
                     <span className={styles.selectChevron}><ChevronIcon /></span>
                   </div>
@@ -560,10 +586,9 @@ if (esRegrabacion) {
                       required
                     >
                       <option value="">Seleccionar...</option>
-                      <option value="Automóvil">Automóvil</option>
-                      <option value="Camioneta">Camioneta</option>
-                      <option value="Motocicleta">Motocicleta</option>
-                      <option value="Camión">Camión</option>
+                      {clases.map(c => (
+                        <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                      ))}
                     </select>
                     <span className={styles.selectChevron}><ChevronIcon /></span>
                   </div>

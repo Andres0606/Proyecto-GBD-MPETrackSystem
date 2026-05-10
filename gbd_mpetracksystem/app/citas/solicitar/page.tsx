@@ -398,10 +398,10 @@ const esRematricula =
   nombreTramite.includes('rematricular');
 
 const esVehiculoCancelado = (v: Vehiculo) =>
-  (v.estado || '').toUpperCase() === 'CANCELADO';
+  (v.estado || '').toUpperCase() === 'INACTIVO' || (v.estado || '').toUpperCase() === 'CANCELADO';
 
 const esVehiculoActivo = (v: Vehiculo) =>
-  (v.estado || '').toUpperCase() !== 'CANCELADO';
+  (v.estado || '').toUpperCase() === 'ACTIVO';
 
 const vehiculosDisponibles = esRematricula
   ? vehiculos.filter(v => esVehiculoCancelado(v))

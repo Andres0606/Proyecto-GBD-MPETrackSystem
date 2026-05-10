@@ -8,6 +8,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const tramiteRoutes = require('./routes/tramiteRoutes');
+const consultasRoutes = require('./routes/consultasRoutes');
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/vehiculos', vehicleRoutes);
 app.use('/api/citas', appointmentRoutes);
 app.use('/api/tipo-tramite', tramiteRoutes);
 app.use('/api/tramite', tramiteRoutes);
+app.use('/api/consultas', consultasRoutes);
 
 // Root path
 app.get('/', (req, res) => {

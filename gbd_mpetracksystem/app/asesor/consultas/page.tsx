@@ -90,12 +90,11 @@ export default function AsesorConsultasPage() {
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/consultas/responder`, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           idConsulta: selectedConsulta?.idConsulta,
-          respuesta: respuestaText,
-          idAsesor: parseInt(cedulaAsesor!)
+          respuesta: respuestaText
         }),
       });
 
