@@ -8,21 +8,9 @@ router.get('/asesor/:cedulaAsesor', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT 
-        p.NDOCUMENTO as "cedula",
-        p.NOMBRES as "nombres",
-        p.APELLIDOS as "apellido",
-        p.TELEFONO as "telefono",
-        p.CORREO as "correo",
-        COUNT(t.IDTRAMITE) as "totalTramites"
-      FROM PERSONA p
-      JOIN CLIENTE cl ON p.NDOCUMENTO = cl.NDOCUMENTO
-      JOIN CITA c ON cl.IDCLIENTE = c.IDCLIENTE
-      JOIN TRAMITE t ON c.IDCITA = t.IDCITA
-      JOIN ASESOR a ON c.IDASESOR = a.IDASESOR
-      WHERE a.NDOCUMENTO = :1
-      GROUP BY p.NDOCUMENTO, p.NOMBRES, p.APELLIDOS, p.TELEFONO, p.CORREO
-      ORDER BY p.NOMBRES ASC
+      SELECT * FROM vw_clientes_por_asesor
+      WHERE "cedula_asesor" = :1
+      ORDER BY "nombres" ASC
     `;
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', clientes: result.rows });

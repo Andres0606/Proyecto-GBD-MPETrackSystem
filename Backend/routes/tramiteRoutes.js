@@ -26,47 +26,9 @@ router.get('/asesor/:cedula', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT 
-        t.idTramite as "idTramite",
-        t.idCita as "idCita",
-        p.nDocumento as "idCliente",
-        p.nombres || ' ' || p.apellidos as "cliente",
-        p.telefono as "telefono",
-        p.correo as "correo",
-        v.Placa as "vehiculo",
-        tt.nombre as "tipoTramite",
-        NVL(tt.valorBase, 0) as "valorTramite",
-        NVL(t.valorOtroConceptos, 0) as "valorOtrosConceptos",
-        t.estadoTramite as "estadoTramite",
-        c.fechaHoraSolicitud as "fechaCreacion",
-        c.fechaHoraProgramada as "fechaCita",
-        c.esElDueno as "esElDueno",
-        c.idClienteExterno as "idExterno",
-        ce.nombres as "nombreDuenioActual",
-        ce.apellido as "apellidoDuenioActual",
-        ce.cedula as "cedulaDuenioActual",
-        CASE 
-          WHEN tt.nombre = 'Traspaso' THEN NVL(TRIM(pd.nombres || ' ' || pd.apellidos), TRIM(ce.nombres || ' ' || ce.apellido))
-          ELSE NULL 
-        END as "nombreDestino",
-        CASE 
-          WHEN tt.nombre = 'Traspaso' THEN NVL(pd.nDocumento, ce.cedula)
-          ELSE NULL 
-        END as "cedulaDestino",
-        pd.telefono as "telefonoDestino",
-        pd.correo as "correoDestino"
-      FROM TRAMITE t
-      JOIN CITA c ON t.idCita = c.idCita
-      JOIN ASESOR a ON c.idAsesor = a.idAsesor
-      JOIN CLIENTE cl ON c.idCliente = cl.idCliente
-      JOIN PERSONA p ON cl.nDocumento = p.nDocumento
-      LEFT JOIN CLIENTE cld ON c.idClienteDestino = cld.idCliente
-      LEFT JOIN PERSONA pd ON cld.nDocumento = pd.nDocumento
-      LEFT JOIN CLIENTEEXTERNO ce ON c.idClienteExterno = ce.idExterno
-      LEFT JOIN VEHICULO v ON c.placaVehiculo = v.Placa
-      JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
-      WHERE a.nDocumento = :1
-      ORDER BY t.idTramite DESC
+      SELECT * FROM vw_tramites_asesor
+      WHERE "cedula_asesor" = :1
+      ORDER BY "idTramite" DESC
     `;
     
     const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
