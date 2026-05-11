@@ -191,7 +191,8 @@ class AuthService {
         correo: persona.CORREO,
         telefono: persona.TELEFONO,
         fechaNacimiento: persona.FECHANACIMIENTO ? new Date(persona.FECHANACIMIENTO).toLocaleDateString('es-ES') : '',
-        licenciaConduccion: clienteRes.rows.length > 0 ? clienteRes.rows[0].LICENCIACONDUCCION : 'N'
+        licenciaConduccion: clienteRes.rows.length > 0 ? clienteRes.rows[0].LICENCIACONDUCCION : 'N',
+        faceIdEnabled: persona.FACE_ID_ENABLED === 'Y'
       };
     } finally {
       if (connection) await connection.close();

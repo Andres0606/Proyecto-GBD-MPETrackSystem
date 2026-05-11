@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../CSS/Perfil/Perfil.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import FaceCapture from '../components/FaceCapture';
 
 /* ── Icons ── */
 const CarIcon = () => (
@@ -27,6 +28,12 @@ const AlertIcon = () => (
     <circle cx="12" cy="12" r="10"/>
     <line x1="12" y1="8" x2="12" y2="12"/>
     <line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+);
+
+const FaceIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 10L9.01 10M15 10L15.01 10M12 18C14.5 18 16.5 16.5 17 14.5M7 14.5C7.5 16.5 9.5 18 12 18M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"/>
   </svg>
 );
 
@@ -70,6 +77,8 @@ export default function PerfilPage() {
 
   /* Toggle licencia */
   const [tieneLicencia, setTieneLicencia] = useState<boolean | null>(null);
+  const [faceIdEnabled, setFaceIdEnabled] = useState(false);
+  const [showFaceScanner, setShowFaceScanner] = useState(false);
 
   const [formData, setFormData] = useState({
     cedula: '',
@@ -135,6 +144,7 @@ export default function PerfilPage() {
         });
         // 👈 Corregido: solo marcar "Sí" si licencia es 'S'
         setTieneLicencia(licencia === 'S');
+        setFaceIdEnabled(data.faceIdEnabled);
       } else {
         setError(data.mensaje || 'Error al cargar perfil');
       }
@@ -237,6 +247,39 @@ const handleSubmit = async (e: React.FormEvent) => {
   } catch {
     setError('Error de conexión con el servidor');
     desbloquearEnvio();
+  }
+};
+
+const handleFaceCapture = async (descriptor: number[], imageBase64: string) => {
+  setShowFaceScanner(false);
+  setSaving(true);
+  setError('');
+  setSuccess('');
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/biometric/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        correo: formData.correo,
+        descriptor: descriptor,
+        image: imageBase64
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.status === 'OK') {
+      setSuccess('Biometría facial registrada con éxito');
+      setFaceIdEnabled(true);
+    } else {
+      setError(data.mensaje || 'Error al registrar biometría');
+    }
+  } catch (err) {
+    console.error('Error biometría:', err);
+    setError('Error de conexión con el servidor biométrico');
+  } finally {
+    setSaving(false);
   }
 };
 
@@ -427,6 +470,35 @@ const handleSubmit = async (e: React.FormEvent) => {
                 )}
               </div>
 
+              {/* ── Sección Seguridad Biométrica ── */}
+              <div style={{ marginTop: '2.5rem' }}>
+                <div className={styles.divider} />
+                <p className={styles.sectionLabel}>Seguridad Biométrica</p>
+                
+                <div className={styles.biometricCard}>
+                  <div className={styles.biometricInfo}>
+                    <div className={`${styles.biometricIcon} ${faceIdEnabled ? styles.biometricActive : ''}`}>
+                      <FaceIcon />
+                    </div>
+                    <div>
+                      <p className={styles.biometricTitle}>Reconocimiento Facial (Face ID)</p>
+                      <p className={styles.biometricStatus}>
+                        Estado: <strong>{faceIdEnabled ? 'Activado' : 'No configurado'}</strong>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className={styles.biometricBtn}
+                    onClick={() => setShowFaceScanner(true)}
+                    disabled={saving}
+                  >
+                    {faceIdEnabled ? 'Actualizar Rostro' : 'Configurar Face ID'}
+                  </button>
+                </div>
+              </div>
+
               {/* ── Sección contraseña ── */}
               <div style={{ marginTop: '1.4rem' }}>
                 <div className={styles.divider} />
@@ -469,6 +541,14 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
 
       </div>
+
+      {showFaceScanner && (
+        <FaceCapture 
+          onCapture={handleFaceCapture}
+          onCancel={() => setShowFaceScanner(false)}
+        />
+      )}
+
     </div>
   );
 }

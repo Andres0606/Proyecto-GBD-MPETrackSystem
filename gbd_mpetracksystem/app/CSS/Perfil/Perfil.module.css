@@ -378,3 +378,55 @@
 @media (max-width: 480px) {
   .backButton span { display: none; }
 }
+
+/* ══════════════════════════════════════
+   SEGURIDAD BIOMÉTRICA
+   ══════════════════════════════════════ */
+.biometricCard {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.2rem; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(21, 101, 192, 0.1);
+  margin-top: 1rem;
+}
+
+.biometricInfo {
+  display: flex; align-items: center; gap: 1rem;
+}
+
+.biometricIcon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: #f1f5f9; color: #64748b;
+  display: grid; place-items: center; transition: all 0.3s;
+}
+.biometricIcon svg { width: 22px; height: 22px; }
+
+.biometricActive {
+  background: rgba(46, 125, 50, 0.1);
+  color: #2E7D32;
+}
+
+.biometricTitle {
+  font-size: 0.88rem; font-weight: 700; color: #0d1f36; margin: 0;
+}
+
+.biometricStatus {
+  font-size: 0.78rem; color: #7a92ae; margin: 0.1rem 0 0;
+}
+
+.biometricBtn {
+  padding: 0.6rem 1.1rem; border-radius: 10px; border: none;
+  background: #fff; border: 1.5px solid rgba(21, 101, 192, 0.2);
+  color: #1565C0; font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+}
+.biometricBtn:hover:not(:disabled) {
+  background: #1565C0; color: #fff; border-color: #1565C0;
+  transform: translateY(-1px); box-shadow: 0 4px 12px rgba(21, 101, 192, 0.25);
+}
+
+@media (max-width: 640px) {
+  .biometricCard { flex-direction: column; align-items: flex-start; }
+  .biometricBtn { width: 100%; }
+}
