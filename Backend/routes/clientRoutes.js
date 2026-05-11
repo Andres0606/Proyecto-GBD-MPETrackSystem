@@ -129,6 +129,28 @@ router.delete('/:cedula', async (req, res) => {
       ? 'No se puede eliminar: El cliente tiene citas registradas en el sistema.' 
       : err.message;
     res.status(500).json({ status: 'ERROR', mensaje: msg });
+  }
+});
+
+// OBTENER HISTORIAL DE TRÁMITES DE UN CLIENTE (Usando Colección de Oracle)
+router.get('/:cedula/historial', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const sql = `
+      SELECT 
+        idTramite as "id",
+        tipoTramite as "tipo",
+        fecha as "fecha",
+        estado as "estado",
+        vehiculo as "vehiculo",
+        valorTotal as "total"
+      FROM TABLE(fn_get_historial_cliente(:1))
+    `;
+    const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    res.json({ status: 'OK', historial: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {
     if (connection) await connection.close();
   }

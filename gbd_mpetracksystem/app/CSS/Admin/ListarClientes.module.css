@@ -288,6 +288,136 @@
   to { transform: rotate(360deg); }
 }
 
+.historyBtn {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.historyBtn:hover {
+  background: #16a34a;
+  color: white;
+}
+
+.historyBtn svg { width: 18px; height: 18px; }
+
+/* ── Modal Historial ── */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 900px;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modalHeader {
+  padding: 25px 30px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.2rem;
+}
+
+.closeBtn {
+  background: #e2e8f0;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover { background: #cbd5e1; color: #0f172a; }
+
+.modalBody {
+  padding: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historyTable th {
+  text-align: left;
+  padding: 12px 15px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.historyTable td {
+  padding: 15px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+
+/* Status Badges en Historial */
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.PENDIENTE { background: #fef3c7; color: #92400e; }
+.ACTIVO { background: #dcfce7; color: #166534; }
+.FINALIZADO { background: #eff6ff; color: #1e40af; }
+.CANCELADO { background: #fee2e2; color: #991b1b; }
+
+.loadingModal, .emptyModal {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
 .errorAlert {
   background: #fee2e2;
   color: #991b1b;

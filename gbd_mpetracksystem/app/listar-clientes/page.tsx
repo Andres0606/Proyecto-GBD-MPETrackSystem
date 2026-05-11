@@ -42,6 +42,12 @@ const TrashIcon = () => (
   </svg>
 );
 
+const HistoryIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+
 interface Cliente {
   cedula: string;
   nombres: string;
@@ -52,6 +58,15 @@ interface Cliente {
   licencia: string;
 }
 
+interface HistorialItem {
+  id: number;
+  tipo: string;
+  fecha: string;
+  estado: string;
+  vehiculo: string;
+  total: number;
+}
+
 export default function ListarClientesPage() {
   const router = useRouter();
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -59,6 +74,12 @@ export default function ListarClientesPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados para el Modal de Historial
+  const [showHistory, setShowHistory] = useState(false);
+  const [clientHistory, setClientHistory] = useState<HistorialItem[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedClientName, setSelectedClientName] = useState('');
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -89,6 +110,23 @@ export default function ListarClientesPage() {
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const verHistorial = async (cedula: string, nombre: string) => {
+    try {
+      setSelectedClientName(nombre);
+      setShowHistory(true);
+      setLoadingHistory(true);
+      const response = await fetch(`${BACKEND_URL}/api/clientes/${cedula}/historial`);
+      const data = await response.json();
+      if (data.status === 'OK') {
+        setClientHistory(data.historial);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingHistory(false);
     }
   };
 
@@ -206,6 +244,13 @@ export default function ListarClientesPage() {
                   </td>
                   <td>
                     <div className={styles.actionsCell}>
+                      <button 
+                        onClick={() => verHistorial(cliente.cedula, `${cliente.nombres} ${cliente.apellido}`)}
+                        className={styles.historyBtn} 
+                        title="Ver Historial"
+                      >
+                        <HistoryIcon />
+                      </button>
                       <Link href={`/listar-clientes/${cliente.cedula}/editar`} className={styles.editBtn} title="Editar">
                         Editar
                       </Link>
@@ -228,6 +273,54 @@ export default function ListarClientesPage() {
             </div>
           )}
         </div>
+
+        {/* ── Modal de Historial ── */}
+        {showHistory && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h3>Historial de Trámites: {selectedClientName}</h3>
+                <button onClick={() => setShowHistory(false)} className={styles.closeBtn}>×</button>
+              </div>
+              <div className={styles.modalBody}>
+                {loadingHistory ? (
+                  <p className={styles.loadingModal}>Cargando historial...</p>
+                ) : clientHistory.length > 0 ? (
+                  <table className={styles.historyTable}>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Trámite</th>
+                        <th>Vehículo</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientHistory.map((item) => (
+                        <tr key={item.id}>
+                          <td>#{item.id}</td>
+                          <td><strong>{item.tipo}</strong></td>
+                          <td>{item.vehiculo}</td>
+                          <td>{new Date(item.fecha).toLocaleDateString()}</td>
+                          <td>
+                            <span className={`${styles.statusBadge} ${styles[item.estado]}`}>
+                              {item.estado}
+                            </span>
+                          </td>
+                          <td>${item.total.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className={styles.emptyModal}>Este cliente no tiene trámites registrados.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
