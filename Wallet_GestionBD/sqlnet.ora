@@ -1,2 +1,2 @@
-WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="C:\Users\camil\OneDrive\Documentos\GitHub\Proyecto-GBD-MPETrackSystem\Wallet_GestionBD")))
+WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="C:\Users\andre\Documents\UNIVERSIDAD\Materias septimo\GESTION DE BD\PROYECTO CORRECCION GBD\Wallet_GestionBD")))
 SSL_SERVER_DN_MATCH=yes
