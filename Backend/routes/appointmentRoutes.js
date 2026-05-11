@@ -72,24 +72,29 @@ router.post('/solicitar', async (req, res) => {
 
 // Obtener citas ACTIVAS de un cliente específico (Que aún no son trámites)
 router.get('/cliente/:cedula', async (req, res) => {
+  const { cedula } = req.params;
   let connection;
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT * FROM vw_mis_citas 
-      WHERE "cedula_cliente" = :1
+      SELECT 
+        idCita as "idCita",
+        tipoTramite as "tipoTramite",
+        placa as "placa",
+        fechaCita as "fechaCita",
+        fechaSolicitud as "fechaSolicitud",
+        asesor as "asesor",
+        idAsesor as "idAsesor"
+      FROM TABLE(fn_get_citas_cliente(:1))
       ORDER BY 
-        CASE WHEN "fechaCita" IS NULL THEN 2 ELSE 1 END,
-        "fechaCita" ASC,
-        "fechaSolicitud" DESC
+        CASE WHEN fechaCita IS NULL THEN 2 ELSE 1 END,
+        fechaCita ASC,
+        fechaSolicitud DESC
     `;
-    const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
-  } catch (err) {
-    res.status(500).json({ status: 'ERROR', mensaje: err.message });
-  } finally {
-    if (connection) await connection.close();
-  }
+  } catch (err) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
+  finally { if (connection) await connection.close(); }
 });
 
 // Obtener citas pendientes para el asesor (Sin agendar)
