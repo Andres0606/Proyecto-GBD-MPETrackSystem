@@ -75,8 +75,6 @@ export default function VehiculosPage() {
   const getEstadoTexto = (estado?: string) =>
     estado === 'CANCELADO' ? 'Matrícula Cancelada' : 'Activo';
 
-  const handleRegistrar = () => router.push('/vehiculos/registrar');
-
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -100,9 +98,6 @@ export default function VehiculosPage() {
             <Link href="/dashboard" className={styles.backButton}>
               <ArrowLeftIcon /> Volver al Dashboard
             </Link>
-            <button onClick={handleRegistrar} className={styles.registrarButton}>
-              <PlusIcon /> Registrar Vehículo
-            </button>
           </div>
         </div>
 
@@ -123,10 +118,7 @@ export default function VehiculosPage() {
           <div className={styles.emptyState}>
             <CarIcon />
             <h3>No tienes vehículos registrados</h3>
-            <p>Registra tu primer vehículo para comenzar</p>
-            <button onClick={handleRegistrar} className={styles.emptyButton}>
-              <PlusIcon /> Registrar Vehículo
-            </button>
+            <p>Comunícate con un asesor para registrar tus vehículos</p>
           </div>
         ) : (
           <>
@@ -173,12 +165,6 @@ export default function VehiculosPage() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className={styles.footerButton}>
-              <button onClick={handleRegistrar} className={styles.addButton}>
-                <PlusIcon /> Agregar otro vehículo
-              </button>
             </div>
           </>
         )}
