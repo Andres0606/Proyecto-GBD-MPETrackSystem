@@ -9,8 +9,7 @@ import { BACKEND_URL } from '@/lib/config';
 /* ── Icons ── */
 const ArrowLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="19" y1="12" x2="5" y2="12"/>
-    <polyline points="12 19 5 12 12 5"/>
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
   </svg>
 );
 
@@ -18,6 +17,54 @@ const ReplyIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     <polyline points="17 9 21 5 17 1"/>
+  </svg>
+);
+
+const CarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
+  </svg>
+);
+
+const MessageIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+  </svg>
+);
+
+const HelpCircleIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 );
 
@@ -62,11 +109,11 @@ export default function AsesorConsultasPage() {
   }, []);
 
   const cargarConsultas = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await fetch(`${BACKEND_URL}/api/consultas/asesor/todas`);
       const data = await response.json();
-      if (data.status === 'OK') {
+      if (response.ok && data.status === 'OK') {
         setConsultas(data.consultas || []);
       } else {
         setError(data.mensaje || 'Error al cargar consultas');
@@ -84,11 +131,10 @@ export default function AsesorConsultasPage() {
       return;
     }
 
-    setSubmitting(true);
-    setError('');
-    setSuccess('');
-
     try {
+      setSubmitting(true);
+      setError('');
+      setSuccess('');
       const response = await fetch(`${BACKEND_URL}/api/consultas/responder`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -99,7 +145,6 @@ export default function AsesorConsultasPage() {
       });
 
       const data = await response.json();
-
       if (response.ok && data.status === 'OK') {
         setSuccess('Respuesta enviada exitosamente');
         setRespondiendo(false);
@@ -111,27 +156,9 @@ export default function AsesorConsultasPage() {
         setError(data.mensaje || 'Error al enviar respuesta');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      setError('Error de conexión');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const getEstadoColor = (estado: string) => {
-    switch(estado) {
-      case 'PENDIENTE': return styles.estadoPendiente;
-      case 'RESPONDIDA': return styles.estadoRespondida;
-      case 'CERRADA': return styles.estadoCerrada;
-      default: return '';
-    }
-  };
-
-  const getEstadoTexto = (estado: string) => {
-    switch(estado) {
-      case 'PENDIENTE': return 'Pendiente';
-      case 'RESPONDIDA': return 'Respondida';
-      case 'CERRADA': return 'Cerrada';
-      default: return estado;
     }
   };
 
@@ -149,158 +176,191 @@ export default function AsesorConsultasPage() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner} />
-        <p>Cargando consultas...</p>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Link href="/dashboard-asesor" className={styles.backButton}>
-          <ArrowLeftIcon /> Volver al Dashboard
-        </Link>
-        <h1>Consultas de Clientes</h1>
-      </div>
-
-      {error && <div className={styles.errorAlert}>{error}</div>}
-      {success && <div className={styles.successAlert}>{success}</div>}
-
-      {/* Estadísticas */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>{estadisticas.total}</h3>
-          <p>Total Consultas</p>
+      <div className={styles.inner}>
+        
+        {/* ── Header ── */}
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <span className={styles.logoMark}><CarIcon /></span>
+            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+          </div>
+          <Link href="/dashboard-asesor" className={styles.backButton}>
+            <ArrowLeftIcon />
+            Volver al Dashboard
+          </Link>
         </div>
-        <div className={`${styles.statCard} ${styles.statPendiente}`}>
-          <h3>{estadisticas.pendientes}</h3>
-          <p>Pendientes</p>
-        </div>
-        <div className={`${styles.statCard} ${styles.statRespondida}`}>
-          <h3>{estadisticas.respondidas}</h3>
-          <p>Respondidas</p>
-        </div>
-      </div>
 
-      {/* Filtros */}
-      <div className={styles.filters}>
-        <button 
-          className={`${styles.filterBtn} ${filter === 'todas' ? styles.filterActive : ''}`}
-          onClick={() => setFilter('todas')}
-        >
-          Todas ({estadisticas.total})
-        </button>
-        <button 
-          className={`${styles.filterBtn} ${filter === 'PENDIENTE' ? styles.filterActive : ''}`}
-          onClick={() => setFilter('PENDIENTE')}
-        >
-          Pendientes ({estadisticas.pendientes})
-        </button>
-        <button 
-          className={`${styles.filterBtn} ${filter === 'RESPONDIDA' ? styles.filterActive : ''}`}
-          onClick={() => setFilter('RESPONDIDA')}
-        >
-          Respondidas ({estadisticas.respondidas})
-        </button>
-      </div>
-
-      {/* Lista de consultas */}
-      {consultasFiltradas.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p>No hay consultas {filter === 'todas' ? '' : filter.toLowerCase()}</p>
+        {/* ── Title Row ── */}
+        <div className={styles.titleRow}>
+          <div className={styles.iconBox}><MessageIcon /></div>
+          <div>
+            <h1>Consultas de Clientes</h1>
+            <p>Gestiona y responde las inquietudes de los ciudadanos</p>
+          </div>
         </div>
-      ) : (
-        <div className={styles.consultasList}>
-          {consultasFiltradas.map((consulta) => (
-            <div key={consulta.idConsulta} className={styles.consultaCard}>
-              <div className={styles.cardHeader}>
-                <div className={styles.headerInfo}>
-                  <span className={`${styles.estadoBadge} ${getEstadoColor(consulta.estado)}`}>
-                    {getEstadoTexto(consulta.estado)}
-                  </span>
-                  <span className={styles.fecha}>
-                    {new Date(consulta.fechaCreacion).toLocaleString('es-CO')}
-                  </span>
-                </div>
-                <h3>{consulta.asunto}</h3>
-                <div className={styles.clienteInfo}>
-                  <p><strong>Cliente:</strong> {consulta.cliente}</p>
-                  <p><strong>Teléfono:</strong> {consulta.telefonoCliente}</p>
-                  <p><strong>Correo:</strong> {consulta.correoCliente}</p>
-                </div>
-              </div>
-              
-              <div className={styles.cardBody}>
-                <div className={styles.mensajeCliente}>
-                  <strong>Consulta del cliente:</strong>
-                  <p>{consulta.mensaje}</p>
-                </div>
-                
-                {consulta.respuesta && (
-                  <div className={styles.respuestaAdmin}>
-                    <strong>Respuesta (Soporte):</strong>
-                    <p>{consulta.respuesta}</p>
-                    {consulta.fechaRespuesta && (
-                      <small>
-                        Respondido el {new Date(consulta.fechaRespuesta).toLocaleString('es-CO')}
-                      </small>
-                    )}
-                  </div>
-                )}
-              </div>
 
-              {consulta.estado === 'PENDIENTE' && (
-                <div className={styles.cardFooter}>
-                  <button 
-                    onClick={() => {
-                      setSelectedConsulta(consulta);
-                      setRespondiendo(true);
-                    }}
-                    className={styles.responderBtn}
-                  >
-                    <ReplyIcon /> Responder
-                  </button>
-                </div>
-              )}
+        {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
+
+        {/* ── Estadísticas ── */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}><HelpCircleIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{estadisticas.total}</h3>
+              <p>Total</p>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal para responder */}
-      {respondiendo && selectedConsulta && (
-        <div className={styles.modalOverlay} onClick={() => setRespondiendo(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Responder Consulta</h2>
-              <button onClick={() => setRespondiendo(false)} className={styles.closeBtn}>×</button>
+          </div>
+          <div className={`${styles.statCard} ${styles.statPendiente}`}>
+            <div className={styles.statIcon}><ClockIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{estadisticas.pendientes}</h3>
+              <p>Pendientes</p>
             </div>
-            <div className={styles.modalBody}>
-              <p><strong>Cliente:</strong> {selectedConsulta.cliente}</p>
-              <p><strong>Asunto:</strong> {selectedConsulta.asunto}</p>
-              <p><strong>Consulta:</strong> {selectedConsulta.mensaje}</p>
-              
-              <div className={styles.formGroup}>
-                <label>Respuesta *</label>
-                <textarea
-                  value={respuestaText}
-                  onChange={(e) => setRespuestaText(e.target.value)}
-                  rows={5}
-                  placeholder="Escriba su respuesta aquí..."
-                />
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <button type="button" onClick={() => setRespondiendo(false)} className={styles.cancelBtn}>
-                Cancelar
-              </button>
-              <button type="button" onClick={handleResponder} disabled={submitting} className={styles.sendBtn}>
-                {submitting ? 'Enviando...' : 'Enviar Respuesta'}
-              </button>
+          </div>
+          <div className={`${styles.statCard} ${styles.statRespondida}`}>
+            <div className={styles.statIcon}><CheckCircleIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{estadisticas.respondidas}</h3>
+              <p>Respondidas</p>
             </div>
           </div>
         </div>
-      )}
+
+        {/* ── Filtros ── */}
+        <div className={styles.filters}>
+          <button 
+            className={`${styles.filterBtn} ${filter === 'todas' ? styles.filterActive : ''}`}
+            onClick={() => setFilter('todas')}
+          >
+            Todas ({estadisticas.total})
+          </button>
+          <button 
+            className={`${styles.filterBtn} ${filter === 'PENDIENTE' ? styles.filterActive : ''}`}
+            onClick={() => setFilter('PENDIENTE')}
+          >
+            Pendientes ({estadisticas.pendientes})
+          </button>
+          <button 
+            className={`${styles.filterBtn} ${filter === 'RESPONDIDA' ? styles.filterActive : ''}`}
+            onClick={() => setFilter('RESPONDIDA')}
+          >
+            Respondidas ({estadisticas.respondidas})
+          </button>
+        </div>
+
+        {/* ── Lista de consultas ── */}
+        {consultasFiltradas.length === 0 ? (
+          <div className={styles.emptyState}>
+            <MessageIcon />
+            <h3>No hay consultas registradas</h3>
+            <p>No se encontraron consultas con el filtro seleccionado.</p>
+          </div>
+        ) : (
+          <div className={styles.consultasList}>
+            {consultasFiltradas.map((consulta) => (
+              <div key={consulta.idConsulta} className={styles.consultaCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.headerInfo}>
+                    <span className={`${styles.estadoBadge} ${
+                      consulta.estado === 'RESPONDIDA' ? styles.estadoRespondida : styles.estadoPendiente
+                    }`}>
+                      {consulta.estado}
+                    </span>
+                    <span className={styles.fecha}>
+                      {new Date(consulta.fechaCreacion).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h3>{consulta.asunto}</h3>
+                  <div className={styles.clienteInfo}>
+                    <p>{consulta.cliente}</p>
+                    <div className={styles.infoDivider} />
+                    <p><PhoneIcon /> {consulta.telefonoCliente}</p>
+                    <div className={styles.infoDivider} />
+                    <p><MailIcon /> {consulta.correoCliente}</p>
+                  </div>
+                </div>
+                
+                <div className={styles.cardBody}>
+                  <div className={styles.mensajeCliente}>
+                    <small>Consulta del ciudadano</small>
+                    <p>{consulta.mensaje}</p>
+                  </div>
+                  
+                  {consulta.respuesta && (
+                    <div className={styles.respuestaAdmin}>
+                      <small>Tu respuesta</small>
+                      <p>{consulta.respuesta}</p>
+                      {consulta.fechaRespuesta && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <span className={styles.fecha}>
+                            Respondido el {new Date(consulta.fechaRespuesta).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {consulta.estado === 'PENDIENTE' && (
+                  <div className={styles.cardFooter}>
+                    <button 
+                      onClick={() => {
+                        setSelectedConsulta(consulta);
+                        setRespondiendo(true);
+                      }}
+                      className={styles.responderBtn}
+                    >
+                      <ReplyIcon /> Responder Consulta
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Modal para responder ── */}
+        {respondiendo && selectedConsulta && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Responder Consulta</h2>
+                <button onClick={() => setRespondiendo(false)} className={styles.closeBtn}>×</button>
+              </div>
+              <div className={styles.modalBody}>
+                <strong>Consulta de {selectedConsulta.cliente}:</strong>
+                <p>{selectedConsulta.mensaje}</p>
+                
+                <div className={styles.formGroup}>
+                  <label>Tu respuesta</label>
+                  <textarea
+                    value={respuestaText}
+                    onChange={(e) => setRespuestaText(e.target.value)}
+                    rows={5}
+                    placeholder="Escribe aquí tu respuesta detallada..."
+                  />
+                </div>
+              </div>
+              <div className={styles.modalFooter}>
+                <button type="button" onClick={() => setRespondiendo(false)} className={styles.cancelBtn}>
+                  Cancelar
+                </button>
+                <button type="button" onClick={handleResponder} disabled={submitting} className={styles.sendBtn}>
+                  {submitting ? 'Enviando...' : 'Enviar Respuesta'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

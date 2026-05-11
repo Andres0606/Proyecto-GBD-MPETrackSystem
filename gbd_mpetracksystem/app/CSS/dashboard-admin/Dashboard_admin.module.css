@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    DashboardAdmin.module.css — TransMeta · Admin
-═══════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════ */
 
 .container {
   min-height: 100vh;
@@ -77,7 +77,7 @@
 
 /* ══════════════════════════════════════
    HEADER
-══════════════════════════════════════ */
+   ══════════════════════════════════════ */
 .header {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   margin-bottom: 1.8rem; padding: 1rem 1.4rem;
@@ -106,11 +106,11 @@
 
 .headerRight { display:flex; align-items:center; gap:0.8rem; }
 
-/* Badge rojo de admin */
+/* Badge azul de admin */
 .adminBadge {
   display: flex; align-items: center; gap: 0.35rem;
-  font-size:0.78rem; font-weight:700; color:#b71c1c;
-  background:rgba(183,28,28,0.08); border:1px solid rgba(183,28,28,0.18);
+  font-size:0.78rem; font-weight:700; color:#1565C0;
+  background:rgba(21,101,192,0.08); border:1px solid rgba(21,101,192,0.18);
   border-radius:8px; padding:0.3rem 0.75rem;
 }
 .adminBadge svg { width:12px; height:12px; }
@@ -129,7 +129,7 @@
 
 /* ══════════════════════════════════════
    HERO CARD (admin)
-══════════════════════════════════════ */
+   ══════════════════════════════════════ */
 .heroCard {
   position: relative; overflow: hidden;
   background: rgba(255,255,255,0.72);
@@ -154,10 +154,10 @@
   100%{ left:160%; opacity:0; }
 }
 
-/* Banner — rojo/naranja para admin, diferenciado del cliente */
+/* Banner — azul para admin */
 .heroBanner {
   height: 90px;
-  background: linear-gradient(135deg, #b71c1c 0%, #c62828 30%, #e53935 65%, #ef9a9a 100%);
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 30%, #42A5F5 65%, #90CAF9 100%);
   position: relative; overflow: hidden;
 }
 .heroBanner::before {
@@ -179,12 +179,12 @@
 }
 .avatar {
   width:76px; height:76px; border-radius:20px;
-  background: linear-gradient(135deg, #ef5350, #b71c1c);
+  background: linear-gradient(135deg, #42A5F5, #1565C0);
   border:4px solid #fff;
   display:grid; place-items:center; color:#fff;
   font-family:var(--ff,'Sora',sans-serif);
   font-size:1.7rem; font-weight:800; flex-shrink:0;
-  box-shadow:0 8px 24px rgba(183,28,28,0.3);
+  box-shadow:0 8px 24px rgba(21,101,192,0.3);
   animation:avatarPop 0.6s cubic-bezier(0.34,1.4,0.64,1) 0.4s both;
 }
 @keyframes avatarPop {
@@ -195,16 +195,16 @@
 .statusBadge {
   display:flex; align-items:center; gap:0.35rem;
   padding:0.32rem 0.85rem; border-radius:20px;
-  background:rgba(183,28,28,0.09); border:1px solid rgba(183,28,28,0.22);
-  font-size:0.74rem; font-weight:700; color:#b71c1c;
+  background:rgba(21,101,192,0.09); border:1px solid rgba(21,101,192,0.22);
+  font-size:0.74rem; font-weight:700; color:#1565C0;
 }
 .statusDot {
-  width:7px; height:7px; border-radius:50%; background:#e53935;
+  width:7px; height:7px; border-radius:50%; background:#1565C0;
   animation:dotPulse 2s ease-in-out infinite;
 }
 @keyframes dotPulse {
-  0%,100%{ box-shadow:0 0 0 0 rgba(229,57,53,0.5); }
-  50%    { box-shadow:0 0 0 5px rgba(229,57,53,0); }
+  0%,100%{ box-shadow:0 0 0 0 rgba(21,101,192,0.5); }
+  50%    { box-shadow:0 0 0 5px rgba(21,101,192,0); }
 }
 
 .heroName {
@@ -213,7 +213,7 @@
   margin-bottom:0.15rem;
 }
 .heroName span {
-  background:linear-gradient(90deg,#c62828,#ef5350);
+  background:linear-gradient(90deg,#1565C0,#42A5F5);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 .heroSub { font-size:0.84rem; color:#7a92ae; margin-bottom:1.3rem; }
@@ -221,16 +221,16 @@
 .infoRow { display:flex; flex-wrap:wrap; gap:0.65rem; }
 .infoChip {
   display:flex; align-items:center; gap:0.4rem;
-  background:rgba(183,28,28,0.06); border:1px solid rgba(183,28,28,0.13);
+  background:rgba(21,101,192,0.06); border:1px solid rgba(21,101,192,0.13);
   border-radius:10px; padding:0.42rem 0.9rem;
   font-size:0.79rem; color:#2a3a52;
   transition:background 0.2s,transform 0.2s;
 }
-.infoChip:hover { background:rgba(183,28,28,0.11); transform:translateY(-1px); }
-.infoChip svg { width:13px; height:13px; color:#c62828; flex-shrink:0; }
-.infoChip strong { font-weight:700; color:#b71c1c; }
+.infoChip:hover { background:rgba(21,101,192,0.11); transform:translateY(-1px); }
+.infoChip svg { width:13px; height:13px; color:#1565C0; flex-shrink:0; }
+.infoChip strong { font-weight:700; color:#1565C0; }
 
-.heroDivider { height:1px; background:rgba(183,28,28,0.08); margin:1.4rem 0; }
+.heroDivider { height:1px; background:rgba(21,101,192,0.08); margin:1.4rem 0; }
 
 .statsRow {
   display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
@@ -243,14 +243,14 @@
   color:#0d1f36; line-height:1;
 }
 .statNumber span {
-  background:linear-gradient(90deg,#c62828,#ef5350);
+  background:linear-gradient(90deg,#1565C0,#42A5F5);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 .statLabel { font-size:0.74rem; color:#7a92ae; margin-top:0.22rem; font-weight:500; }
 
 /* ══════════════════════════════════════
    MÓDULOS
-══════════════════════════════════════ */
+   ══════════════════════════════════════ */
 .sectionTitle {
   font-family:var(--ff,'Sora',sans-serif);
   font-size:0.78rem; font-weight:700; color:#7a92ae;
@@ -277,11 +277,11 @@
 .card:nth-child(1){ animation-delay:0.32s; }
 .card:nth-child(2){ animation-delay:0.40s; }
 .card:nth-child(3){ animation-delay:0.48s; }
-.card:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(183,28,28,0.1); }
+.card:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(21,101,192,0.1); }
 .card::after {
   content:''; position:absolute; top:0; left:0;
   width:100%; height:3px; border-radius:18px 18px 0 0;
-  background:linear-gradient(90deg,#ef5350,#b71c1c);
+  background:linear-gradient(90deg,#42A5F5,#1565C0);
   opacity:0; transition:opacity 0.25s;
 }
 .card:hover::after { opacity:1; }
@@ -289,12 +289,12 @@
 .cardIcon {
   width:44px; height:44px; border-radius:13px;
   display:grid; place-items:center;
-  background:rgba(183,28,28,0.08); color:#c62828;
+  background:rgba(21,101,192,0.08); color:#1565C0;
   margin-bottom:1rem;
   transition:background 0.25s,transform 0.25s;
 }
 .cardIcon svg { width:20px; height:20px; }
-.card:hover .cardIcon { background:rgba(183,28,28,0.14); transform:scale(1.08); }
+.card:hover .cardIcon { background:rgba(21,101,192,0.14); transform:scale(1.08); }
 
 .card h3 {
   font-family:var(--ff,'Sora',sans-serif);
@@ -305,18 +305,18 @@
 .cardBtn {
   display:inline-flex; align-items:center; gap:0.35rem;
   padding:0.5rem 1rem; border-radius:10px;
-  border:1.5px solid rgba(183,28,28,0.18); background:rgba(183,28,28,0.07);
-  color:#b71c1c; font-family:var(--ffb,'DM Sans',sans-serif);
+  border:1.5px solid rgba(21,101,192,0.18); background:rgba(21,101,192,0.07);
+  color:#1565C0; font-family:var(--ffb,'DM Sans',sans-serif);
   font-size:0.8rem; font-weight:700; cursor:pointer; text-decoration:none;
   transition:background 0.2s,border-color 0.2s,transform 0.2s;
 }
 .cardBtn svg { width:13px; height:13px; transition:transform 0.2s; }
-.cardBtn:hover { background:rgba(183,28,28,0.13); border-color:rgba(183,28,28,0.3); transform:translateX(2px); }
+.cardBtn:hover { background:rgba(21,101,192,0.13); border-color:rgba(21,101,192,0.3); transform:translateX(2px); }
 .cardBtn:hover svg { transform:translateX(3px); }
 
 /* ══════════════════════
    LOADING
-══════════════════════ */
+   ══════════════════════ */
 .loadingContainer {
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   min-height:100vh; gap:1rem;
@@ -325,7 +325,7 @@
 .loadingContainer p { font-family:var(--ffb,'DM Sans',sans-serif); font-size:0.9rem; color:#7a92ae; }
 .spinner {
   width:36px; height:36px;
-  border:3px solid rgba(183,28,28,0.2); border-top-color:#c62828;
+  border:3px solid rgba(21,101,192,0.2); border-top-color:#1565C0;
   border-radius:50%; animation:spin 0.75s linear infinite;
 }
 @keyframes spin { to { transform:rotate(360deg); } }

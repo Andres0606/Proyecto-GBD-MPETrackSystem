@@ -32,6 +32,12 @@ const CarIcon = () => (
     <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
   </svg>
 );
+const CheckCircleIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
 
 interface Cita {
   idCita: number;
@@ -81,6 +87,12 @@ export default function MisCitasPage() {
       day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
+  const stats = {
+    total: citas.length,
+    agendadas: citas.filter(c => c.fechaCita).length,
+    pendientes: citas.filter(c => !c.fechaCita).length
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -94,21 +106,53 @@ export default function MisCitasPage() {
     <div className={styles.container}>
       <div className={styles.inner}>
         
-        {/* Header */}
+        {/* ── Header ── */}
         <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <span className={styles.logoMark}><CarIcon /></span>
+            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+          </div>
           <Link href="/dashboard" className={styles.backButton}>
-            <ArrowLeftIcon /> Volver al Dashboard
+            <ArrowLeftIcon />
+            Volver al Dashboard
           </Link>
-          <div className={styles.titleRow}>
-            <div className={styles.iconBox}><CalendarIcon /></div>
-            <div>
-              <h1>Mis Citas</h1>
-              <p>Gestiona y consulta tus citas agendadas</p>
-            </div>
+        </div>
+
+        {/* ── Page title ── */}
+        <div className={styles.titleRow}>
+          <div className={styles.iconBox}><CalendarIcon /></div>
+          <div>
+            <h1>Mis Citas</h1>
+            <p>Gestiona y consulta tus citas agendadas</p>
           </div>
         </div>
 
         {error && <div className={styles.errorAlert}>{error}</div>}
+
+        {/* ── Stats ── */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}><CalendarIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{stats.total}</h3>
+              <p>Total citas</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconVerde}`}><CheckCircleIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{stats.agendadas}</h3>
+              <p>Agendadas</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconDorado}`}><ClockIcon /></div>
+            <div className={styles.statInfo}>
+              <h3>{stats.pendientes}</h3>
+              <p>Pendientes</p>
+            </div>
+          </div>
+        </div>
 
         {citas.length === 0 ? (
           <div className={styles.emptyState}>
@@ -123,12 +167,13 @@ export default function MisCitasPage() {
           <div className={styles.citasGrid}>
             {citas.map((cita) => (
               <div key={cita.idCita} className={`${styles.citaCard} ${!cita.fechaCita ? styles.citaPendiente : ''}`}>
-                <div className={styles.cardStatus}>
-                  {cita.fechaCita ? 'AGENDADA' : 'PENDIENTE DE ASIGNACIÓN'}
-                </div>
-                
                 <div className={styles.cardHeader}>
-                  <span className={styles.citaId}>Cita #{cita.idCita}</span>
+                  <div className={styles.headerTop}>
+                    <span className={styles.citaId}>Cita #{cita.idCita}</span>
+                    <span className={`${styles.estadoBadge} ${cita.fechaCita ? styles.estadoAgendada : styles.estadoPendiente}`}>
+                      {cita.fechaCita ? 'AGENDADA' : 'PENDIENTE'}
+                    </span>
+                  </div>
                   <h3>{cita.tipoTramite}</h3>
                 </div>
 
@@ -161,7 +206,7 @@ export default function MisCitasPage() {
                 </div>
 
                 <div className={styles.cardFooter}>
-                  <small>Solicitada el {new Date(cita.fechaSolicitud).toLocaleDateString()}</small>
+                  Solicitada el {new Date(cita.fechaSolicitud).toLocaleDateString()}
                 </div>
               </div>
             ))}

@@ -9,15 +9,13 @@ import { BACKEND_URL } from '@/lib/config';
 /* ── Icons ── */
 const ArrowLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="19" y1="12" x2="5" y2="12"/>
-    <polyline points="12 19 5 12 12 5"/>
+    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
   </svg>
 );
 
 const SendIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="22" y1="2" x2="11" y2="13"/>
-    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
   </svg>
 );
 
@@ -27,18 +25,15 @@ const MessageIcon = () => (
   </svg>
 );
 
-const CheckCircleIcon = () => (
+const PlusIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22 4 12 14.01 9 11.01"/>
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
 );
 
-const AlertCircleIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
+const CarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
   </svg>
 );
 
@@ -56,20 +51,20 @@ export default function ConsultasPage() {
   const router = useRouter();
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [nuevaConsulta, setNuevaConsulta] = useState({
-    asunto: '',
-    mensaje: ''
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Form state
+  const [asunto, setAsunto] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const idCliente = typeof window !== 'undefined' ? sessionStorage.getItem('userCedula') : null;
+  const cedulaCliente = typeof window !== 'undefined' ? sessionStorage.getItem('userCedula') : null;
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    if (!isLoggedIn || !idCliente) {
+    if (!isLoggedIn || !cedulaCliente) {
       router.push('/login');
       return;
     }
@@ -77,88 +72,57 @@ export default function ConsultasPage() {
   }, []);
 
   const cargarConsultas = async () => {
-    setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/consultas/cliente/${idCliente}`);
+      setLoading(true);
+      const response = await fetch(`${BACKEND_URL}/api/consultas/cliente/${cedulaCliente}`);
       const data = await response.json();
-      if (data.status === 'OK') {
+      if (response.ok && data.status === 'OK') {
         setConsultas(data.consultas || []);
+      } else {
+        setError(data.mensaje || 'Error al cargar consultas');
       }
     } catch (err) {
-      console.error('Error:', err);
-      setError('Error al cargar consultas');
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNuevaConsulta(prev => ({ ...prev, [name]: value }));
-    setError('');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    setError('');
-    setSuccess('');
-
-    if (!nuevaConsulta.asunto.trim()) {
-      setError('El asunto es requerido');
-      setSubmitting(false);
-      return;
-    }
-    if (!nuevaConsulta.mensaje.trim()) {
-      setError('El mensaje es requerido');
-      setSubmitting(false);
+    if (!asunto.trim() || !mensaje.trim()) {
+      setError('Por favor completa todos los campos');
       return;
     }
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/consultas/solicitar`, {
+      setSubmitting(true);
+      setError('');
+      const response = await fetch(`${BACKEND_URL}/api/consultas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cedula: idCliente,
-          asunto: nuevaConsulta.asunto,
-          mensaje: nuevaConsulta.mensaje
+          nDocumento: cedulaCliente,
+          asunto,
+          mensaje
         }),
       });
 
       const data = await response.json();
-
       if (response.ok && data.status === 'OK') {
-        setSuccess('Consulta enviada exitosamente');
-        setNuevaConsulta({ asunto: '', mensaje: '' });
-        setShowModal(false);
+        setSuccess('Consulta enviada correctamente');
+        setAsunto('');
+        setMensaje('');
+        setIsModalOpen(false);
         cargarConsultas();
         setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(data.mensaje || 'Error al enviar consulta');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      setError('Error de conexión');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const getEstadoColor = (estado: string) => {
-    switch(estado) {
-      case 'PENDIENTE': return styles.estadoPendiente;
-      case 'RESPONDIDA': return styles.estadoRespondida;
-      case 'CERRADA': return styles.estadoCerrada;
-      default: return '';
-    }
-  };
-
-  const getEstadoTexto = (estado: string) => {
-    switch(estado) {
-      case 'PENDIENTE': return 'Pendiente';
-      case 'RESPONDIDA': return 'Respondida';
-      case 'CERRADA': return 'Cerrada';
-      default: return estado;
     }
   };
 
@@ -166,123 +130,151 @@ export default function ConsultasPage() {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner} />
-        <p>Cargando consultas...</p>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Link href="/dashboard" className={styles.backButton}>
-          <ArrowLeftIcon /> Volver al Dashboard
-        </Link>
-        <h1>Mis Consultas</h1>
-        <button onClick={() => setShowModal(true)} className={styles.nuevaConsultaBtn}>
-          <SendIcon /> Nueva Consulta
-        </button>
-      </div>
+      <div className={styles.inner}>
+        
+        {/* ── Header ── */}
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <span className={styles.logoMark}><CarIcon /></span>
+            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+          </div>
+          <Link href="/dashboard" className={styles.backButton}>
+            <ArrowLeftIcon />
+            Volver al Dashboard
+          </Link>
+        </div>
 
-      {error && <div className={styles.errorAlert}>{error}</div>}
-      {success && <div className={styles.successAlert}>{success}</div>}
-
-      {consultas.length === 0 ? (
-        <div className={styles.emptyState}>
-          <MessageIcon />
-          <h3>No tienes consultas</h3>
-          <p>Haz clic en "Nueva Consulta" para enviar un mensaje a soporte</p>
-          <button onClick={() => setShowModal(true)} className={styles.emptyButton}>
-            Nueva Consulta
+        {/* ── Title Row ── */}
+        <div className={styles.titleRow}>
+          <div className={styles.titleInfo}>
+            <div className={styles.iconBox}><MessageIcon /></div>
+            <div>
+              <h1>Mis Consultas</h1>
+              <p>Envía tus dudas y recibe atención personalizada</p>
+            </div>
+          </div>
+          <button 
+            className={styles.nuevaConsultaBtn}
+            onClick={() => setIsModalOpen(true)}
+          >
+            <PlusIcon /> Nueva Consulta
           </button>
         </div>
-      ) : (
-        <div className={styles.consultasList}>
-          {consultas.map((consulta) => (
-            <div key={consulta.idConsulta} className={styles.consultaCard}>
-              <div className={styles.cardHeader}>
-                <div className={styles.headerInfo}>
-                  <span className={`${styles.estadoBadge} ${getEstadoColor(consulta.estado)}`}>
-                    {getEstadoTexto(consulta.estado)}
-                  </span>
-                  <span className={styles.fecha}>
-                    {new Date(consulta.fechaCreacion).toLocaleString('es-CO', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+
+        {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
+
+        {consultas.length === 0 ? (
+          <div className={styles.emptyState}>
+            <MessageIcon />
+            <h3>No tienes consultas registradas</h3>
+            <p>Si tienes alguna duda sobre tus trámites, envíanos un mensaje.</p>
+            <button className={styles.nuevaConsultaBtn} onClick={() => setIsModalOpen(true)}>
+              Enviar mi primera consulta
+            </button>
+          </div>
+        ) : (
+          <div className={styles.consultasList}>
+            {consultas.map((consulta) => (
+              <div key={consulta.idConsulta} className={styles.consultaCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.headerTitleArea}>
+                    <h3>{consulta.asunto}</h3>
+                    <span className={styles.fecha}>
+                      Enviada el {new Date(consulta.fechaCreacion).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className={`${styles.estadoBadge} ${
+                    consulta.respuesta ? styles.estadoRespondida : styles.estadoPendiente
+                  }`}>
+                    {consulta.respuesta ? 'RESPONDIDA' : 'PENDIENTE'}
                   </span>
                 </div>
-                <h3>{consulta.asunto}</h3>
+
+                <div className={styles.cardBody}>
+                  <div className={styles.mensajeCliente}>
+                    <small>Tu mensaje</small>
+                    <p>{consulta.mensaje}</p>
+                  </div>
+
+                  {consulta.respuesta && (
+                    <div className={styles.respuestaAdmin}>
+                      <small>Respuesta del Asesor</small>
+                      <p>{consulta.respuesta}</p>
+                      {consulta.fechaRespuesta && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <span className={styles.fecha}>
+                            Recibida el {new Date(consulta.fechaRespuesta).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Modal Nueva Consulta ── */}
+        {isModalOpen && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Nueva Consulta</h2>
+                <button className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>×</button>
               </div>
               
-              <div className={styles.cardBody}>
-                <div className={styles.mensajeCliente}>
-                  <strong>Tú:</strong>
-                  <p>{consulta.mensaje}</p>
+              <form onSubmit={handleSubmit}>
+                <div className={styles.formGroup}>
+                  <label>Asunto</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ej: Duda sobre mi licencia" 
+                    value={asunto}
+                    onChange={(e) => setAsunto(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Mensaje</label>
+                  <textarea 
+                    rows={4} 
+                    placeholder="Escribe aquí tu consulta detalladamente..."
+                    value={mensaje}
+                    onChange={(e) => setMensaje(e.target.value)}
+                    required
+                  />
                 </div>
                 
-                {consulta.respuesta && (
-                  <div className={styles.respuestaAdmin}>
-                    <strong>📌 Soporte:</strong>
-                    <p>{consulta.respuesta}</p>
-                    {consulta.fechaRespuesta && (
-                      <small>
-                        Respondido el {new Date(consulta.fechaRespuesta).toLocaleString('es-CO')}
-                      </small>
-                    )}
-                  </div>
-                )}
-              </div>
+                <div className={styles.modalFooter}>
+                  <button 
+                    type="button" 
+                    className={styles.cancelBtn} 
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className={styles.sendBtn}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Enviando...' : 'Enviar Consulta'}
+                  </button>
+                </div>
+              </form>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal Nueva Consulta */}
-      {showModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Nueva Consulta</h2>
-              <button onClick={() => setShowModal(false)} className={styles.closeBtn}>×</button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Asunto *</label>
-                <input
-                  type="text"
-                  name="asunto"
-                  value={nuevaConsulta.asunto}
-                  onChange={handleChange}
-                  placeholder="Ej: Problema con mi vehículo"
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Mensaje *</label>
-                <textarea
-                  name="mensaje"
-                  value={nuevaConsulta.mensaje}
-                  onChange={handleChange}
-                  rows={5}
-                  placeholder="Describa su consulta en detalle..."
-                  required
-                />
-              </div>
-              <div className={styles.modalFooter}>
-                <button type="button" onClick={() => setShowModal(false)} className={styles.cancelBtn}>
-                  Cancelar
-                </button>
-                <button type="submit" disabled={submitting} className={styles.sendBtn}>
-                  {submitting ? 'Enviando...' : 'Enviar Consulta'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 }
