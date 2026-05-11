@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../CSS/Login/Login.module.css';
@@ -52,6 +52,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [visible, setVisible] = useState(false);
+  
+  // Estados para OTP
+  const [isOtpRequired, setIsOtpRequired] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpMessage, setOtpMessage] = useState('');
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
@@ -60,210 +65,169 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!correo.trim() || !password.trim()) { 
+        setError('Ingresa tus credenciales.'); 
+        return; 
+    }
+    setLoading(true);
     setError('');
     
-    if (!correo.trim()) { 
-        setError('Ingresa tu correo electrónico.'); 
-        return; 
-    }
-    if (!password.trim()) { 
-        setError('Ingresa tu contraseña.'); 
-        return; 
-    }
-    
-    setLoading(true);
-    
     try {
-        // SOLO UNA LLAMADA - Login
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                correo: correo, 
-                contrasena: password 
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo, contrasena: password }),
         });
         
         const data = await response.json();
-        console.log('Respuesta login completa:', data);
         
-        if (!response.ok || data.status !== 'OK') {
-            throw new Error(data.mensaje || 'Credenciales inválidas');
+        if (!response.ok) throw new Error(data.mensaje || 'Error en el servidor');
+
+        if (data.status === 'OTP_REQUIRED') {
+            setIsOtpRequired(true);
+            setOtpMessage(data.mensaje);
+            setLoading(false);
+            return;
         }
-        
-        // Guardar TODOS los datos que vienen del login
-        const cedula = data.cedula?.toString() || '';
-        const rol = data.rol?.toString() || '2';
-        const correoUsuario = data.correo || correo;
-        
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('userCedula', cedula);
-        sessionStorage.setItem('userCorreo', correoUsuario);
-        sessionStorage.setItem('userRol', rol);
-        
-        // Guardar nombres y apellidos DIRECTAMENTE de la respuesta del login
-        if (data.nombres) {
-            sessionStorage.setItem('userNombres', data.nombres);
-        } else {
-            const nombreDesdeCorreo = correoUsuario.split('@')[0];
-            sessionStorage.setItem('userNombres', nombreDesdeCorreo);
-        }
-        
-        if (data.apellido) {
-            sessionStorage.setItem('userApellido', data.apellido);
-        } else {
-            sessionStorage.setItem('userApellido', '');
-        }
-        
-        console.log('Datos guardados en sessionStorage:', {
-            cedula: sessionStorage.getItem('userCedula'),
-            rol: sessionStorage.getItem('userRol'),
-            nombres: sessionStorage.getItem('userNombres'),
-            apellido: sessionStorage.getItem('userApellido'),
-            correo: sessionStorage.getItem('userCorreo')
-        });
-        
-        // Redirigir según rol
-        if (rol === '3') {
-            console.log('Redirigiendo a dashboard-admin');
-            router.push('/dashboard-admin');
-        } else if (rol === '2') {
-            console.log('Redirigiendo a dashboard-asesor');
-            router.push('/dashboard-asesor');
-        } else {
-            console.log('Redirigiendo a dashboard');
-            router.push('/dashboard');
-        }
+
+        if (data.status === 'OK') handleLoginSuccess(data);
+        else throw new Error(data.mensaje || 'Credenciales inválidas');
         
     } catch (err: any) {
-        console.error('Error en login:', err);
-        setError(err.message || 'Error de conexión con el servidor');
+        setError(err.message || 'Error de conexión');
     } finally {
         setLoading(false);
     }
-};
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length < 4) {
+        setError('Ingresa el código completo.');
+        return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo, codigo: otpCode }),
+        });
+        const data = await response.json();
+        if (!response.ok || data.status !== 'OK') throw new Error(data.mensaje || 'Código inválido');
+        handleLoginSuccess(data);
+    } catch (err: any) {
+        setError(err.message || 'Error de verificación');
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const handleLoginSuccess = (data: any) => {
+    sessionStorage.setItem('isLoggedIn', 'true');
+    sessionStorage.setItem('userCedula', data.cedula?.toString() || '');
+    sessionStorage.setItem('userCorreo', data.correo || correo);
+    sessionStorage.setItem('userRol', data.rol?.toString() || '1');
+    if (data.nombres) sessionStorage.setItem('userNombres', data.nombres);
+    if (data.apellido) sessionStorage.setItem('userApellido', data.apellido);
+    
+    const rol = data.rol?.toString();
+    if (rol === '3') router.push('/dashboard-admin');
+    else if (rol === '2') router.push('/dashboard-asesor');
+    else router.push('/dashboard');
+  };
+
   return (
     <div className={styles.pg}>
-      {/* Blobs de fondo */}
       <div className={styles.blobs} aria-hidden>
         <div className={`${styles.blob} ${styles.blob1}`} />
         <div className={`${styles.blob} ${styles.blob2}`} />
-        <div className={`${styles.blob} ${styles.blob3}`} />
-        <div className={`${styles.blob} ${styles.blob4}`} />
       </div>
-
-      {/* Grid sutil */}
       <div className={styles.grid} aria-hidden />
 
-      {/* Orbes flotantes decorativos */}
-      <div className={styles.orbs} aria-hidden>
-        <div className={`${styles.orb} ${styles.orb1}`} />
-        <div className={`${styles.orb} ${styles.orb2}`} />
-        <div className={`${styles.orb} ${styles.orb3}`} />
-      </div>
-
-      {/* Partículas flotantes */}
-      <div className={styles.particles} aria-hidden>
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className={styles.particle} />
-        ))}
-      </div>
-
-      {/* Tarjeta principal */}
       <div className={`${styles.card} ${visible ? styles.cardVisible : ''}`}>
-
-        {/* Logo */}
         <div className={styles.logoRow}>
           <span className={styles.logoMark}><CarIcon /></span>
           <span className={styles.logoText}>Trans<strong>Meta</strong></span>
         </div>
 
-        {/* Encabezado */}
         <div className={styles.head}>
-          <h1 className={styles.h1}>¡Bienvenido de nuevo!</h1>
-          <p className={styles.sub}>Accede a tu panel de trámites</p>
+          <h1 className={styles.h1}>{isOtpRequired ? 'Verifica tu identidad' : '¡Bienvenido!'}</h1>
+          <p className={styles.sub}>{isOtpRequired ? otpMessage : 'Accede a tu panel de trámites'}</p>
         </div>
 
-        {/* Formulario */}
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-
-          {/* Correo Electrónico */}
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="correo">Correo electrónico</label>
-            <div className={`${styles.fieldRow} ${error && !correo ? styles.fieldRowError : ''}`}>
-              <span className={styles.fieldIco}><IdCardIcon /></span>
-              <input
-                id="correo"
-                className={styles.input}
-                type="email"
-                placeholder="ejemplo@correo.com"
-                value={correo}
-                onChange={e => { setCorreo(e.target.value); setError(''); }}
-                autoComplete="username"
-              />
+        {!isOtpRequired ? (
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+            <div className={styles.field}>
+              <label className={styles.label}>Correo electrónico</label>
+              <div className={styles.fieldRow}>
+                <span className={styles.fieldIco}><IdCardIcon /></span>
+                <input
+                  className={styles.input}
+                  type="email"
+                  placeholder="ejemplo@correo.com"
+                  value={correo}
+                  onChange={e => { setCorreo(e.target.value); setError(''); }}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Contraseña */}
-          <div className={styles.field}>
-            <div className={styles.labelRow}>
-              <label className={styles.label} htmlFor="password">Contraseña</label>
-              <Link href="/recuperar" className={styles.forgot}>¿Olvidaste tu contraseña?</Link>
+            <div className={styles.field}>
+              <div className={styles.labelRow}>
+                <label className={styles.label}>Contraseña</label>
+                <Link href="/recuperar" className={styles.forgot}>¿Olvidaste tu contraseña?</Link>
+              </div>
+              <div className={styles.fieldRow}>
+                <span className={styles.fieldIco}><LockIcon /></span>
+                <input
+                  className={styles.input}
+                  type={showPwd ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
+                />
+                <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(v => !v)}>
+                  {showPwd ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
-            <div className={`${styles.fieldRow} ${error && correo && !password ? styles.fieldRowError : ''}`}>
-              <span className={styles.fieldIco}><LockIcon /></span>
-              <input
-                id="password"
-                className={styles.input}
-                type={showPwd ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                onClick={() => setShowPwd(v => !v)}
-                aria-label={showPwd ? 'Ocultar' : 'Mostrar'}
-              >
-                {showPwd ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
+
+            {error && <div className={styles.errorBanner}>{error}</div>}
+
+            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ''}`} disabled={loading}>
+              {loading ? <span className={styles.spinner} /> : <><span>Ingresar</span><ArrowRightIcon /></>}
+            </button>
+          </form>
+        ) : (
+          <form className={styles.form} onSubmit={handleVerifyOtp} noValidate>
+            <div className={styles.field}>
+              <label className={styles.label}>Código OTP</label>
+              <div className={styles.fieldRow}>
+                <span className={styles.fieldIco}><LockIcon /></span>
+                <input
+                  className={styles.input}
+                  type="text"
+                  placeholder="123456"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={e => { setOtpCode(e.target.value.replace(/\D/g, '')); setError(''); }}
+                  autoFocus
+                />
+              </div>
+              <p className={styles.forgot} style={{ marginTop: '0.5rem', cursor: 'pointer' }} onClick={() => setIsOtpRequired(false)}>
+                ← Volver al login
+              </p>
             </div>
-          </div>
 
-          {/* Error */}
-          {error && (
-            <div className={styles.errorBanner} role="alert">{error}</div>
-          )}
+            {error && <div className={styles.errorBanner}>{error}</div>}
 
-          {/* Botón */}
-          <button
-            type="submit"
-            className={`${styles.submitBtn} ${loading ? styles.loading : ''}`}
-            disabled={loading}
-          >
-            {loading
-              ? <span className={styles.spinner} />
-              : <><span>Ingresar</span><ArrowRightIcon /></>
-            }
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className={styles.divider}><span>¿Aún no tienes cuenta?</span></div>
-
-        {/* Registro */}
-        <Link href="/registro" className={styles.registerBtn}>
-          Crear cuenta gratis <ArrowRightIcon />
-        </Link>
-
-        {/* Volver */}
-        <p className={styles.back}>
-          <Link href="/">← Volver al inicio</Link>
-        </p>
+            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ''}`} disabled={loading}>
+              {loading ? <span className={styles.spinner} /> : <><span>Verificar</span><ArrowRightIcon /></>}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

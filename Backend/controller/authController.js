@@ -21,6 +21,16 @@ class AuthController {
     }
   }
 
+  async verifyOTP(req, res) {
+    try {
+      const { correo, codigo } = req.body;
+      const result = await authService.verifyOTP(correo, codigo);
+      res.json(result);
+    } catch (err) {
+      res.status(401).json({ status: 'ERROR', mensaje: err.message });
+    }
+  }
+
   async getPerfil(req, res) {
     try {
       const { cedula } = req.params;

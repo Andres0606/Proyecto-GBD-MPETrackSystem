@@ -4,6 +4,7 @@ const authController = require('../controller/authController');
 
 router.post('/register/cliente', authController.registerCliente);
 router.post('/login', authController.login);
+router.post('/verify-otp', authController.verifyOTP);
 router.get('/perfil/:cedula', authController.getPerfil);
 router.put('/perfil', authController.updatePerfil);
 router.post('/asesor', authController.registerAsesor);
