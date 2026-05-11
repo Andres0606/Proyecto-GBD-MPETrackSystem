@@ -27,4 +27,30 @@ router.get('/asesor/:cedulaAsesor', async (req, res) => {
   }
 });
 
+// NUEVA RUTA: Obtener TODOS los clientes (Para el Administrador)
+router.get('/all', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const sql = `
+      SELECT 
+        cedula as "cedula", 
+        nombres as "nombres", 
+        apellido as "apellido", 
+        telefono as "telefono", 
+        correo as "correo", 
+        totalCitas as "totalCitas",
+        licencia as "licencia"
+      FROM TABLE(fn_get_todos_los_clientes())
+      ORDER BY "nombres" ASC
+    `;
+    const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    res.json({ status: 'OK', clientes: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
 module.exports = router;

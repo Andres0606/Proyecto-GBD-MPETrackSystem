@@ -286,6 +286,15 @@ export default function DashboardAdminPage() {
             </button>
           </div>
 
+          <div className={styles.card}>
+            <div className={styles.cardIcon}><UsersIcon /></div>
+            <h3>Ver Clientes</h3>
+            <p>Gestiona y consulta la lista completa de clientes registrados</p>
+            <Link href="/listar-clientes" className={styles.cardBtn}>
+              Ver Clientes <ArrowIcon />
+            </Link>
+          </div>
+
         </div>
       </div>
     </div>
