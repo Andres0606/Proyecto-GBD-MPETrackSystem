@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../CSS/Registro/Registro.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import FaceCapture from '../components/FaceCapture';
 
 /* ── Icons ── */
 const CarIcon = () => (
@@ -31,21 +32,27 @@ export default function RegistroPage() {
     correo: '',
     contrasena: '',
     confirmarContrasena: '',
-    licenciaConduccion: 'S'  // 'S' o 'N'
+    licenciaConduccion: 'S'
   });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Estados para Biometría
+  const [useFaceId, setUseFaceId] = useState(false);
+  const [showFaceCapture, setShowFaceCapture] = useState(false);
+  const [faceData, setFaceData] = useState<{ descriptor: number[], image: string } | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData(prev => ({ ...prev, [name]: target.checked ? 'S' : 'N' }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
+  };
+
+  const onFaceCapture = (descriptor: number[], image: string) => {
+    setFaceData({ descriptor, image });
+    setShowFaceCapture(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,56 +60,56 @@ export default function RegistroPage() {
     setError('');
     setSuccess('');
 
-    if (!formData.numeroDocumento.trim()) { setError('El número de documento es requerido'); return; }
-    if (!formData.nombres.trim()) { setError('Los nombres son requeridos'); return; }
-    if (!formData.apellido.trim()) { setError('Los apellidos son requeridos'); return; }
-    if (!formData.fechaNacimiento) { setError('La fecha de nacimiento es requerida'); return; }
-    if (!formData.correo.trim()) { setError('El correo es requerido'); return; }
-    if (!formData.contrasena) { setError('La contraseña es requerida'); return; }
-    if (formData.contrasena !== formData.confirmarContrasena) { setError('Las contraseñas no coinciden'); return; }
-    if (formData.contrasena.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return; }
+    if (!formData.numeroDocumento || !formData.nombres || !formData.correo || !formData.contrasena) {
+      setError('Por favor completa todos los campos obligatorios (*)');
+      return;
+    }
+    if (useFaceId && !faceData) {
+      setError('Debes capturar tu rostro si activaste Face ID');
+      return;
+    }
 
     setLoading(true);
 
     try {
-      let fechaFormateada = '';
-      if (formData.fechaNacimiento) {
-        const fecha = new Date(formData.fechaNacimiento);
-        const dia = fecha.getDate().toString().padStart(2, '0');
-        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-        const anio = fecha.getFullYear();
-        fechaFormateada = `${dia}/${mes}/${anio}`;
-      }
+      const fecha = new Date(formData.fechaNacimiento);
+      const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
 
+      // 1. Registro normal
       const response = await fetch(`${BACKEND_URL}/api/auth/register/cliente`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tipoDocumento: formData.tipoDocumento,
+          ...formData,
           numeroDocumento: parseInt(formData.numeroDocumento),
-          nombres: formData.nombres,
-          apellido: formData.apellido,
-          fechaNacimiento: fechaFormateada,
           telefono: formData.telefono ? parseInt(formData.telefono) : null,
-          correo: formData.correo,
-          contrasena: formData.contrasena,
-          licenciaConduccion: formData.licenciaConduccion  // 'S' o 'N'
+          fechaNacimiento: fechaFormateada
         }),
       });
 
       const data = await response.json();
-      
       if (!response.ok) throw new Error(data.mensaje || 'Error en el registro');
-      
-      if (data.status === 'OK') {
-        setSuccess('¡Registro exitoso! Redirigiendo al login...');
-        setTimeout(() => { router.push('/login'); }, 2000);
-      } else {
-        throw new Error(data.mensaje || 'Error en el registro');
+
+      // 2. Si Face ID está activo, enviar datos biométricos
+      if (useFaceId && faceData) {
+        setSuccess('Datos básicos guardados. Vinculando rostro...');
+        const bioResponse = await fetch(`${BACKEND_URL}/api/biometric/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            correo: formData.correo,
+            descriptor: faceData.descriptor,
+            image: faceData.image
+          }),
+        });
+        const bioData = await bioResponse.json();
+        if (!bioResponse.ok) console.error('Error Face ID:', bioData.mensaje);
       }
+
+      setSuccess('¡Registro completado exitosamente!');
+      setTimeout(() => router.push('/login'), 2000);
     } catch (err: any) {
-      console.error('Error en registro:', err);
-      setError(err.message || 'Error de conexión con el servidor');
+      setError(err.message || 'Error de conexión');
     } finally {
       setLoading(false);
     }
@@ -111,12 +118,6 @@ export default function RegistroPage() {
   return (
     <div className={styles.container}>
       <div className={styles.grid} aria-hidden />
-      <div className={styles.particles} aria-hidden>
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className={styles.particle} />
-        ))}
-      </div>
-
       <div className={styles.card}>
         <div className={styles.logoRow}>
           <span className={styles.logoMark}><CarIcon /></span>
@@ -128,8 +129,8 @@ export default function RegistroPage() {
           <p className={styles.subtitle}>Regístrate para acceder al sistema</p>
         </div>
 
-        {error && <div className={styles.errorAlert} role="alert">{error}</div>}
-        {success && <div className={styles.successAlert} role="alert">{success}</div>}
+        {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
@@ -139,87 +140,71 @@ export default function RegistroPage() {
                 <option value="CEDULA">Cédula de Ciudadanía</option>
                 <option value="NIT">NIT</option>
                 <option value="PASAPORTE">Pasaporte</option>
-                <option value="TARJETA_IDENTIDAD">Tarjeta de Identidad</option>
               </select>
             </div>
-
             <div className={styles.field}>
               <label>Número de documento *</label>
-              <input type="text" name="numeroDocumento" value={formData.numeroDocumento}
-                onChange={handleChange} placeholder="Número de documento" />
+              <input type="text" name="numeroDocumento" value={formData.numeroDocumento} onChange={handleChange} />
             </div>
-
             <div className={styles.field}>
               <label>Nombres *</label>
-              <input type="text" name="nombres" value={formData.nombres}
-                onChange={handleChange} placeholder="Tus nombres" />
+              <input type="text" name="nombres" value={formData.nombres} onChange={handleChange} />
             </div>
-
             <div className={styles.field}>
               <label>Apellidos *</label>
-              <input type="text" name="apellido" value={formData.apellido}
-                onChange={handleChange} placeholder="Tus apellidos" />
+              <input type="text" name="apellido" value={formData.apellido} onChange={handleChange} />
             </div>
-
             <div className={styles.field}>
               <label>Fecha de nacimiento *</label>
-              <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento}
-                onChange={handleChange} />
+              <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} />
             </div>
-
             <div className={styles.field}>
               <label>Teléfono</label>
-              <input type="tel" name="telefono" value={formData.telefono}
-                onChange={handleChange} placeholder="Número de teléfono" />
+              <input type="tel" name="telefono" value={formData.telefono} onChange={handleChange} />
             </div>
-
-            <div className={styles.field}>
-              <label>Correo electrónico *</label>
-              <input type="email" name="correo" value={formData.correo}
-                onChange={handleChange} placeholder="ejemplo@correo.com" />
-            </div>
-
-            {/* Checkbox para licencia */}
             <div className={styles.field} style={{ gridColumn: 'span 2' }}>
-  <label>¿Tiene licencia de conducción?</label>
-  <div className={styles.toggleRow}>
-    <span className={styles.toggleLabel}>
-      {formData.licenciaConduccion === 'S' ? 'Sí, tengo licencia' : 'No tengo licencia'}
-    </span>
-    <div className={styles.toggleBtns}>
-      <button
-        type="button"
-        className={`${styles.toggleBtn} ${formData.licenciaConduccion === 'S' ? styles.toggleBtnActive : ''}`}
-        onClick={() => setFormData(prev => ({ ...prev, licenciaConduccion: 'S' }))}
-      >
-        Sí
-      </button>
-      <button
-        type="button"
-        className={`${styles.toggleBtn} ${formData.licenciaConduccion === 'N' ? styles.toggleBtnActive : ''}`}
-        onClick={() => setFormData(prev => ({ ...prev, licenciaConduccion: 'N' }))}
-      >
-        No
-      </button>
-    </div>
-  </div>
-</div>
-
+              <label>Correo electrónico *</label>
+              <input type="email" name="correo" value={formData.correo} onChange={handleChange} />
+            </div>
             <div className={styles.field}>
               <label>Contraseña *</label>
-              <input type="password" name="contrasena" value={formData.contrasena}
-                onChange={handleChange} placeholder="Mínimo 6 caracteres" />
+              <input type="password" name="contrasena" value={formData.contrasena} onChange={handleChange} />
             </div>
-
             <div className={styles.field}>
               <label>Confirmar contraseña *</label>
-              <input type="password" name="confirmarContrasena" value={formData.confirmarContrasena}
-                onChange={handleChange} placeholder="Repite tu contraseña" />
+              <input type="password" name="confirmarContrasena" value={formData.confirmarContrasena} onChange={handleChange} />
+            </div>
+
+            {/* FACE ID OPTION */}
+            <div className={styles.field} style={{ gridColumn: 'span 2', marginTop: '10px' }}>
+              <div style={faceIdContainerStyle}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="faceId" 
+                    checked={useFaceId} 
+                    onChange={e => setUseFaceId(e.target.checked)} 
+                    style={{ width: '20px', height: '20px' }}
+                  />
+                  <label htmlFor="faceId" style={{ fontWeight: '600', cursor: 'pointer' }}>Activar Verificación Facial (Face ID)</label>
+                </div>
+                {useFaceId && (
+                  <div style={{ marginTop: '10px' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowFaceCapture(true)}
+                      style={faceBtnStyle(!!faceData)}
+                    >
+                      {faceData ? '✅ Rostro capturado' : '📸 Capturar mi rostro'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Registrando...' : <><span>Registrarse</span><ArrowRightIcon /></>}
+            {loading ? 'Procesando...' : <><span>Registrarse</span><ArrowRightIcon /></>}
           </button>
         </form>
 
@@ -227,6 +212,22 @@ export default function RegistroPage() {
           ¿Ya tienes cuenta? <Link href="/login">Inicia sesión aquí</Link>
         </p>
       </div>
+
+      {showFaceCapture && (
+        <FaceCapture 
+          onCapture={onFaceCapture} 
+          onCancel={() => setShowFaceCapture(false)} 
+        />
+      )}
     </div>
   );
 }
+
+const faceIdContainerStyle: React.CSSProperties = {
+  backgroundColor: '#f0f7ff', padding: '15px', borderRadius: '12px', border: '1px solid #cce3ff'
+};
+
+const faceBtnStyle = (hasData: boolean): React.CSSProperties => ({
+  backgroundColor: hasData ? '#22c55e' : '#0070f3',
+  color: 'white', padding: '10px 15px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500'
+});

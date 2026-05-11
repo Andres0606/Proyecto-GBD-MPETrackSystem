@@ -10,6 +10,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const tramiteRoutes = require('./routes/tramiteRoutes');
 const consultasRoutes = require('./routes/consultasRoutes');
 const clientRoutes = require('./routes/clientRoutes');
+const biometricRoutes = require('./routes/biometricRoutes');
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
 // Oracle Client Initialization (Thin mode with Wallet)
@@ -43,6 +44,7 @@ app.use('/api/tipo-tramite', tramiteRoutes);
 app.use('/api/tramite', tramiteRoutes);
 app.use('/api/consultas', consultasRoutes);
 app.use('/api/clientes', clientRoutes);
+app.use('/api/biometric', biometricRoutes);
 
 // Root path
 app.get('/', (req, res) => {

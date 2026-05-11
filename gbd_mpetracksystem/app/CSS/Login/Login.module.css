@@ -519,6 +519,33 @@
 }
 .back a:hover { color: #1976D2; }
 
+/* ── Botón Face ID ── */
+.faceIdBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 13px;
+  border: 1.5px solid rgba(25, 118, 210, 0.2);
+  background: rgba(25, 118, 210, 0.04);
+  color: #1976D2;
+  font-family: var(--ff, 'Sora', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+.faceIdBtn svg { width: 20px; height: 20px; }
+.faceIdBtn:hover:not(:disabled) {
+  background: rgba(25, 118, 210, 0.08);
+  border-color: #1976D2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.1);
+}
+.faceIdBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* ══════════════════════
    RESPONSIVE
 ══════════════════════ */

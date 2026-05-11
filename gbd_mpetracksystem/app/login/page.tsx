@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../CSS/Login/Login.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import FaceCapture from '../components/FaceCapture';
 
 /* ── Icons ── */
 const EyeIcon = () => (
@@ -43,6 +44,12 @@ const CarIcon = () => (
     <circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
   </svg>
 );
+const FaceIdIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+    <path d="M8 7v2m8-2v2M9 13s.5 1 3 1 3-1 3-1"/>
+  </svg>
+);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,10 +60,11 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [visible, setVisible] = useState(false);
   
-  // Estados para OTP
+  // Estados para OTP y Biometría
   const [isOtpRequired, setIsOtpRequired] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpMessage, setOtpMessage] = useState('');
+  const [showFaceCapture, setShowFaceCapture] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
@@ -97,6 +105,27 @@ export default function LoginPage() {
         setError(err.message || 'Error de conexión');
     } finally {
         setLoading(false);
+    }
+  };
+
+  const onFaceCapture = async (descriptor: number[]) => {
+    setShowFaceCapture(false);
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/biometric/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptor }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.status !== 'OK') throw new Error(data.mensaje || 'Rostro no reconocido');
+      handleLoginSuccess(data);
+    } catch (err: any) {
+      setError(err.message || 'Error en reconocimiento facial');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,47 +188,61 @@ export default function LoginPage() {
         </div>
 
         {!isOtpRequired ? (
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <div className={styles.field}>
-              <label className={styles.label}>Correo electrónico</label>
-              <div className={styles.fieldRow}>
-                <span className={styles.fieldIco}><IdCardIcon /></span>
-                <input
-                  className={styles.input}
-                  type="email"
-                  placeholder="ejemplo@correo.com"
-                  value={correo}
-                  onChange={e => { setCorreo(e.target.value); setError(''); }}
-                />
+          <>
+            <form className={styles.form} onSubmit={handleSubmit} noValidate>
+              <div className={styles.field}>
+                <label className={styles.label}>Correo electrónico</label>
+                <div className={styles.fieldRow}>
+                  <span className={styles.fieldIco}><IdCardIcon /></span>
+                  <input
+                    className={styles.input}
+                    type="email"
+                    placeholder="ejemplo@correo.com"
+                    value={correo}
+                    onChange={e => { setCorreo(e.target.value); setError(''); }}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className={styles.field}>
-              <div className={styles.labelRow}>
-                <label className={styles.label}>Contraseña</label>
-                <Link href="/recuperar" className={styles.forgot}>¿Olvidaste tu contraseña?</Link>
+              <div className={styles.field}>
+                <div className={styles.labelRow}>
+                  <label className={styles.label}>Contraseña</label>
+                  <Link href="/recuperar" className={styles.forgot}>¿Olvidaste tu contraseña?</Link>
+                </div>
+                <div className={styles.fieldRow}>
+                  <span className={styles.fieldIco}><LockIcon /></span>
+                  <input
+                    className={styles.input}
+                    type={showPwd ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setError(''); }}
+                  />
+                  <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(v => !v)}>
+                    {showPwd ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
               </div>
-              <div className={styles.fieldRow}>
-                <span className={styles.fieldIco}><LockIcon /></span>
-                <input
-                  className={styles.input}
-                  type={showPwd ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); setError(''); }}
-                />
-                <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(v => !v)}>
-                  {showPwd ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
-              </div>
-            </div>
 
-            {error && <div className={styles.errorBanner}>{error}</div>}
+              {error && <div className={styles.errorBanner}>{error}</div>}
 
-            <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ''}`} disabled={loading}>
-              {loading ? <span className={styles.spinner} /> : <><span>Ingresar</span><ArrowRightIcon /></>}
+              <button type="submit" className={`${styles.submitBtn} ${loading ? styles.loading : ''}`} disabled={loading}>
+                {loading ? <span className={styles.spinner} /> : <><span>Ingresar</span><ArrowRightIcon /></>}
+              </button>
+            </form>
+
+            <div className={styles.divider}><span>O inicia sesión con biometría</span></div>
+
+            <button 
+              type="button" 
+              className={styles.faceIdBtn} 
+              onClick={() => setShowFaceCapture(true)}
+              disabled={loading}
+            >
+              <FaceIdIcon />
+              <span>Ingresar con Face ID</span>
             </button>
-          </form>
+          </>
         ) : (
           <form className={styles.form} onSubmit={handleVerifyOtp} noValidate>
             <div className={styles.field}>
@@ -228,7 +271,19 @@ export default function LoginPage() {
             </button>
           </form>
         )}
+
+        <div className={styles.divider}><span>¿Aún no tienes cuenta?</span></div>
+        <Link href="/registro" className={styles.registerBtn}>
+          Crear cuenta gratis <ArrowRightIcon />
+        </Link>
       </div>
+
+      {showFaceCapture && (
+        <FaceCapture 
+          onCapture={onFaceCapture} 
+          onCancel={() => setShowFaceCapture(false)} 
+        />
+      )}
     </div>
   );
 }
