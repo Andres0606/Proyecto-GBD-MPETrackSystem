@@ -35,6 +35,13 @@ const PhoneIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+  </svg>
+);
+
 interface Cliente {
   cedula: string;
   nombres: string;
@@ -50,6 +57,7 @@ export default function ListarClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -81,6 +89,27 @@ export default function ListarClientesPage() {
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const eliminarCliente = async (cedula: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/clientes/${cedula}`, { method: 'DELETE' });
+      const data = await response.json();
+      
+      if (response.ok && data.status === 'OK') {
+        setSuccess('Cliente eliminado correctamente');
+        setClientes(clientes.filter(c => c.cedula !== cedula));
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.mensaje || 'No se pudo eliminar el cliente');
+        setTimeout(() => setError(''), 4000);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Error al conectar con el servidor');
     }
   };
 
@@ -130,8 +159,9 @@ export default function ListarClientesPage() {
           <span className={styles.count}>{clientesFiltrados.length} clientes encontrados</span>
         </div>
 
-        {/* ── Error ── */}
+        {/* ── Alertas ── */}
         {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
 
         {/* ── Tabla ── */}
         <div className={styles.tableWrapper}>
@@ -175,7 +205,18 @@ export default function ListarClientesPage() {
                     </span>
                   </td>
                   <td>
-                    <button className={styles.detailBtn}>Detalles</button>
+                    <div className={styles.actionsCell}>
+                      <Link href={`/listar-clientes/${cliente.cedula}/editar`} className={styles.editBtn} title="Editar">
+                        Editar
+                      </Link>
+                      <button 
+                        onClick={() => eliminarCliente(cliente.cedula)} 
+                        className={styles.deleteBtn}
+                        title="Eliminar"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
