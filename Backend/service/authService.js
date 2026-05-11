@@ -1,13 +1,20 @@
 const personaRepository = require('../repository/personaRepository');
 const clienteRepository = require('../repository/clienteRepository');
 const { oracledb } = require('../config/db');
-const twilio = require('twilio');
+const nodemailer = require('nodemailer');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+// Almacén temporal de OTPs (en memoria para este proyecto)
+// Formato: { 'correo@test.com': { code: '123456', expires: timestamp } }
+const OTP_STORE = {};
 
-const client = twilio(accountSid, authToken);
+// Configuración del transporte de correo
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Puedes cambiarlo por 'outlook', 'hotmail', etc.
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 class AuthService {
   async registerCliente(data) {
@@ -67,78 +74,101 @@ class AuthService {
       throw new Error('Credenciales inválidas');
     }
 
-    if (!persona.TELEFONO) {
-      throw new Error('El usuario no tiene un teléfono registrado para la verificación OTP');
-    }
-
-    // Paso 1: Enviar OTP
-    await this.sendOTP(persona.TELEFONO);
+    // Paso 1: Enviar OTP por correo
+    await this.sendOTP(persona.CORREO);
 
     return {
       status: 'OTP_REQUIRED',
-      mensaje: 'Código de verificación enviado al teléfono terminado en ' + String(persona.TELEFONO).slice(-4),
+      mensaje: 'Código de verificación enviado a tu correo electrónico: ' + persona.CORREO,
       correo: persona.CORREO
     };
   }
 
-  async sendOTP(telefono) {
+  async sendOTP(correo) {
     try {
-      // Convertir a string por si viene como número de la BD
-      const telStr = String(telefono);
-      const formattedPhone = telStr.startsWith('+') ? telStr : `+57${telStr}`;
+      // Generar código aleatorio de 6 dígitos
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
       
-      await client.verify.v2.services(verifyServiceSid)
-        .verifications
-        .create({ to: formattedPhone, channel: 'sms' });
+      // Guardar en el almacén con expiración de 15 minutos
+      OTP_STORE[correo] = {
+        code: code,
+        expires: Date.now() + 2 * 60 * 1000 // 15 minutos
+      };
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: correo,
+        subject: 'Código de Verificación - MPE Track System',
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #2563eb;">Verificación de Seguridad</h2>
+            <p>Hola,</p>
+            <p>Tu código de verificación para ingresar al sistema es:</p>
+            <div style="background: #f3f4f6; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #1e40af; border-radius: 5px;">
+              ${code}
+            </div>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">Este código expirará en 2 minutos.</p>
+            <p>Si no solicitaste este código, por favor ignora este mensaje.</p>
+          </div>
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`OTP enviado a ${correo}: ${code}`);
     } catch (err) {
-      console.error('Twilio Send Error:', err);
-      throw new Error('Error al enviar el código de verificación: ' + err.message);
+      console.error('Email Send Error:', err);
+      throw new Error('Error al enviar el correo de verificación: ' + err.message);
     }
   }
 
   async verifyOTP(correo, code) {
+    const otpData = OTP_STORE[correo];
+
+    if (!otpData) {
+      throw new Error('No hay un código pendiente para este correo');
+    }
+
+    if (Date.now() > otpData.expires) {
+      delete OTP_STORE[correo];
+      throw new Error('El código ha expirado. Por favor solicita uno nuevo.');
+    }
+
+    if (otpData.code !== code) {
+      throw new Error('Código de verificación incorrecto');
+    }
+
+    // Código válido, eliminarlo del almacén
+    delete OTP_STORE[correo];
+
     const persona = await personaRepository.findByCorreo(correo);
     if (!persona) throw new Error('Usuario no encontrado');
 
-    const telStr = String(persona.TELEFONO);
-    const formattedPhone = telStr.startsWith('+') ? telStr : `+57${telStr}`;
-
+    let connection;
     try {
-      const verificationCheck = await client.verify.v2.services(verifyServiceSid)
-        .verificationChecks
-        .create({ to: formattedPhone, code: code });
+      connection = await oracledb.getConnection();
+      const nDocumento = persona.NDOCUMENTO;
+      let rol = '1';
 
-      if (verificationCheck.status !== 'approved') {
-        throw new Error('Código de verificación inválido o expirado');
+      const adminRes = await connection.execute('SELECT nDocumento FROM ADMIN WHERE nDocumento = :1', [nDocumento]);
+      if (adminRes.rows.length > 0) {
+        rol = '3';
+      } else {
+        const asesorRes = await connection.execute('SELECT nDocumento FROM ASESOR WHERE nDocumento = :1', [nDocumento]);
+        if (asesorRes.rows.length > 0) rol = '2';
       }
 
-      let connection;
-      try {
-        connection = await oracledb.getConnection();
-        const nDocumento = persona.NDOCUMENTO;
-        let rol = '1';
-
-        const adminRes = await connection.execute('SELECT nDocumento FROM ADMIN WHERE nDocumento = :1', [nDocumento]);
-        if (adminRes.rows.length > 0) {
-          rol = '3';
-        } else {
-          const asesorRes = await connection.execute('SELECT nDocumento FROM ASESOR WHERE nDocumento = :1', [nDocumento]);
-          if (asesorRes.rows.length > 0) rol = '2';
-        }
-
-        return {
-          status: 'OK',
-          cedula: persona.NDOCUMENTO,
-          nombres: persona.NOMBRES,
-          apellido: persona.APELLIDOS,
-          correo: persona.CORREO,
-          rol: rol
-        };
-      } finally {
-        if (connection) await connection.close();
-      }
+      return {
+        status: 'OK',
+        cedula: persona.NDOCUMENTO,
+        nombres: persona.NOMBRES,
+        apellido: persona.APELLIDOS,
+        correo: persona.CORREO,
+        rol: rol
+      };
     } catch (err) {
       throw new Error(err.message || 'Error al verificar el código');
+    } finally {
+      if (connection) await connection.close();
     }
   }
 
