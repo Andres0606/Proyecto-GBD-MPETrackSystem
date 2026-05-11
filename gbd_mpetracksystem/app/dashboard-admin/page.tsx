@@ -281,9 +281,9 @@ export default function DashboardAdminPage() {
             <div className={styles.cardIcon}><BarChartIcon /></div>
             <h3>Reportes</h3>
             <p>Genera y consulta reportes de actividad y gestión del sistema</p>
-            <button className={styles.cardBtn}>
+            <Link href="/reportes" className={styles.cardBtn}>
               Ver Reportes <ArrowIcon />
-            </button>
+            </Link>
           </div>
 
           <div className={styles.card}>

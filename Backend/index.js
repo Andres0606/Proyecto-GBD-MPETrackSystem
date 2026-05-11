@@ -11,6 +11,7 @@ const tramiteRoutes = require('./routes/tramiteRoutes');
 const consultasRoutes = require('./routes/consultasRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const biometricRoutes = require('./routes/biometricRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/tramite', tramiteRoutes);
 app.use('/api/consultas', consultasRoutes);
 app.use('/api/clientes', clientRoutes);
 app.use('/api/biometric', biometricRoutes);
+app.use('/api/reportes', reportRoutes);
 
 // Root path
 app.get('/', (req, res) => {
