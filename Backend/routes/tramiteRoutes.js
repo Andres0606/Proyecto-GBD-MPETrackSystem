@@ -41,23 +41,30 @@ router.get('/asesor/:cedula', async (req, res) => {
 });
 
 // NUEVA RUTA: Obtener trámites de un cliente específico (Para "Mis Trámites")
-router.get('/cliente/:cedula', async (req, res) => {
+router.get(['/mis-tramites/:cedula', '/cliente/:cedula'], async (req, res) => {
+  const { cedula } = req.params;
   let connection;
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT * FROM vw_mis_tramites 
-      WHERE "cedula_cliente" = :1
-      ORDER BY "idTramite" DESC
+      SELECT 
+        idTramite as "idTramite",
+        idCita as "idCita",
+        vehiculo as "vehiculo",
+        tipoTramite as "tipoTramite",
+        valorTramite as "valorTramite",
+        valorOtrosConceptos as "valorOtrosConceptos",
+        estadoTramite as "estadoTramite",
+        fechaCreacion as "fechaCreacion",
+        fechaCita as "fechaCita",
+        asesor as "asesor"
+      FROM TABLE(fn_get_tramites_cliente(:1))
+      ORDER BY fechaCreacion DESC
     `;
-    
-    const result = await connection.execute(sql, [req.params.cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', tramites: result.rows });
-  } catch (err) {
-    res.status(500).json({ status: 'ERROR', mensaje: err.message });
-  } finally {
-    if (connection) await connection.close();
-  }
+  } catch (err) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
+  finally { if (connection) await connection.close(); }
 });
 
 // Registrar Trámite Finalizado

@@ -72,27 +72,20 @@ router.get('/cliente/:cedula', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
-    
-    // Esta consulta usa una subconsulta para encontrar el ÚLTIMO trámite de cada vehículo.
-    // Si el último trámite fue un traspaso, el dueño es el DESTINO.
-    // Si no, es el CLIENTE que solicitó el trámite original.
     const sql = `
-      SELECT * FROM vw_detalle_vehiculos v
-      WHERE v."placa" IN (
-          SELECT PLACA
-          FROM (
-              SELECT 
-                ci.PLACAVEHICULO as PLACA,
-                NVL(ci.IDCLIENTEDESTINO, ci.IDCLIENTE) as ID_DUENIO_ACTUAL,
-                ROW_NUMBER() OVER (PARTITION BY ci.PLACAVEHICULO ORDER BY tr.IDTRAMITE DESC) as rn
-              FROM CITA ci
-              JOIN TRAMITE tr ON ci.IDCITA = tr.IDCITA
-              WHERE tr.ESTADOTRAMITE = 'Finalizado'
-          ) t
-          JOIN CLIENTE cl ON t.ID_DUENIO_ACTUAL = cl.IDCLIENTE
-          WHERE t.rn = 1 
-          AND cl.NDOCUMENTO = :1
-      )
+      SELECT 
+        PLACA as "placa",
+        MARCA as "marca",
+        LINEA as "linea",
+        COLOR as "color",
+        MODELO as "modelo",
+        clase as "clase",
+        numMotor as "numMotor",
+        numChasis as "numChasis",
+        tipoServicio as "tipoServicio",
+        PRENDADO as "prendado",
+        ESTADO as "estado"
+      FROM TABLE(fn_get_vehiculos_cliente(:1))
     `;
     const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', vehiculos: result.rows });
