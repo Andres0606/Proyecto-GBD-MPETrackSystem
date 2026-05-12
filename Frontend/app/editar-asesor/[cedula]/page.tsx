@@ -6,6 +6,13 @@ import Link from 'next/link';
 import styles from '../../CSS/Admin/EditarAsesor.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
+interface TipoTramite {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  valorBase: number;
+}
+
 // Iconos
 const UserIcon = () => (
   <svg className={styles.titleIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -79,6 +86,7 @@ export default function EditarAsesorPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [tiposTramite, setTiposTramite] = useState<TipoTramite[]>([]);
   const [formData, setFormData] = useState({
     nombres: '',
     apellido: '',
@@ -90,7 +98,20 @@ export default function EditarAsesorPage() {
 
   useEffect(() => {
     cargarAsesor();
+    cargarTiposTramite();
   }, [cedula]);
+
+  const cargarTiposTramite = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/tipo-tramite/list`);
+      const data = await response.json();
+      if (data.status === 'OK' && data.tiposTramite) {
+        setTiposTramite(data.tiposTramite);
+      }
+    } catch (error) {
+      console.error('Error cargando tipos de trámite:', error);
+    }
+  };
 
   const cargarAsesor = async () => {
     setLoading(true);
@@ -119,7 +140,7 @@ export default function EditarAsesorPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
@@ -272,15 +293,20 @@ export default function EditarAsesorPage() {
               <label className={styles.label}>Especialidad *</label>
               <div className={styles.inputWrapper}>
                 <BriefcaseIcon />
-                <input
-                  type="text"
+                <select
                   name="especialidad"
                   value={formData.especialidad}
                   onChange={handleChange}
-                  className={styles.input}
-                  placeholder="Ej: Matrícula/Registro"
+                  className={`${styles.input} ${styles.select}`}
                   required
-                />
+                >
+                  <option value="">Seleccione especialidad</option>
+                  {tiposTramite.map((tipo) => (
+                    <option key={tipo.id} value={tipo.nombre}>
+                      {tipo.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
