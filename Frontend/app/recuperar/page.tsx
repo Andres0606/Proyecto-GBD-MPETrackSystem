@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   Mail, 
   Lock, 
@@ -98,7 +98,7 @@ export default function RecuperarPage() {
     }
   };
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: { 
       opacity: 1, 
@@ -108,7 +108,7 @@ export default function RecuperarPage() {
     }
   };
 
-  const stepVariants = {
+  const stepVariants: Variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 100 : -100,
       opacity: 0
