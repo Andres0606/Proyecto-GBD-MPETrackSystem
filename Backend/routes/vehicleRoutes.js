@@ -208,10 +208,25 @@ router.post('/traspaso', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const { placa, idTramite } = req.body;
+
+    // 1. Finalizar el trámite
     await connection.execute("UPDATE TRAMITE SET ESTADOTRAMITE = 'Finalizado' WHERE IDTRAMITE = :1", [idTramite]);
+
+    // 2. Desvincular el vehículo del dueño actual (vendedor) 
+    // Al poner ESELDUENO = 'N', ya no aparecerá en su lista de "Mis Vehículos"
+    const sqlCita = `
+      UPDATE CITA 
+      SET ESELDUENO = 'N' 
+      WHERE IDCITA = (SELECT IDCITA FROM TRAMITE WHERE IDTRAMITE = :1)
+    `;
+    await connection.execute(sqlCita, [idTramite]);
+
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Traspaso completado' });
-  } catch (err) { if (connection) await connection.rollback(); res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
+    res.json({ status: 'OK', mensaje: 'Traspaso completado y vehículo desvinculado del dueño anterior' });
+  } catch (err) { 
+    if (connection) await connection.rollback(); 
+    res.status(500).json({ status: 'ERROR', mensaje: err.message }); 
+  }
   finally { if (connection) await connection.close(); }
 });
 

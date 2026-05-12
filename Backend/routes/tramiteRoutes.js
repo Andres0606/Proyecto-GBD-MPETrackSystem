@@ -121,9 +121,37 @@ router.put('/estado', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const { idTramite, estado } = req.body;
-    await connection.execute("UPDATE TRAMITE SET ESTADOTRAMITE = :1 WHERE IDTRAMITE = :2", [estado, idTramite]);
+
+    // 1. Actualizar el estado del trámite
+    await connection.execute(
+      "UPDATE TRAMITE SET ESTADOTRAMITE = :1 WHERE IDTRAMITE = :2",
+      [estado, idTramite]
+    );
+
+    // 2. Si el estado es 'Finalizado', verificar si es un Traspaso para desvincular el vehículo
+    if (estado === 'Finalizado') {
+      const resTipo = await connection.execute(
+        `SELECT tt.NOMBRE 
+         FROM TRAMITE t 
+         JOIN CITA c ON t.IDCITA = c.IDCITA 
+         JOIN TIPOTRAMITE tt ON c.TIPOTRAMITE = tt.IDTIPOTRAMITE 
+         WHERE t.IDTRAMITE = :1`,
+        [idTramite],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      if (resTipo.rows.length > 0 && resTipo.rows[0].NOMBRE === 'Traspaso') {
+        await connection.execute(
+          `UPDATE CITA 
+           SET ESELDUENO = 'N' 
+           WHERE IDCITA = (SELECT IDCITA FROM TRAMITE WHERE IDTRAMITE = :1)`,
+          [idTramite]
+        );
+      }
+    }
+
     await connection.commit();
-    res.json({ status: 'OK', mensaje: 'Estado actualizado' });
+    res.json({ status: 'OK', mensaje: 'Estado actualizado correctamente' });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });

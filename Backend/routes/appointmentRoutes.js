@@ -22,16 +22,51 @@ router.post('/solicitar', async (req, res) => {
 
     const idClienteReal = resCliente.rows[0].IDCLIENTE;
 
-    // 2. Obtener el IDCLIENTEDESTINO real si se proporcionó una cédula
+    // 2. Manejo de la contraparte (Dueño o Comprador)
     let idDestinoReal = null;
+    let idExternoReal = null;
+
+    // Si hay una cédula de destino (traspaso)
     if (c.cedulaDestino) {
+      // Intentamos buscarlo en CLIENTE (Registrados)
       const resDestino = await connection.execute(
         'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
         [c.cedulaDestino],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
+
       if (resDestino.rows.length > 0) {
         idDestinoReal = resDestino.rows[0].IDCLIENTE;
+      } else {
+        // No es cliente registrado -> Usar CLIENTEEXTERNO
+        // Primero verificamos si ya existe en CLIENTEEXTERNO
+        const resExterno = await connection.execute(
+          'SELECT IDEXTERNO FROM CLIENTEEXTERNO WHERE CEDULA = :1',
+          [c.cedulaDestino],
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+
+        if (resExterno.rows.length > 0) {
+          idExternoReal = resExterno.rows[0].IDEXTERNO;
+        } else {
+          // No existe -> Lo creamos
+          // Determinamos los nombres/apellidos según quién sea el externo
+          const nombres = c.nombreDuenioActual || c.nombreReceptorExterno || 'Desconocido';
+          const apellidos = c.apellidoDuenioActual || c.apellidoReceptorExterno || 'Desconocido';
+
+          const resNewExterno = await connection.execute(
+            `INSERT INTO CLIENTEEXTERNO (IDEXTERNO, CEDULA, NOMBRES, APELLIDO) 
+             VALUES (seq_clienteexterno.NEXTVAL, :1, :2, :3) 
+             RETURNING IDEXTERNO INTO :id`,
+            { 
+              1: c.cedulaDestino, 
+              2: nombres, 
+              3: apellidos, 
+              id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } 
+            }
+          );
+          idExternoReal = resNewExterno.outBinds.id[0];
+        }
       }
     }
 
@@ -49,7 +84,7 @@ router.post('/solicitar', async (req, res) => {
       placa: c.idVehiculo || null,
       idTipo: c.idTipoTramite,
       esDueno: esDuenoStr,
-      idExterno: c.idExterno || null,
+      idExterno: idExternoReal,
       idDestino: idDestinoReal
     });
 
@@ -59,10 +94,9 @@ router.post('/solicitar', async (req, res) => {
     if (connection) await connection.rollback();
     console.error('Error en solicitar cita:', err.message);
     
-    // Si el error viene de uno de nuestros triggers (RAISE_APPLICATION_ERROR)
     const msg = err.message.includes('ORA-20') 
       ? err.message.split('\n')[0].split(': ')[1] 
-      : 'Error interno al procesar la cita';
+      : 'Error interno al procesar la cita: ' + err.message;
       
     res.status(500).json({ status: 'ERROR', mensaje: msg });
   } finally {
