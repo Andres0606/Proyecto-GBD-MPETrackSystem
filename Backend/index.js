@@ -16,6 +16,7 @@ const consultasRoutes = require('./routes/consultasRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const biometricRoutes = require('./routes/biometricRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const NotificationService = require('./service/notificationService');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -57,6 +58,33 @@ async function startServer() {
   try {
     await db.initialize();
     console.log('✅ Conexión a Oracle Cloud establecida.');
+    
+    // ── Verificar y crear columna de notificaciones si no existe ──
+    let conn;
+    try {
+      conn = await db.oracledb.getConnection();
+      // Verificar si la columna existe
+      const checkCol = await conn.execute(
+        "SELECT COUNT(*) as COUNT FROM user_tab_columns WHERE table_name = 'CITA' AND column_name = 'NOTIFICADO_RECORDATORIO'",
+        [], { outFormat: db.oracledb.OUT_FORMAT_OBJECT }
+      );
+      
+      if (checkCol.rows[0].COUNT === 0) {
+        console.log('➕ Agregando columna NOTIFICADO_RECORDATORIO a la tabla CITA...');
+        await conn.execute("ALTER TABLE CITA ADD NOTIFICADO_RECORDATORIO CHAR(1) DEFAULT 'N'");
+        await conn.execute("UPDATE CITA SET NOTIFICADO_RECORDATORIO = 'N' WHERE NOTIFICADO_RECORDATORIO IS NULL");
+        await conn.commit();
+        console.log('✅ Columna agregada correctamente.');
+      }
+    } catch (dbErr) {
+      console.error('⚠️ Advertencia al verificar esquema:', dbErr.message);
+    } finally {
+      if (conn) await conn.close();
+    }
+
+    // Inicializar servicio de recordatorios
+    NotificationService.init();
+
   } catch (err) {
     console.error('❌ Error en DB:', err.message);
   }
