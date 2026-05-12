@@ -40,7 +40,7 @@ class AuthService {
           :correo, :contrasena, TO_DATE(:fechaNacimiento, 'DD/MM/YYYY'), :telefono
         )
       `;
-      
+
       await connection.execute(personaSql, {
         nDocumento: data.numeroDocumento,
         tipoDocumento: data.tipoDocumento,
@@ -56,7 +56,7 @@ class AuthService {
         INSERT INTO CLIENTE (idCliente, nDocumento, LicenciaConduccion)
         VALUES (seq_cliente.NEXTVAL, :nDocumento, :licenciaConduccion)
       `;
-      
+
       await connection.execute(clienteSql, {
         nDocumento: data.numeroDocumento,
         licenciaConduccion: data.licenciaConduccion || 'N'
@@ -92,7 +92,7 @@ class AuthService {
     try {
       // Generar código aleatorio de 6 dígitos
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-      
+
       // Guardar en el almacén con expiración de 15 minutos
       OTP_STORE[correo] = {
         code: code,
@@ -262,6 +262,34 @@ class AuthService {
       `;
       await connection.execute(asesorSql, { nDocumento: data.cedula, especialidad: data.especialidadTramite, sueldo: data.sueldo });
       await connection.commit();
+
+      // --- Enviar correo al asesor ---
+      try {
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: data.correo,
+          subject: 'Bienvenido al equipo - MPE Track System',
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 25px; border: 1px solid #e2e8f0; border-radius: 15px; max-width: 600px; margin: auto;">
+              <h2 style="color: #1565C0; text-align: center;">¡Bienvenido, ${data.nombres}!</h2>
+              <p>Has sido registrado como <strong>Asesor</strong> en MPE Track System.</p>
+              <div style="background: #f8fafc; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <p style="margin: 5px 0;"><strong>Tus credenciales de acceso:</strong></p>
+                <p style="margin: 5px 0;"> Correo: ${data.correo}</p>
+                <p style="margin: 5px 0;"> Contraseña temporal: <span style="background: #fff; padding: 2px 5px; border: 1px solid #cbd5e1; border-radius: 4px;">${data.contrasena}</span></p>
+              </div>
+              <p style="color: #ef4444; font-weight: bold; text-align: center;"> RECOMENDACIÓN DE SEGURIDAD:</p>
+              <p style="text-align: center;">Por favor, ingresa al sistema y cambia tu contraseña lo antes posible desde la sección de Perfil.</p>
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+              <p style="font-size: 12px; color: #64748b; text-align: center;">Este es un correo automático de MPE Track System, por favor no respondas.</p>
+            </div>
+          `
+        };
+        await transporter.sendMail(mailOptions);
+      } catch (emailErr) {
+        console.error('Error enviando correo a asesor:', emailErr);
+      }
+
       return { status: 'OK', mensaje: 'Asesor registrado correctamente' };
     } catch (err) {
       if (connection) await connection.rollback();
@@ -336,7 +364,7 @@ class AuthService {
 
     // Generar código aleatorio de 6 dígitos
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Guardar en el almacén de RESET con expiración de 10 minutos
     RESET_OTP_STORE[correo] = {
       code: code,
@@ -363,7 +391,7 @@ class AuthService {
 
     await transporter.sendMail(mailOptions);
     console.log(`Reset OTP enviado a ${correo}: ${code}`);
-    
+
     return { status: 'OK', mensaje: 'Código de recuperación enviado' };
   }
 
@@ -386,16 +414,16 @@ class AuthService {
     let connection;
     try {
       connection = await oracledb.getConnection();
-      
+
       const sql = 'UPDATE PERSONA SET contrasena = :nuevaContrasena WHERE correo = :correo';
       const result = await connection.execute(sql, { nuevaContrasena, correo });
-      
+
       if (result.rowsAffected === 0) {
         throw new Error('No se pudo actualizar la contraseña. Usuario no encontrado.');
       }
 
       await connection.commit();
-      
+
       // Limpiar el código usado
       delete RESET_OTP_STORE[correo];
 

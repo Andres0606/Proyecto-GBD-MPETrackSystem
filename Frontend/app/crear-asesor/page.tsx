@@ -106,7 +106,7 @@ export default function CrearAsesorPage() {
     }
 
     // Validaciones
-    if (!formData.cedula || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.correo || !formData.contrasena || !formData.especialidadTramite || !formData.sueldo) {
+    if (!formData.cedula || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.correo || !formData.contrasena || !formData.especialidadTramite || !formData.sueldo || !formData.telefono) {
       setError('Todos los campos marcados con * son obligatorios');
       return;
     }
@@ -148,7 +148,7 @@ export default function CrearAsesorPage() {
 
       <div className={styles.card}>
         <Link href="/dashboard-admin" className={styles.backHome}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           <span>Volver al Dashboard</span>
@@ -178,6 +178,7 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="Número de identificación"
                 className={styles.input}
+                required
               />
             </div>
 
@@ -190,6 +191,7 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="Nombres"
                 className={styles.input}
+                required
               />
             </div>
 
@@ -202,6 +204,7 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="Apellidos"
                 className={styles.input}
+                required
               />
             </div>
 
@@ -213,11 +216,12 @@ export default function CrearAsesorPage() {
                 value={formData.fechaNacimiento}
                 onChange={handleChange}
                 className={styles.input}
+                required
               />
             </div>
 
             <div className={styles.field}>
-              <label>Teléfono</label>
+              <label>Teléfono *</label>
               <input
                 type="tel"
                 name="telefono"
@@ -225,6 +229,7 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="Número móvil"
                 className={styles.input}
+                required
               />
             </div>
 
@@ -237,6 +242,7 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="correo@ejemplo.com"
                 className={styles.input}
+                required
               />
             </div>
 
@@ -249,7 +255,9 @@ export default function CrearAsesorPage() {
                 onChange={handleChange}
                 placeholder="Mínimo 6 caracteres"
                 className={styles.input}
+                required
               />
+              <p className={styles.inputNote}>💡 El asesor recibirá esta contraseña por correo y el sistema le solicitará cambiarla al ingresar.</p>
             </div>
 
             <div className={styles.field}>
