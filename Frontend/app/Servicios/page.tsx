@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar  from '../inicio/sidebar';
-import Footer from '../inicio/footer';
-import styles from '../css/servicios/servicios.module.css';
+import Sidebar  from '../Inicio/Sidebar';
+import Footer from '../Inicio/Footer';
+import styles from '../CSS/Servicios/Servicios.module.css';
 
 /* ── Icons ── */
 const ArrowIcon = () => (

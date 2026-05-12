@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import styles from '../css/header.module.css';
+import styles from '../CSS/Header.module.css';
 
 /* ── Icons ── */
 const CarIcon = () => (
@@ -30,9 +30,9 @@ const XIcon = () => (
 
 const NAV_LINKS = [
   { label: 'Inicio', href: '/' },
-  { label: 'Servicios', href: '/servicios' },
-  { label: 'Sedes', href: '/sedes' },
-  { label: 'Nosotros', href: '/nosotros' },
+  { label: 'Servicios', href: '/Servicios' },
+  { label: 'Sedes', href: '/Sedes' },
+  { label: 'Nosotros', href: '/Nosotros' },
 ];
 
 interface HeaderProps {

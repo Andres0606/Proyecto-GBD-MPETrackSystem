@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import styles from '../css/sidebar.module.css';
+import styles from '../CSS/Sidebar.module.css';
 
 const CarIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -52,9 +52,9 @@ const UserIcon = () => (
 
 const NAV_LINKS = [
   { label: 'Inicio', href: '/', icon: <HomeIcon /> },
-  { label: 'Servicios', href: '/servicios', icon: <ServicesIcon /> },
-  { label: 'Sedes', href: '/sedes', icon: <SedesIcon /> },
-  { label: 'Nosotros', href: '/nosotros', icon: <NosotrosIcon /> },
+  { label: 'Servicios', href: '/Servicios', icon: <ServicesIcon /> },
+  { label: 'Sedes', href: '/Sedes', icon: <SedesIcon /> },
+  { label: 'Nosotros', href: '/Nosotros', icon: <NosotrosIcon /> },
 ];
 
 export default function Sidebar() {
