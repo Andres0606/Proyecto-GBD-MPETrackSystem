@@ -226,30 +226,35 @@ export default function RegistroPage() {
             </div>
 
             {/* FACE ID OPTION */}
-            <div className={styles.field} style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-              <div style={faceIdContainerStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <input 
-                    type="checkbox" 
-                    id="faceId" 
-                    checked={useFaceId} 
-                    onChange={e => setUseFaceId(e.target.checked)} 
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <label htmlFor="faceId" style={{ fontWeight: '600', cursor: 'pointer' }}>Activar Verificación Facial (Face ID)</label>
-                </div>
-                {useFaceId && (
-                  <div style={{ marginTop: '10px' }}>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowFaceCapture(true)}
-                      style={faceBtnStyle(!!faceData)}
-                    >
-                      {faceData ? '✅ Rostro capturado' : '📸 Capturar mi rostro'}
-                    </button>
-                  </div>
-                )}
-              </div>
+            <div className={styles.faceIdContainer}>
+              <label htmlFor="faceId" className={styles.faceToggle}>
+                <input 
+                  type="checkbox" 
+                  id="faceId" 
+                  checked={useFaceId} 
+                  onChange={e => setUseFaceId(e.target.checked)} 
+                />
+                <span>Activar Verificación Facial (Face ID)</span>
+              </label>
+
+              {useFaceId && (
+                <button 
+                  type="button" 
+                  onClick={() => setShowFaceCapture(true)}
+                  className={`${styles.faceBtn} ${faceData ? styles.faceBtnCaptured : ''}`}
+                >
+                  {faceData ? (
+                    <>✅ Rostro capturado</>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                      </svg>
+                      Capturar mi rostro
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -272,12 +277,3 @@ export default function RegistroPage() {
     </div>
   );
 }
-
-const faceIdContainerStyle: React.CSSProperties = {
-  backgroundColor: '#f0f7ff', padding: '15px', borderRadius: '12px', border: '1px solid #cce3ff'
-};
-
-const faceBtnStyle = (hasData: boolean): React.CSSProperties => ({
-  backgroundColor: hasData ? '#22c55e' : '#0070f3',
-  color: 'white', padding: '10px 15px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500'
-});

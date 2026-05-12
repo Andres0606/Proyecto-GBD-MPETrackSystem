@@ -471,3 +471,75 @@
   .toggleBtns { width: 100%; }
   .toggleBtn { flex: 1; text-align: center; }
 }
+
+/* ── Face ID Pretty Section ── */
+.faceIdContainer {
+  grid-column: span 2;
+  margin-top: 0.5rem;
+  background: rgba(21, 101, 192, 0.04);
+  border: 1.5px dashed rgba(21, 101, 192, 0.2);
+  border-radius: 16px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.faceIdContainer:hover {
+  background: rgba(21, 101, 192, 0.06);
+  border-color: rgba(21, 101, 192, 0.3);
+}
+
+.faceToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+}
+
+.faceToggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: #1565C0;
+  cursor: pointer;
+}
+
+.faceToggle span {
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-weight: 700;
+  color: #1a2b45;
+  font-size: 0.95rem;
+}
+
+.faceBtn {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--ff, 'Sora', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #42A5F5 0%, #1565C0 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.2);
+  transition: all 0.25s ease;
+}
+
+.faceBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(21, 101, 192, 0.35);
+  filter: brightness(1.05);
+}
+
+.faceBtnCaptured {
+  background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+}
+
+.faceBtnCaptured:hover {
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.35);
+}

@@ -31,6 +31,21 @@ class PersonaRepository {
     }
   }
 
+  async findByTelefono(telefono) {
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      const result = await connection.execute(
+        `SELECT * FROM PERSONA WHERE telefono = :1`,
+        [telefono],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      return result.rows[0];
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
   async createPersona(personaData) {
     let connection;
     try {

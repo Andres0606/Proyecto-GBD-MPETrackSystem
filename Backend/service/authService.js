@@ -25,6 +25,9 @@ class AuthService {
     const existingEmail = await personaRepository.findByCorreo(data.correo);
     if (existingEmail) throw new Error('El correo ya está registrado');
 
+    const existingTelefono = await personaRepository.findByTelefono(data.telefono);
+    if (existingTelefono) throw new Error('El número de teléfono ya está registrado');
+
     let connection;
     try {
       connection = await oracledb.getConnection();
