@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import styles from '../CSS/Footer.module.css';
+import styles from '../css/footer.module.css';
 
 /* ── Icons ── */
 const CarIcon = () => (
@@ -84,10 +84,10 @@ const NAV_COLS = [
   {
     title: 'Empresa',
     links: [
-      { label: 'Servicios', href: '/Servicios' },
-      { label: 'Sedes', href: '/Sedes' },
-      { label: 'Nosotros', href: '/Nosotros' },
-      { label: 'Preguntas Frecuentes', href: '/Nosotros#faq' },
+      { label: 'Servicios', href: '/servicios' },
+      { label: 'Sedes', href: '/sedes' },
+      { label: 'Nosotros', href: '/nosotros' },
+      { label: 'Preguntas Frecuentes', href: '/nosotros#faq' },
     ],
   },
 ];

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar  from '../Inicio/Sidebar';
-import Header from '../Inicio/Header';
-import Footer from '../Inicio/Footer';
-import styles from '../CSS/Servicios/Servicios.module.css';
+import Sidebar  from '../inicio/sidebar';
+import Footer from '../inicio/footer';
+import styles from '../css/servicios/servicios.module.css';
 
 /* ── Icons ── */
 const ArrowIcon = () => (
@@ -333,51 +332,20 @@ const SERVICES = [
   },
 ] as const;
 
-const CATEGORIES = ['Todos', 'Registro', 'Transferencia', 'Documentos', 'Modificaciones'];
-
 export default function ServiciosPage() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState('Todos');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
-
-  const [estaLogueado, setEstaLogueado] = useState(false);
-
-  useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    setEstaLogueado(!!isLoggedIn && !!cedula);
-  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
-  const irAlPanel = () => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    const rol = sessionStorage.getItem('userRol');
-
-    if (!isLoggedIn || !cedula) {
-      router.push('/login');
-      return;
-    }
-
-    if (rol === '1') router.push('/dashboard');
-    else if (rol === '2') router.push('/dashboard-asesor');
-    else if (rol === '3') router.push('/dashboard-admin');
-    else router.push('/login');
-  };
-
   const toggle = (id: string) => setExpandedId(prev => prev === id ? null : id);
 
   return (
     <div className={styles.pg}>
-      <Header
-        onLoginClick={irAlPanel}
-        textoBoton={estaLogueado ? 'Mi perfil' : 'Ingresar'}
-      />
       <Sidebar />
 
       {/* ── HERO ── */}

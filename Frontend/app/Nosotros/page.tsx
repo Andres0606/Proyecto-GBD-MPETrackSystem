@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '../Inicio/Sidebar';
-import Header from '../Inicio/Header';
-import Footer from '../Inicio/Footer';
-import styles from '../CSS/Nosotros/Nosotros.module.css';
+import Sidebar from '../inicio/sidebar';
+import Footer from '../inicio/footer';
+import styles from '../css/nosotros/nosotros.module.css';
 
 /* ── Icons ── */
 const ArrowIcon = () => (
@@ -139,34 +138,10 @@ export default function NosotrosPage() {
   const [openFaq, setOpenFaq]   = useState<number | null>(null);
   const [agentIdx, setAgentIdx] = useState(0);
 
-  const [estaLogueado, setEstaLogueado] = useState(false);
-
-  useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    setEstaLogueado(!!isLoggedIn && !!cedula);
-  }, []);
-
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
-
-  const irAlPanel = () => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    const rol = sessionStorage.getItem('userRol');
-
-    if (!isLoggedIn || !cedula) {
-      router.push('/login');
-      return;
-    }
-
-    if (rol === '1') router.push('/dashboard');
-    else if (rol === '2') router.push('/dashboard-asesor');
-    else if (rol === '3') router.push('/dashboard-admin');
-    else router.push('/login');
-  };
 
   const prevAgent = () => setAgentIdx(i => Math.max(0, i - 1));
   const nextAgent = () => setAgentIdx(i => Math.min(AGENTES.length - VISIBLE_CARDS, i + 1));
@@ -175,10 +150,6 @@ export default function NosotrosPage() {
 
   return (
     <div className={styles.pg}>
-      <Header
-        onLoginClick={irAlPanel}
-        textoBoton={estaLogueado ? 'Mi perfil' : 'Ingresar'}
-      />
       <Sidebar />
 
       {/* ── HERO ── */}

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Sidebar from '../Inicio/Sidebar';
-import Header from '../Inicio/Header';
-import Footer from '../Inicio/Footer';
-import styles from '../CSS/Sedes/Sedes.module.css';
+import Sidebar from '../inicio/sidebar';
+import Footer from '../inicio/footer';
+import styles from '../css/sedes/sedes.module.css';
 
 /* ── Icons ── */
 const ArrowIcon = () => (
@@ -178,34 +177,10 @@ export default function SedesPage() {
   const [visible, setVisible] = useState(false);
   const [activeSede, setActiveSede] = useState(SEDES[0].id);
 
-  const [estaLogueado, setEstaLogueado] = useState(false);
-
-  useEffect(() => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    setEstaLogueado(!!isLoggedIn && !!cedula);
-  }, []);
-
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
-
-  const irAlPanel = () => {
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const cedula = sessionStorage.getItem('userCedula');
-    const rol = sessionStorage.getItem('userRol');
-
-    if (!isLoggedIn || !cedula) {
-      router.push('/login');
-      return;
-    }
-
-    if (rol === '1') router.push('/dashboard');
-    else if (rol === '2') router.push('/dashboard-asesor');
-    else if (rol === '3') router.push('/dashboard-admin');
-    else router.push('/login');
-  };
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
@@ -221,10 +196,6 @@ export default function SedesPage() {
 
   return (
     <div className={styles.pg}>
-      <Header
-        onLoginClick={irAlPanel}
-        textoBoton={estaLogueado ? 'Mi perfil' : 'Ingresar'}
-      />
       <Sidebar />
 
       {/* ── HERO ── */}

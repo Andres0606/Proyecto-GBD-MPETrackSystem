@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from './Header';
-import Footer from './Footer';
-import styles from '../CSS/Inicio/Inicio.module.css';
+import Header from './header';
+import Footer from './footer';
+import styles from '../css/inicio/inicio.module.css';
 
 /* ── Icons ── */
 const ArrowIcon = () => (
@@ -296,7 +296,7 @@ export default function HomePage() {
                     <p className={styles.heroP}>{current.desc}</p>
 
                     <div className={styles.heroCtas}>
-                        <button className={styles.ctaMain} onClick={() => router.push('/Servicios')}>
+                        <button className={styles.ctaMain} onClick={() => router.push('/servicios')}>
                             Ver servicios <ArrowIcon />
                         </button>
                         <button className={styles.ctaSec} onClick={() => router.push('/registro')}>

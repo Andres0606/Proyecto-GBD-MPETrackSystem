@@ -28,7 +28,7 @@
   min-height: 100vh;
   background: var(--bg);
   overflow-x: hidden;
-  padding-top: 68px;
+  padding-top: 0;
   padding-left: 65px;
 }
 
