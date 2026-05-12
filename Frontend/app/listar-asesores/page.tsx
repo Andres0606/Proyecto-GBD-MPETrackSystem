@@ -3,174 +3,30 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import styles from '../CSS/Admin/ListarAsesores.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: '2rem',
-  },
-  card: {
-    background: 'white',
-    borderRadius: '1rem',
-    padding: '2rem',
-    maxWidth: '1200px',
-    margin: '0 auto',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2rem',
-    flexWrap: 'wrap' as const,
-    gap: '1rem',
-  },
-  title: {
-    color: '#333',
-    margin: 0,
-  },
-  backBtn: {
-    padding: '0.5rem 1rem',
-    background: '#667eea',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.5rem',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    display: 'inline-block',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse' as const,
-    overflowX: 'auto' as const,
-    display: 'block' as const,
-  },
-  th: {
-    padding: '0.75rem',
-    textAlign: 'left' as const,
-    borderBottom: '2px solid #ddd',
-    backgroundColor: '#f3f4f6',
-    fontWeight: 600,
-  },
-  td: {
-    padding: '0.75rem',
-    borderBottom: '1px solid #ddd',
-    verticalAlign: 'middle' as const,
-  },
-  loading: {
-    textAlign: 'center' as const,
-    padding: '2rem',
-  },
-  errorAlert: {
-    backgroundColor: '#fee2e2',
-    color: '#dc2626',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    marginBottom: '1rem',
-    borderLeft: '4px solid #dc2626',
-  },
-  successAlert: {
-    backgroundColor: '#d1fae5',
-    color: '#065f46',
-    padding: '0.75rem',
-    borderRadius: '0.5rem',
-    marginBottom: '1rem',
-    borderLeft: '4px solid #10b981',
-  },
-  emptyMessage: {
-    textAlign: 'center' as const,
-    padding: '2rem',
-    color: '#666',
-  },
-  especialidadBadge: {
-    backgroundColor: '#e0e7ff',
-    color: '#4338ca',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '0.25rem',
-    fontSize: '0.875rem',
-    display: 'inline-block',
-  },
-  rolBadge: {
-    backgroundColor: '#d1fae5',
-    color: '#065f46',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '0.25rem',
-    fontSize: '0.875rem',
-    display: 'inline-block',
-  },
-  actionsContainer: {
-    display: 'flex',
-    gap: '0.5rem',
-  },
-  editBtn: {
-    padding: '0.4rem 0.8rem',
-    background: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    textDecoration: 'none',
-    display: 'inline-block',
-  },
-  deleteBtn: {
-    padding: '0.4rem 0.8rem',
-    background: '#ef4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-  },
-  modalOverlay: {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modal: {
-    background: 'white',
-    borderRadius: '0.75rem',
-    padding: '1.5rem',
-    maxWidth: '400px',
-    width: '90%',
-  },
-  modalTitle: {
-    fontSize: '1.25rem',
-    fontWeight: 'bold',
-    marginBottom: '1rem',
-  },
-  modalButtons: {
-    display: 'flex',
-    gap: '0.75rem',
-    justifyContent: 'flex-end',
-    marginTop: '1.5rem',
-  },
-  confirmBtn: {
-    padding: '0.5rem 1rem',
-    background: '#ef4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
-  },
-  cancelBtn: {
-    padding: '0.5rem 1rem',
-    background: '#9ca3af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
-  },
-};
+/* ── Icons ── */
+const CarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
+    <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="17.5" r="2.5" />
+  </svg>
+);
+
+const EditIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
 
 interface Asesor {
   cedula: number;
@@ -221,9 +77,7 @@ export default function ListarAsesoresPage() {
         throw new Error(data.mensaje || 'Error al cargar asesores');
       }
     } catch (err: any) {
-      console.error('Error:', err);
-      setError(err.message || 'Error de conexión con el servidor');
-      setAsesores([]);
+      setError(err.message || 'Error de conexión');
     } finally {
       setLoading(false);
     }
@@ -238,14 +92,14 @@ export default function ListarAsesoresPage() {
       const data = await response.json();
       
       if (response.ok && data.status === 'OK') {
-        setSuccess(`Asesor ${asesor.nombres} ${asesor.apellido} eliminado exitosamente`);
-        cargarAsesores(); // Recargar la lista
+        setSuccess(`Asesor eliminado correctamente`);
+        cargarAsesores();
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.mensaje || 'Error al eliminar asesor');
+        setError(data.mensaje || 'Error al eliminar');
       }
     } catch (err) {
-      setError('Error al conectar con el servidor');
+      setError('Error de conexión');
     } finally {
       setAsesorAEliminar(null);
     }
@@ -253,147 +107,99 @@ export default function ListarAsesoresPage() {
 
   const formatearSueldo = (sueldo: number) => {
     return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      style: 'currency', currency: 'COP', minimumFractionDigits: 0
     }).format(sueldo);
-  };
-
-  const getRolTexto = (tipoUsuario: number) => {
-    return tipoUsuario === 2 ? 'Asesor' : 'Otro';
   };
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <div style={styles.loading}>
-            <div>Cargando lista de asesores...</div>
-          </div>
+      <div className={styles.container}>
+        <div className={styles.loadingWrapper}>
+          <div className={styles.spinner} />
+          <p>Cargando panel de asesores...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Lista de Asesores</h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <Link href="/dashboard-admin" style={styles.backBtn}>
-              ← Volver al Dashboard
+    <div className={styles.container}>
+      <div className={styles.grid} aria-hidden />
+
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <div className={styles.titleSection}>
+            <div className={styles.logoMark}><CarIcon /></div>
+            <h1 className={styles.title}>Lista de Asesores</h1>
+          </div>
+          <div className={styles.buttonGroup}>
+            <Link href="/dashboard-admin" className={`${styles.actionBtn} ${styles.secondaryBtn}`}>
+              ← Volver
             </Link>
-            <Link href="/registrar-asesor" style={styles.editBtn}>
+            <Link href="/crear-asesor" className={`${styles.actionBtn} ${styles.primaryBtn}`}>
               + Nuevo Asesor
             </Link>
           </div>
         </div>
 
-        {error && (
-          <div style={styles.errorAlert} role="alert">
-            {error}
-          </div>
-        )}
+        {error && <div className={`${styles.alert} ${styles.errorAlert}`}>{error}</div>}
+        {success && <div className={`${styles.alert} ${styles.successAlert}`}>{success}</div>}
 
-        {success && (
-          <div style={styles.successAlert} role="alert">
-            {success}
-          </div>
-        )}
-
-        {asesores.length === 0 && !error ? (
-          <div style={styles.emptyMessage}>
-            <p>No hay asesores registrados en el sistema.</p>
-            <p>
-              <Link href="/registrar-asesor" style={{ color: '#667eea' }}>
-                Haz clic aquí para registrar un asesor
-              </Link>
-            </p>
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Cédula</th>
-                  <th style={styles.th}>Nombre Completo</th>
-                  <th style={styles.th}>Correo</th>
-                  <th style={styles.th}>Especialidad</th>
-                  <th style={styles.th}>Sueldo</th>
-                  <th style={styles.th}>Rol</th>
-                  <th style={styles.th}>Acciones</th>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.th}>ID / Cédula</th>
+                <th className={styles.th}>Nombre</th>
+                <th className={styles.th}>Correo</th>
+                <th className={styles.th}>Especialidad</th>
+                <th className={styles.th}>Sueldo</th>
+                <th className={styles.th}>Rol</th>
+                <th className={styles.th}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {asesores.map((asesor, index) => (
+                <tr key={index} className={styles.tr}>
+                  <td className={styles.td}><strong>{asesor.cedula}</strong></td>
+                  <td className={styles.td}>{asesor.nombres} {asesor.apellido}</td>
+                  <td className={styles.td}>{asesor.correo}</td>
+                  <td className={styles.td}><span className={styles.especialidadBadge}>{asesor.especialidad}</span></td>
+                  <td className={styles.td}><strong>{formatearSueldo(asesor.sueldo)}</strong></td>
+                  <td className={styles.td}><span className={styles.rolBadge}>Asesor</span></td>
+                  <td className={styles.td}>
+                    <div className={styles.rowActions}>
+                      <Link href={`/editar-asesor/${asesor.cedula}`} className={styles.editIconBtn} title="Editar">
+                        <EditIcon />
+                      </Link>
+                      <button className={styles.deleteIconBtn} onClick={() => setAsesorAEliminar(asesor)} title="Eliminar">
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {asesores.map((asesor, index) => (
-                  <tr key={index}>
-                    <td style={styles.td}>{asesor.cedula}</td>
-                    <td style={styles.td}>
-                      {asesor.nombres} {asesor.apellido}
-                    </td>
-                    <td style={styles.td}>{asesor.correo}</td>
-                    <td style={styles.td}>
-                      <span style={styles.especialidadBadge}>
-                        {asesor.especialidad}
-                      </span>
-                    </td>
-                    <td style={styles.td}>{formatearSueldo(asesor.sueldo)}</td>
-                    <td style={styles.td}>
-                      <span style={styles.rolBadge}>
-                        {getRolTexto(asesor.tipoUsuario)}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <div style={styles.actionsContainer}>
-                        <Link
-                          href={`/editar-asesor/${asesor.cedula}`}
-                          style={styles.editBtn}
-                        >
-                          Editar
-                        </Link>
-                        <button
-                          style={styles.deleteBtn}
-                          onClick={() => setAsesorAEliminar(asesor)}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              ))}
+            </tbody>
+          </table>
+          {asesores.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+              No se han encontrado asesores registrados.
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Modal de confirmación para eliminar */}
       {asesorAEliminar && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>Confirmar eliminación</h3>
-            <p>
-              ¿Estás seguro de que deseas eliminar al asesor{' '}
-              <strong>{asesorAEliminar.nombres} {asesorAEliminar.apellido}</strong>?
-            </p>
-            <p style={{ fontSize: '0.875rem', color: '#666' }}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>Confirmar eliminación</h3>
+            <p className={styles.modalText}>
+              ¿Estás seguro de que deseas eliminar a <strong>{asesorAEliminar.nombres} {asesorAEliminar.apellido}</strong>?<br/>
               Esta acción no se puede deshacer.
             </p>
-            <div style={styles.modalButtons}>
-              <button
-                style={styles.cancelBtn}
-                onClick={() => setAsesorAEliminar(null)}
-              >
-                Cancelar
-              </button>
-              <button
-                style={styles.confirmBtn}
-                onClick={() => handleEliminar(asesorAEliminar)}
-              >
-                Eliminar
-              </button>
+            <div className={styles.modalButtons}>
+              <button className={styles.cancelModalBtn} onClick={() => setAsesorAEliminar(null)}>Cancelar</button>
+              <button className={styles.confirmDeleteBtn} onClick={() => handleEliminar(asesorAEliminar)}>Eliminar</button>
             </div>
           </div>
         </div>

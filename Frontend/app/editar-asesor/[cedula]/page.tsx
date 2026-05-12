@@ -174,6 +174,7 @@ export default function EditarAsesorPage() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.grid} aria-hidden />
       <div className={styles.card}>
         <Link href="/listar-asesores" className={styles.backButton}>
           <ArrowLeftIcon /> Volver a la lista
