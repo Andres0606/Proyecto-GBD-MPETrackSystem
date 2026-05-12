@@ -46,7 +46,22 @@ export default function RegistroPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'numeroDocumento') {
+      // Solo números, sin letras
+      const cleanValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else if (name === 'nombres' || name === 'apellido') {
+      // Solo letras, máximo 25 caracteres
+      const cleanValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 25);
+      setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else if (name === 'telefono') {
+      // Solo números, máximo 10 caracteres
+      const cleanValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     setError('');
   };
 
@@ -64,6 +79,33 @@ export default function RegistroPage() {
       setError('Por favor completa todos los campos obligatorios (*)');
       return;
     }
+
+    if (formData.telefono && formData.telefono.length !== 10) {
+      setError('El teléfono debe tener exactamente 10 dígitos');
+      return;
+    }
+
+    const emailValidDomains = ['@gmail.com', '@hotmail.com', '@outlok.com', '@outlook.com'];
+    const lastAtIdx = formData.correo.lastIndexOf('@');
+    const emailDomain = lastAtIdx !== -1 ? formData.correo.substring(lastAtIdx).toLowerCase() : '';
+    
+    if (!emailValidDomains.includes(emailDomain)) {
+      setError('Se requiere una cuenta @gmail.com, @hotmail.com o @outlook.com ya que es de un uso privado y personal');
+      return;
+    }
+
+    // Mínimo 8 caracteres, una minúscula, una mayúscula, un número y un carácter especial
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(formData.contrasena)) {
+      setError('La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial');
+      return;
+    }
+
+    if (formData.contrasena !== formData.confirmarContrasena) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
     if (useFaceId && !faceData) {
       setError('Debes capturar tu rostro si activaste Face ID');
       return;

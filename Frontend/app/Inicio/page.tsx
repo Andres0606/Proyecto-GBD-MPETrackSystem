@@ -432,36 +432,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* ═══════════════════════════════════
-          TESTIMONIOS
-      ═══════════════════════════════════ */}
-            <section className={styles.testiSection}>
-                <div className={styles.inner}>
-                    <div className={styles.secHead}>
-                        <span className={styles.eyebrow}>Testimonios</span>
-                        <h2 className={styles.secH2}>Lo que dicen <span className={styles.accent}>nuestros clientes</span></h2>
-                    </div>
-                    <div className={styles.testiGrid}>
-                        {TESTIMONIALS.map(t => (
-                            <div key={t.name} className={styles.testiCard}>
-                                <div className={styles.stars}>
-                                    {Array.from({ length: t.stars }).map((_, i) => <StarIcon key={i} />)}
-                                </div>
-                                <p className={styles.testiText}>"{t.text}"</p>
-                                <div className={styles.testiFoot}>
-                                    <div className={styles.testiAvatar}>{t.initials}</div>
-                                    <div>
-                                        <div className={styles.testiName}>{t.name}</div>
-                                        <div className={styles.testiMeta}>{t.city} · {t.tramite}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             {/* ═══════════════════════════════════
           CTA FINAL
       ═══════════════════════════════════ */}
