@@ -79,6 +79,23 @@ export default function LoginPage() {
     }
     setLoading(true);
     setError('');
+
+    // --- Protección Anti-Inyección SQL ---
+    const suspiciousPatterns = [
+      /'/g, /"/g, /;/g, /--/g, /\/\*/g, /\*\//g, /xp_/gi,
+      /\b(SELECT|INSERT|DELETE|UPDATE|DROP|UNION|ALTER|TRUNCATE|EXEC)\b/gi,
+      /OR\s+1\s*=\s*1/gi,
+      /'\s+OR\s+'/gi
+    ];
+
+    const isSuspicious = (text: string) => suspiciousPatterns.some(pattern => pattern.test(text));
+
+    if (isSuspicious(correo) || isSuspicious(password)) {
+      setError('Acción bloqueada: Se detectaron caracteres o palabras no permitidas por seguridad.');
+      setLoading(false);
+      return;
+    }
+    // --------------------------------------
     
     try {
         const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
