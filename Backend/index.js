@@ -1,7 +1,11 @@
+const ws = require('ws');
+global.WebSocket = ws;
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+dotenv.config();
+
 const db = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
@@ -13,30 +17,23 @@ const clientRoutes = require('./routes/clientRoutes');
 const biometricRoutes = require('./routes/biometricRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
-// Oracle Client Initialization (Thin mode with Wallet)
 const oracledb = require('oracledb');
 try {
-  // Establecemos TNS_ADMIN para que Oracle encuentre los archivos de configuración
+  // En Linux, configDir debe ser la ruta a la Wallet
   process.env.TNS_ADMIN = process.env.WALLET_PATH;
-  
-  // Use Thin mode (default in v6) and specify where tnsnames.ora is
   oracledb.initOracleClient({ configDir: process.env.WALLET_PATH });
-  console.log('Oracle Client initialized with configDir:', process.env.WALLET_PATH);
+  console.log('✅ Oracle Client inicializado en:', process.env.WALLET_PATH);
 } catch (err) {
-  console.error('Error initializing Oracle Client:', err);
+  console.error('❌ Error initializing Oracle Client:', err.message);
 }
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vehiculos', vehicleRoutes);
@@ -48,31 +45,25 @@ app.use('/api/clientes', clientRoutes);
 app.use('/api/biometric', biometricRoutes);
 app.use('/api/reportes', reportRoutes);
 
-// Root path
 app.get('/', (req, res) => {
   res.json({ message: 'TransMeta Backend API is running' });
 });
 
-// Start Server
 async function startServer() {
-  // Iniciamos el servidor Express primero para evitar ERR_CONNECTION_REFUSED
   app.listen(PORT, () => {
-    console.log(`🚀 Servidor Express escuchando en http://localhost:${PORT}`);
-    console.log('⏳ Conectando a Oracle Cloud (esto puede tardar unos segundos)...');
+    console.log(`🚀 Servidor Express escuchando en el puerto ${PORT}`);
   });
 
   try {
     await db.initialize();
-    console.log('✅ Conexión a Oracle Cloud establecida correctamente.');
+    console.log('✅ Conexión a Oracle Cloud establecida.');
   } catch (err) {
-    console.error('❌ Error crítico al conectar a Oracle:', err.message);
-    console.log('⚠️ El servidor está corriendo pero las consultas a la BD fallarán.');
+    console.error('❌ Error en DB:', err.message);
   }
 }
 
 startServer();
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   await db.close();
   process.exit(0);

@@ -1,20 +1,25 @@
 const { createClient } = require('@supabase/supabase-js');
+const ws = require('ws');
 const { oracledb } = require('../config/db');
 const personaRepository = require('../repository/personaRepository');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  process.env.SUPABASE_KEY,
+  {
+    realtime: {
+      websocket: ws
+    }
+  }
 );
 
 class BiometricService {
   async registerFace(correo, descriptor, imageBase64) {
     let connection;
     try {
-      // 1. Subir imagen a Supabase Storage
       const fileName = `public/${correo}_${Date.now()}.jpg`;
       const buffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
-      
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('FACE_ID')
         .upload(fileName, buffer, { contentType: 'image/jpeg', upsert: true });
@@ -27,10 +32,9 @@ class BiometricService {
 
       const imageUrl = urlData.publicUrl;
 
-      // 2. Guardar en Oracle
       connection = await oracledb.getConnection();
       const sql = `
-        UPDATE PERSONA SET 
+        UPDATE PERSONA SET
           FACE_ID_ENABLED = 'Y',
           FACE_DESCRIPTOR = :descriptor,
           FACE_IMAGE_URL = :imageUrl
@@ -57,18 +61,17 @@ class BiometricService {
     let connection;
     try {
       connection = await oracledb.getConnection();
-      // Buscamos todos los usuarios que tengan Face ID activado
-      const sql = `SELECT nDocumento, correo, nombres, apellidos, FACE_DESCRIPTOR 
+      const sql = `SELECT nDocumento, correo, nombres, apellidos, FACE_DESCRIPTOR
                    FROM PERSONA WHERE FACE_ID_ENABLED = 'Y'`;
       const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
       const users = result.rows;
       let bestMatch = null;
-      let minDistance = 0.7; // Umbral de confianza ajustado (más flexible)
+      let minDistance = 0.7;
 
       for (const user of users) {
         if (!user.FACE_DESCRIPTOR) continue;
-        
+
         const storedDescriptor = JSON.parse(user.FACE_DESCRIPTOR);
         const distance = this.euclideanDistance(descriptor, storedDescriptor);
 
@@ -82,7 +85,6 @@ class BiometricService {
         throw new Error('Rostro no reconocido. Por favor usa correo y contraseña.');
       }
 
-      // Obtener el rol (mismo proceso que el login normal)
       const nDocumento = bestMatch.NDOCUMENTO;
       let rol = '1';
       const adminRes = await connection.execute('SELECT nDocumento FROM ADMIN WHERE nDocumento = :1', [nDocumento]);
