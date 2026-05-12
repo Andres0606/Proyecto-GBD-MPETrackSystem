@@ -13,6 +13,20 @@ interface TipoTramite {
   valorBase: number;
 }
 
+/* ── Icons ── */
+const CarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
+    <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="17.5" r="2.5" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
 export default function CrearAsesorPage() {
   const router = useRouter();
   const [tiposTramite, setTiposTramite] = useState<TipoTramite[]>([]);
@@ -65,7 +79,16 @@ export default function CrearAsesorPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'cedula' || name === 'telefono') {
+        const cleanValue = value.replace(/\D/g, '');
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else if (name === 'nombres' || name === 'apellido') {
+        const cleanValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 25);
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
     setError('');
   };
 
@@ -74,97 +97,46 @@ export default function CrearAsesorPage() {
     setError('');
     setSuccess('');
 
+    // --- Protección Anti-Inyección SQL ---
+    const suspiciousPatterns = [/'/g, /"/g, /;/g, /--/g, /\/\*/g, /\*\//g, /\b(SELECT|INSERT|DELETE|UPDATE|DROP|UNION|ALTER|TRUNCATE|EXEC)\b/gi];
+    const hasInjection = Object.values(formData).some(val => typeof val === 'string' && suspiciousPatterns.some(p => p.test(val)));
+    if (hasInjection) {
+      setError('Acción bloqueada por seguridad.');
+      return;
+    }
+
     // Validaciones
-    if (!formData.cedula.trim()) {
-      setError('La cédula es requerida');
-      return;
-    }
-    if (!formData.nombres.trim()) {
-      setError('Los nombres son requeridos');
-      return;
-    }
-    if (!formData.apellido.trim()) {
-      setError('Los apellidos son requeridos');
-      return;
-    }
-    if (!formData.fechaNacimiento) {
-      setError('La fecha de nacimiento es requerida');
-      return;
-    }
-    if (!formData.correo.trim()) {
-      setError('El correo es requerido');
-      return;
-    }
-    if (!formData.contrasena.trim()) {
-      setError('La contraseña es requerida');
-      return;
-    }
-    if (formData.contrasena.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    if (!formData.especialidadTramite) {
-      setError('La especialidad es requerida');
-      return;
-    }
-    if (!formData.sueldo.trim()) {
-      setError('El sueldo es requerido');
+    if (!formData.cedula || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.correo || !formData.contrasena || !formData.especialidadTramite || !formData.sueldo) {
+      setError('Todos los campos marcados con * son obligatorios');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Formatear fecha a DD/MM/YYYY
       const fecha = new Date(formData.fechaNacimiento);
-      const dia = fecha.getDate().toString().padStart(2, '0');
-      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-      const anio = fecha.getFullYear();
-      const fechaFormateada = `${dia}/${mes}/${anio}`;
+      const fechaFormateada = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
 
       const response = await fetch(`${BACKEND_URL}/api/auth/asesor`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...formData,
           cedula: parseInt(formData.cedula),
-          nombres: formData.nombres,
-          apellido: formData.apellido,
-          fechaNacimiento: fechaFormateada,
           telefono: formData.telefono ? parseInt(formData.telefono) : null,
-          correo: formData.correo,
-          contrasena: formData.contrasena,
-          especialidadTramite: formData.especialidadTramite,
+          fechaNacimiento: fechaFormateada,
           sueldo: parseFloat(formData.sueldo)
         }),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.mensaje || 'Error al registrar asesor');
 
-      if (data.status === 'OK') {
-        setSuccess('¡Asesor registrado exitosamente!');
-        setFormData({
-          cedula: '',
-          nombres: '',
-          apellido: '',
-          fechaNacimiento: '',
-          telefono: '',
-          correo: '',
-          contrasena: '',
-          especialidadTramite: '',
-          sueldo: ''
-        });
-        setTimeout(() => {
-          router.push('/dashboard-admin');
-        }, 2000);
-      } else {
-        throw new Error(data.mensaje || 'Error al registrar asesor');
-      }
+      setSuccess('¡Asesor registrado exitosamente!');
+      setTimeout(() => router.push('/dashboard-admin'), 2000);
 
     } catch (err: any) {
-      console.error('Error:', err);
-      setError(err.message || 'Error de conexión con el servidor');
+      setError(err.message || 'Error de conexión');
     } finally {
       setLoading(false);
     }
@@ -172,62 +144,69 @@ export default function CrearAsesorPage() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.grid} aria-hidden />
+
       <div className={styles.card}>
-        <h1 className={styles.title}>Registrar Nuevo Asesor</h1>
-        <p className={styles.subtitle}>Complete todos los datos del nuevo asesor</p>
+        <Link href="/dashboard-admin" className={styles.backHome}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          <span>Volver al Dashboard</span>
+        </Link>
 
-        {error && (
-          <div className={styles.errorAlert} role="alert">
-            {error}
-          </div>
-        )}
+        <div className={styles.logoRow}>
+          <span className={styles.logoMark}><CarIcon /></span>
+          <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
+        </div>
 
-        {success && (
-          <div className={styles.successAlert} role="alert">
-            {success}
-          </div>
-        )}
+        <div className={styles.head}>
+          <h1>Registrar Nuevo Asesor</h1>
+          <p className={styles.subtitle}>Complete los datos para dar de alta a un nuevo asesor en el sistema</p>
+        </div>
+
+        {error && <div className={styles.errorAlert}>{error}</div>}
+        {success && <div className={styles.successAlert}>{success}</div>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
             <div className={styles.field}>
-              <label className={styles.label}>Cédula *</label>
+              <label>Cédula *</label>
               <input
                 type="text"
                 name="cedula"
                 value={formData.cedula}
                 onChange={handleChange}
-                placeholder="Número de cédula"
+                placeholder="Número de identificación"
                 className={styles.input}
               />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Nombres *</label>
+              <label>Nombres *</label>
               <input
                 type="text"
                 name="nombres"
                 value={formData.nombres}
                 onChange={handleChange}
-                placeholder="Nombres completos"
+                placeholder="Nombres"
                 className={styles.input}
               />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Apellidos *</label>
+              <label>Apellidos *</label>
               <input
                 type="text"
                 name="apellido"
                 value={formData.apellido}
                 onChange={handleChange}
-                placeholder="Apellidos completos"
+                placeholder="Apellidos"
                 className={styles.input}
               />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Fecha de Nacimiento *</label>
+              <label>Fecha de Nacimiento *</label>
               <input
                 type="date"
                 name="fechaNacimiento"
@@ -238,19 +217,19 @@ export default function CrearAsesorPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Teléfono</label>
+              <label>Teléfono</label>
               <input
                 type="tel"
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleChange}
-                placeholder="Número de teléfono"
+                placeholder="Número móvil"
                 className={styles.input}
               />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Correo Electrónico *</label>
+              <label>Correo Electrónico *</label>
               <input
                 type="email"
                 name="correo"
@@ -262,7 +241,7 @@ export default function CrearAsesorPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Contraseña *</label>
+              <label>Contraseña *</label>
               <input
                 type="password"
                 name="contrasena"
@@ -274,14 +253,14 @@ export default function CrearAsesorPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Especialidad *</label>
+              <label>Especialidad *</label>
               <select
                 name="especialidadTramite"
                 value={formData.especialidadTramite}
                 onChange={handleChange}
                 className={styles.select}
               >
-                <option value="">Seleccione una especialidad</option>
+                <option value="">Seleccione especialidad</option>
                 {tiposTramite.map((tipo) => (
                   <option key={tipo.id} value={tipo.nombre}>
                     {tipo.nombre}
@@ -291,36 +270,27 @@ export default function CrearAsesorPage() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Sueldo *</label>
+              <label>Sueldo Base *</label>
               <input
                 type="number"
                 name="sueldo"
                 value={formData.sueldo}
                 onChange={handleChange}
-                placeholder="Sueldo mensual"
-                step="0.01"
+                placeholder="Ej: 1500000"
                 className={styles.input}
               />
             </div>
           </div>
 
           <div className={styles.buttonGroup}>
-            <button
-              type="submit"
-              className={styles.submitBtn}
-              disabled={loading}
-            >
-              {loading ? 'Registrando...' : 'Registrar Asesor'}
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Procesando...' : 'Registrar Asesor'}
             </button>
             <Link href="/dashboard-admin" className={styles.cancelBtn}>
               Cancelar
             </Link>
           </div>
         </form>
-
-        <Link href="/dashboard-admin" className={styles.backLink}>
-          ← Volver al Dashboard
-        </Link>
       </div>
     </div>
   );
