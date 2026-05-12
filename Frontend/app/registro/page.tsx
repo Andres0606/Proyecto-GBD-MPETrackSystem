@@ -45,7 +45,7 @@ export default function RegistroPage() {
     const today = new Date();
     const birth = new Date(birthDate);
     if (isNaN(birth.getTime())) return null;
-    
+
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
@@ -247,11 +247,11 @@ export default function RegistroPage() {
             </div>
             <div className={styles.field}>
               <label>Fecha de nacimiento *</label>
-              <input 
-                type="date" 
-                name="fechaNacimiento" 
-                value={formData.fechaNacimiento} 
-                onChange={handleChange} 
+              <input
+                type="date"
+                name="fechaNacimiento"
+                value={formData.fechaNacimiento}
+                onChange={handleChange}
                 className={formData.fechaNacimiento ? (age !== null && age >= 16 ? styles.inputValid : styles.inputInvalid) : ''}
               />
               {formData.fechaNacimiento && age !== null && (
@@ -270,21 +270,21 @@ export default function RegistroPage() {
             </div>
             <div className={styles.field}>
               <label>Contraseña *</label>
-              <input 
-                type="password" 
-                name="contrasena" 
-                value={formData.contrasena} 
-                onChange={handleChange} 
+              <input
+                type="password"
+                name="contrasena"
+                value={formData.contrasena}
+                onChange={handleChange}
                 className={formData.contrasena && formData.confirmarContrasena ? (formData.contrasena === formData.confirmarContrasena ? styles.inputValid : styles.inputInvalid) : ''}
               />
             </div>
             <div className={styles.field}>
               <label>Confirmar contraseña *</label>
-              <input 
-                type="password" 
-                name="confirmarContrasena" 
-                value={formData.confirmarContrasena} 
-                onChange={handleChange} 
+              <input
+                type="password"
+                name="confirmarContrasena"
+                value={formData.confirmarContrasena}
+                onChange={handleChange}
                 className={formData.contrasena && formData.confirmarContrasena ? (formData.contrasena === formData.confirmarContrasena ? styles.inputValid : styles.inputInvalid) : ''}
               />
               {formData.contrasena && formData.confirmarContrasena && (
