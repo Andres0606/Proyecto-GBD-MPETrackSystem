@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   Header.module.css — TransMeta
+   Header.module.css — MPE SYSTEM
    Fondo: azul institucional sólido SIEMPRE visible.
    Al hacer scroll agrega sombra y se compacta.
 ═══════════════════════════════════════════════════ */
@@ -311,4 +311,5 @@
     pointer-events: auto;
   }
 }
+
 

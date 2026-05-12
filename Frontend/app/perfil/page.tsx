@@ -307,7 +307,7 @@ const handleFaceCapture = async (descriptor: number[], imageBase64: string) => {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.logoMark}><CarIcon /></div>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </div>
 
           <span className={styles.pageTitle}>Mi Perfil</span>

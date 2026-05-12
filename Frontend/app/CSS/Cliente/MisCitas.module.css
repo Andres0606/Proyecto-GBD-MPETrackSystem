@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   MisCitas.module.css — TransMeta · Cliente · Mis Citas
+   MisCitas.module.css — MPE SYSTEM · Cliente · Mis Citas
    ═══════════════════════════════════════════════════════ */
 
 .container {
@@ -308,3 +308,4 @@
   .citasGrid    { grid-template-columns: 1fr; }
   .header       { flex-wrap: wrap; }
 }
+

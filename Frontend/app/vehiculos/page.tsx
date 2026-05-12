@@ -92,7 +92,7 @@ export default function VehiculosPage() {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </div>
           <div className={styles.headerRight}>
             <Link href="/dashboard" className={styles.backButton}>

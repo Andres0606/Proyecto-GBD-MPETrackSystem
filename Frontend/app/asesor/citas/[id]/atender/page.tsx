@@ -311,7 +311,7 @@ setTimeout(() => router.push('/asesor/citas?tab=agendadas'), 2200);
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
             <span className={styles.badgeSection}>Atender Cita</span>
           </div>
           <Link href="/asesor/citas" className={styles.backButton}>

@@ -68,7 +68,7 @@ export default function Sidebar() {
           <CarIcon />
         </span>
         <span className={styles.logoText}>
-          Trans<strong>Meta</strong>
+          MPE <strong>SYSTEM</strong>
         </span>
       </Link>
 

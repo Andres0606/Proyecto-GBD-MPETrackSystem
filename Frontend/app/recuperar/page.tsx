@@ -151,7 +151,7 @@ export default function RecuperarPage() {
           <div className={styles.logoMark}>
             <Car size={24} strokeWidth={2.5} />
           </div>
-          <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+          <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
         </div>
 
         <div className={styles.head}>
@@ -286,3 +286,4 @@ export default function RecuperarPage() {
     </div>
   );
 }
+

@@ -193,7 +193,7 @@ export default function DashboardPage() {
         onClick={() => router.push('/')}
       >
         <span className={styles.logoMark}><CarIcon /></span>
-        <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+        <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
       </div>
           <div className={styles.headerRight}>
             <span className={styles.headerBadge}>Panel de usuario</span>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
             <h2 className={styles.heroName}>
               ¡Bienvenido, <span>{nombreCompleto}</span>!
             </h2>
-            <p className={styles.heroSub}>Has iniciado sesión correctamente en TransMeta</p>
+            <p className={styles.heroSub}>Has iniciado sesión correctamente en MPE SYSTEM</p>
 
             {/* Chips de datos */}
             <div className={styles.infoRow}>

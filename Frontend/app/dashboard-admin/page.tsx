@@ -187,7 +187,7 @@ export default function DashboardAdminPage() {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </div>
           <div className={styles.headerRight}>
             <span className={styles.adminBadge}>
@@ -217,7 +217,7 @@ export default function DashboardAdminPage() {
             <h2 className={styles.heroName}>
               ¡Bienvenido, <span>{nombreCompleto}</span>!
             </h2>
-            <p className={styles.heroSub}>Tienes acceso completo al panel de gestión de TransMeta</p>
+            <p className={styles.heroSub}>Tienes acceso completo al panel de gestión de MPE SYSTEM</p>
 
             <div className={styles.infoRow}>
               <span className={styles.infoChip}>

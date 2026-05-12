@@ -121,7 +121,7 @@ export default function RegistroPage() {
       <div className={styles.card}>
         <div className={styles.logoRow}>
           <span className={styles.logoMark}><CarIcon /></span>
-          <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+          <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
         </div>
 
         <div className={styles.head}>

@@ -108,7 +108,7 @@ export default function Footer() {
         <div className={styles.brand}>
           <Link href="/" className={styles.logo}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </Link>
           <p className={styles.tagline}>
             Especialistas en trámites vehiculares en el departamento del Meta, Colombia. Rápido, claro y sin filas.
@@ -126,7 +126,7 @@ export default function Footer() {
               <span className={styles.contactIco}><MailIcon /></span>
               <div>
                 <span className={styles.contactLabel}>Correo</span>
-                <span className={styles.contactVal}>transmeta@hotmail.com</span>
+                <span className={styles.contactVal}>mpesystem@hotmail.com</span>
               </div>
             </li>
             <li>
@@ -165,7 +165,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className={styles.bottom}>
-        <p className={styles.copy}>© {year} TransMeta® · Todos los derechos reservados </p>
+        <p className={styles.copy}>© {year} MPE SYSTEM® · Todos los derechos reservados </p>
         <div className={styles.bottomLinks}>
           <Link href="/privacidad" className={styles.bottomLink}>Privacidad</Link>
           <span className={styles.bottomDot} />

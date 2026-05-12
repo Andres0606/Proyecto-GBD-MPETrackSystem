@@ -230,7 +230,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <span className={styles.logoMark}><CarIcon /></span>
-              <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+              <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
               <span className={styles.badgeAsesor}>Asesor</span>
             </div>
             <button
@@ -269,7 +269,7 @@ const total = base + otros;
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
             <span className={styles.badgeAsesor}>Asesor</span>
           </div>
           <Link href="/asesor/citas" className={styles.backBtn}>

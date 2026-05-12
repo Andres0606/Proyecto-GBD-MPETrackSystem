@@ -188,7 +188,7 @@ export default function AsesorConsultasPage() {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <span className={styles.logoMark}><CarIcon /></span>
-            <span className={styles.logoText}>Trans<strong>Meta</strong></span>
+            <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </div>
           <Link href="/dashboard-asesor" className={styles.backButton}>
             <ArrowLeftIcon />

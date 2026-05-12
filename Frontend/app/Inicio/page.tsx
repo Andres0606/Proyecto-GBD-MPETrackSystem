@@ -114,7 +114,7 @@ const HERO_SLIDES = [
         img: '/imagen_redimensionada_1700x1122.jpeg',
         tag: 'Trámites vehiculares · Meta, Colombia',
         title: '¡Tus trámites de tránsito, sin complicaciones!',
-        desc: 'En TransMeta trabajamos con dedicación para gestionar tu matrícula, traspasos y duplicados en el Meta. Sin filas, sin papeleos innecesarios.',
+        desc: 'En MPE SYSTEM trabajamos con dedicación para gestionar tu matrícula, traspasos y duplicados en el Meta. Sin filas, sin papeleos innecesarios.',
     },
     {
         img: '/sedes.jpeg',
@@ -193,7 +193,7 @@ const TESTIMONIALS = [
         name: 'Luisa Martínez',
         city: 'Acacias',
         stars: 5,
-        text: 'Llevaba meses con el problema de mis placas deterioradas. TransMeta lo resolvió en un día. El seguimiento en tiempo real es increíble.',
+        text: 'Llevaba meses con el problema de mis placas deterioradas. MPE SYSTEM lo resolvió en un día. El seguimiento en tiempo real es increíble.',
         tramite: 'Duplicado de placas',
         initials: 'LM',
     },
@@ -271,7 +271,7 @@ export default function HomePage() {
                         <img
                             key={i}
                             src={s.img}
-                            alt="TransMeta trámites vehiculares"
+                            alt="MPE SYSTEM trámites vehiculares"
                             className={`${styles.heroImg} ${i === slide ? styles.heroImgActive : ''}`}
                         />
                     ))}
@@ -395,7 +395,7 @@ export default function HomePage() {
                 <div className={styles.whyGrid}>
                     {/* Columna texto */}
                     <div className={styles.whyText}>
-                        <span className={styles.eyebrow}>¿Por qué TransMeta?</span>
+                        <span className={styles.eyebrow}>¿Por qué MPE SYSTEM?</span>
                         <h2 className={styles.secH2}>
                             La forma más fácil de <span className={styles.accent}>tramitar en el Meta</span>
                         </h2>
@@ -422,7 +422,7 @@ export default function HomePage() {
                     <div className={styles.whyImgWrap}>
                         <img
                             src="/WhatsApp 3.jpeg"
-                            alt="Agente TransMeta con cliente"
+                            alt="Agente MPE SYSTEM con cliente"
                             className={styles.whyImg}
                         />
                         <div className={styles.whyBadge}>
