@@ -274,8 +274,22 @@
 /* ══════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+
 @media (max-width: 768px) {
   .container { padding: 1.2rem; }
-  .grid      { grid-template-columns: 1fr; }
-  .header    { flex-wrap: wrap; }
+  .header { padding: 0.8rem 1rem; flex-direction: column; align-items: stretch; gap: 0.8rem; }
+  .headerLeft { justify-content: center; }
+  .headerRight { justify-content: center; }
+  .backButton, .registrarButton { flex: 1; justify-content: center; }
+  .pageTitleRow { flex-direction: column; text-align: center; gap: 0.5rem; }
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 1rem; }
+  .cardHeader { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .badgesGroup { width: 100%; }
 }

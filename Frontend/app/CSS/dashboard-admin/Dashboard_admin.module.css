@@ -235,7 +235,6 @@
 .statsRow {
   display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
 }
-@media(max-width:500px){ .statsRow { grid-template-columns:1fr 1fr; } }
 .statItem { text-align:center; }
 .statNumber {
   font-family:var(--ff,'Sora',sans-serif);
@@ -330,9 +329,35 @@
 }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-@media(max-width:600px){
-  .container { padding:1.2rem; }
-  .heroBody { padding:0 1.3rem 1.5rem; }
-  .card { padding:1.3rem 1.4rem; }
-  .statsRow { grid-template-columns:1fr 1fr; }
+/* ══════════════════════
+   RESPONSIVE
+   ══════════════════════ */
+@media (max-width: 1024px) {
+  .container { padding: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 0.8rem 1rem; flex-wrap: wrap; justify-content: center; text-align: center; }
+  .headerLeft, .headerRight { width: 100%; justify-content: center; }
+  .heroBody { padding: 0 1.5rem 1.8rem; }
+  .avatarRow { justify-content: center; margin-top: -38px; }
+  .heroName, .heroSub { text-align: center; }
+  .infoRow { justify-content: center; }
+  .statsRow { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .container { padding: 1rem; }
+  .heroBanner { height: 70px; }
+  .avatar { width: 68px; height: 68px; font-size: 1.5rem; }
+  .heroName { font-size: 1.3rem; }
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .card { padding: 1.3rem 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .statsRow { grid-template-columns: 1fr; }
+  .infoChip { width: 100%; justify-content: center; }
+  .logoutBtn { width: 100%; justify-content: center; }
 }

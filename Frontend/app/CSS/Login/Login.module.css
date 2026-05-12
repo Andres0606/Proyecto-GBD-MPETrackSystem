@@ -550,7 +550,15 @@
    RESPONSIVE
 ══════════════════════ */
 @media (max-width: 480px) {
-  .pg { padding: 1.5rem 1rem; align-items: flex-start; padding-top: 3rem; }
-  .card { padding: 2.2rem 1.6rem; border-radius: 20px; }
-  .h1 { font-size: 1.55rem; }
+  .pg { padding: 1.5rem 1rem; align-items: center; }
+  .card { padding: 2.2rem 1.6rem; border-radius: 20px; box-shadow: 0 10px 40px rgba(21, 101, 192, 0.15); }
+  .h1 { font-size: 1.6rem; }
+  .logoRow { margin-bottom: 1.5rem; }
+  .blob1, .blob2, .blob3, .blob4 { width: 300px; height: 300px; filter: blur(60px); }
+  .submitBtn { min-height: 48px; }
+}
+
+@media (max-width: 360px) {
+  .card { padding: 1.8rem 1.2rem; }
+  .h1 { font-size: 1.4rem; }
 }

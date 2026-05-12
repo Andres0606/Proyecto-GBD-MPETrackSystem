@@ -5,7 +5,7 @@
 .container {
   min-height: 100vh;
   padding: 2rem;
-  padding-bottom: 22rem; /* 👈 agrega esto */
+  padding-bottom: 5rem;
   position: relative;
   overflow-x: hidden;
   background: linear-gradient(145deg, #dce8ff 0%, #eaf3ff 25%, #e2f0e8 60%, #fdf6e3 100%);
@@ -140,7 +140,7 @@
   box-shadow: 0 4px 24px rgba(21, 101, 192, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
   animation: fadeUp 0.5s ease 0.2s both;
   position: relative; z-index: 2;
-  margin-bottom: 22rem;
+  margin-bottom: 2rem;
 }
 
 /* accent bar top */
@@ -457,15 +457,8 @@
 
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (max-width: 640px) {
-  .toggleGroup {
     grid-template-columns: 1fr;
   }
-}
 
 /* ══════════════════════════════════════
    RESPONSIVE
