@@ -91,7 +91,7 @@ export default function RegistroPage() {
     }
     // --------------------------------------
 
-    if (!formData.numeroDocumento || !formData.nombres || !formData.correo || !formData.contrasena) {
+    if (!formData.numeroDocumento || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.telefono || !formData.correo || !formData.contrasena || !formData.confirmarContrasena) {
       setError('Por favor completa todos los campos obligatorios (*)');
       return;
     }
