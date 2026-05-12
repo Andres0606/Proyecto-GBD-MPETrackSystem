@@ -27,9 +27,17 @@ const XIcon = () => (
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
+const ChevronIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 const NAV_LINKS = [
   { label: 'Inicio', href: '/' },
+];
+
+const DROPDOWN_LINKS = [
   { label: 'Servicios', href: '/Servicios' },
   { label: 'Sedes', href: '/Sedes' },
   { label: 'Nosotros', href: '/Nosotros' },
@@ -44,6 +52,7 @@ export default function Header({ onLoginClick, textoBoton = 'Ingresar' }: Header
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -84,6 +93,25 @@ export default function Header({ onLoginClick, textoBoton = 'Ingresar' }: Header
             {label}
           </Link>
         ))}
+
+        {/* Dropdown Link */}
+        <div 
+          className={styles.dropdown}
+          onMouseEnter={() => setDropdownOpen(true)}
+          onMouseLeave={() => setDropdownOpen(false)}
+        >
+          <button className={`${styles.navLink} ${styles.dropdownTrigger}`}>
+            Conócenos <ChevronIcon />
+          </button>
+          
+          <div className={`${styles.dropdownMenu} ${dropdownOpen ? styles.dropdownOpen : ''}`}>
+            {DROPDOWN_LINKS.map(({ label, href }) => (
+              <Link key={href} href={href} className={styles.dropdownItem}>
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </nav>
 
       {/* Desktop actions */}
@@ -119,16 +147,31 @@ export default function Header({ onLoginClick, textoBoton = 'Ingresar' }: Header
               {label}
             </Link>
           ))}
+          
+          <div className={styles.mobileDivider} />
+          
+          {DROPDOWN_LINKS.map(({ label, href }, i) => (
+            <Link
+              key={href}
+              href={href}
+              className={styles.mobileLink}
+              style={{ animationDelay: `${(i + NAV_LINKS.length) * 0.07 + 0.05}s` }}
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+
           <button
             className={styles.mobileCta}
-            style={{ animationDelay: '0.33s' }}
+            style={{ animationDelay: '0.45s' }}
             onClick={() => { setMenuOpen(false); handleLogin(); }}
           >
             {textoBoton}
           </button>
           <button
             className={styles.mobileCtaOutline}
-            style={{ animationDelay: '0.4s' }}
+            style={{ animationDelay: '0.52s' }}
             onClick={() => { setMenuOpen(false); handleRegister(); }}
           >
             Registrarse

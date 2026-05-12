@@ -28,8 +28,8 @@
   min-height: 100vh;
   background: var(--bg);
   overflow-x: hidden;
- padding-top: 0; /* ← CAMBIA 68px a 0 */
-  padding-left: 65px; 
+  padding-top: 68px;
+  padding-left: 65px;
 }
 
 :global(.global-header) {
