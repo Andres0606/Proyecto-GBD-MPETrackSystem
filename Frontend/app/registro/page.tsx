@@ -10,13 +10,13 @@ import FaceCapture from '../components/FaceCapture';
 /* ── Icons ── */
 const CarIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/>
-    <circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
+    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
+    <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="17.5" r="2.5" />
   </svg>
 );
 const ArrowRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
   </svg>
 );
 
@@ -34,7 +34,7 @@ export default function RegistroPage() {
     confirmarContrasena: '',
     licenciaConduccion: 'S'
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -75,6 +75,22 @@ export default function RegistroPage() {
     setError('');
     setSuccess('');
 
+    // --- Protección Anti-Inyección SQL ---
+    const suspiciousPatterns = [
+      /'/g, /"/g, /;/g, /--/g, /\/\*/g, /\*\//g, /xp_/gi,
+      /\b(SELECT|INSERT|DELETE|UPDATE|DROP|UNION|ALTER|TRUNCATE|EXEC)\b/gi,
+      /OR\s+1\s*=\s*1/gi,
+      /'\s+OR\s+'/gi
+    ];
+    const isSuspicious = (text: string) => suspiciousPatterns.some(pattern => pattern.test(text));
+    const hasInjection = Object.values(formData).some(val => typeof val === 'string' && isSuspicious(val));
+
+    if (hasInjection) {
+      setError('Acción bloqueada: Se detectaron caracteres o palabras no permitidas por seguridad.');
+      return;
+    }
+    // --------------------------------------
+
     if (!formData.numeroDocumento || !formData.nombres || !formData.correo || !formData.contrasena) {
       setError('Por favor completa todos los campos obligatorios (*)');
       return;
@@ -88,7 +104,7 @@ export default function RegistroPage() {
     const emailValidDomains = ['@gmail.com', '@hotmail.com', '@outlok.com', '@outlook.com'];
     const lastAtIdx = formData.correo.lastIndexOf('@');
     const emailDomain = lastAtIdx !== -1 ? formData.correo.substring(lastAtIdx).toLowerCase() : '';
-    
+
     if (!emailValidDomains.includes(emailDomain)) {
       setError('Se requiere una cuenta @gmail.com, @hotmail.com o @outlook.com ya que es de un uso privado y personal');
       return;
@@ -160,11 +176,11 @@ export default function RegistroPage() {
   return (
     <div className={styles.container}>
       <div className={styles.grid} aria-hidden />
-      
+
       <div className={styles.card}>
         <Link href="/" className={styles.backHome}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           <span>Volver al inicio</span>
         </Link>
@@ -228,27 +244,27 @@ export default function RegistroPage() {
             {/* FACE ID OPTION */}
             <div className={styles.faceIdContainer}>
               <label htmlFor="faceId" className={styles.faceToggle}>
-                <input 
-                  type="checkbox" 
-                  id="faceId" 
-                  checked={useFaceId} 
-                  onChange={e => setUseFaceId(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  id="faceId"
+                  checked={useFaceId}
+                  onChange={e => setUseFaceId(e.target.checked)}
                 />
                 <span>Activar Verificación Facial (Face ID)</span>
               </label>
 
               {useFaceId && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowFaceCapture(true)}
                   className={`${styles.faceBtn} ${faceData ? styles.faceBtnCaptured : ''}`}
                 >
                   {faceData ? (
-                    <>✅ Rostro capturado</>
+                    <>   Rostro capturado</>
                   ) : (
                     <>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" />
                       </svg>
                       Capturar mi rostro
                     </>
@@ -269,9 +285,9 @@ export default function RegistroPage() {
       </div>
 
       {showFaceCapture && (
-        <FaceCapture 
-          onCapture={onFaceCapture} 
-          onCancel={() => setShowFaceCapture(false)} 
+        <FaceCapture
+          onCapture={onFaceCapture}
+          onCancel={() => setShowFaceCapture(false)}
         />
       )}
     </div>
