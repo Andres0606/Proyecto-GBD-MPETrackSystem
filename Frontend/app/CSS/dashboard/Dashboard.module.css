@@ -277,7 +277,15 @@
 }
 
 .grid {
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .card {

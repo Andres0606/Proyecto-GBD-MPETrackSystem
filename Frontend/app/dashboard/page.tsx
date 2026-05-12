@@ -270,7 +270,7 @@ export default function DashboardPage() {
 
 <div className={styles.grid}>
 
-  {/* Solicitar Cita */}
+  {/* 1. Solicitar Cita */}
   <div className={styles.card}>
     <div className={styles.cardIcon}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -280,10 +280,8 @@ export default function DashboardPage() {
         <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     </div>
-
     <h3>Solicitar Cita</h3>
     <p>Agenda una cita para realizar tu trámite</p>
-
     <Link href="/citas/solicitar">
       <button className={styles.cardBtn}>
         Solicitar cita <ArrowIcon />
@@ -291,15 +289,29 @@ export default function DashboardPage() {
     </Link>
   </div>
 
-  {/* Mis Trámites */}
+  {/* 2. Mis Citas */}
+  <div className={styles.card}>
+    <div className={styles.cardIcon}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    </div>
+    <h3>Mis Citas</h3>
+    <p>Consulta tus citas agendadas y pendientes</p>
+    <Link href="/mis-citas">
+      <button className={styles.cardBtn}>
+        Ver mi agenda <ArrowIcon />
+      </button>
+    </Link>
+  </div>
+
+  {/* 3. Mis Trámites */}
   <div className={styles.card}>
     <div className={styles.cardIcon}>
       <FileIcon />
     </div>
-
     <h3>Mis Trámites</h3>
     <p>Gestiona y consulta el estado de tus trámites activos</p>
-
     <Link href="/mis-tramites">
       <button className={styles.cardBtn}>
         Ver trámites <ArrowIcon />
@@ -307,15 +319,13 @@ export default function DashboardPage() {
     </Link>
   </div>
 
-  {/* Mis Vehículos */}
+  {/* 4. Mis Vehículos */}
   <div className={styles.card}>
     <div className={styles.cardIcon}>
       <VehicleIcon />
     </div>
-
     <h3>Mis Vehículos</h3>
     <p>Registra y consulta los vehículos asociados a tu cuenta</p>
-
     <Link href="/vehiculos">
       <button className={styles.cardBtn}>
         Ver vehículos <ArrowIcon />
@@ -323,51 +333,34 @@ export default function DashboardPage() {
     </Link>
   </div>
 
-  {/* Perfil */}
+  {/* 5. Consultas */}
   <div className={styles.card}>
+    <div className={styles.cardIcon}>
+      <MailIcon />
+    </div>
+    <h3>Consultas</h3>
+    <p>Envía y consulta tus mensajes con soporte</p>
+    <Link href="/consultas">
+      <button className={styles.cardBtn}>
+        Mis Consultas <ArrowIcon />
+      </button>
+    </Link>
+  </div>
 
+  {/* 6. Perfil */}
+  <div className={styles.card}>
     <div className={styles.cardIcon}>
       <UserIcon />
     </div>
-
     <h3>Perfil</h3>
     <p>Actualiza tu información personal y preferencias de cuenta</p>
-
     <Link href="/perfil">
       <button className={styles.cardBtn}>
         Editar perfil <ArrowIcon />
       </button>
     </Link>
   </div>
-{/* Mis Consultas */}
-<div className={styles.card}>
-  <div className={styles.cardIcon}>
-    <MailIcon />
-  </div>
-  <h3>Consultas</h3>
-  <p>Envía y consulta tus mensajes con soporte</p>
-  <Link href="/consultas">
-    <button className={styles.cardBtn}>
-      Mis Consultas <ArrowIcon />
-    </button>
-  </Link>
-</div>
 
-{/* Mis Citas */}
-<div className={styles.card}>
-  <div className={styles.cardIcon}>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>
-  </div>
-  <h3>Mis Citas</h3>
-  <p>Consulta tus citas agendadas y pendientes</p>
-  <Link href="/mis-citas">
-    <button className={styles.cardBtn}>
-      Ver mi agenda <ArrowIcon />
-    </button>
-  </Link>
-</div>
 </div>
       </div>
     </div>
