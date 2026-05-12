@@ -13,4 +13,7 @@ router.get('/asesores/:cedula', authController.getAsesor);
 router.put('/asesores/:cedula', authController.updateAsesor);
 router.delete('/asesores/:cedula', authController.deleteAsesor);
 
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

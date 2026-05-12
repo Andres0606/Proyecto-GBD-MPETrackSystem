@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 // Almacén temporal de OTPs (en memoria para este proyecto)
 // Formato: { 'correo@test.com': { code: '123456', expires: timestamp } }
 const OTP_STORE = {};
+const RESET_OTP_STORE = {};
 
 // Configuración del transporte de correo
 const transporter = nodemailer.createTransport({
@@ -307,6 +308,86 @@ class AuthService {
       await connection.execute('UPDATE ASESOR SET especialidadTramite = :especialidad, sueldo = :sueldo WHERE nDocumento = :cedula', { especialidad: data.especialidad, sueldo: data.sueldo, cedula });
       await connection.commit();
       return { status: 'OK', mensaje: 'Asesor actualizado correctamente' };
+    } catch (err) {
+      if (connection) await connection.rollback();
+      throw err;
+    } finally {
+      if (connection) await connection.close();
+    }
+  }
+
+  async forgotPassword(correo) {
+    const persona = await personaRepository.findByCorreo(correo);
+    if (!persona) {
+      throw new Error('No existe una cuenta asociada a este correo electrónico');
+    }
+
+    // Generar código aleatorio de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Guardar en el almacén de RESET con expiración de 10 minutos
+    RESET_OTP_STORE[correo] = {
+      code: code,
+      expires: Date.now() + 10 * 60 * 1000
+    };
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: correo,
+      subject: 'Recuperación de Contraseña - MPE Track System',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #2563eb;">Recuperación de Contraseña</h2>
+          <p>Hola,</p>
+          <p>Has solicitado restablecer tu contraseña. Utiliza el siguiente código temporal:</p>
+          <div style="background: #fef2f2; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #dc2626; border-radius: 5px;">
+            ${code}
+          </div>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">Este código expirará en 10 minutos.</p>
+          <p>Si no solicitaste este cambio, puedes ignorar este correo de forma segura.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Reset OTP enviado a ${correo}: ${code}`);
+    
+    return { status: 'OK', mensaje: 'Código de recuperación enviado' };
+  }
+
+  async resetPassword(correo, code, nuevaContrasena) {
+    const otpData = RESET_OTP_STORE[correo];
+
+    if (!otpData) {
+      throw new Error('No hay una solicitud de recuperación pendiente para este correo');
+    }
+
+    if (Date.now() > otpData.expires) {
+      delete RESET_OTP_STORE[correo];
+      throw new Error('El código ha expirado. Por favor solicita uno nuevo.');
+    }
+
+    if (otpData.code !== code) {
+      throw new Error('Código de recuperación incorrecto');
+    }
+
+    let connection;
+    try {
+      connection = await oracledb.getConnection();
+      
+      const sql = 'UPDATE PERSONA SET contrasena = :nuevaContrasena WHERE correo = :correo';
+      const result = await connection.execute(sql, { nuevaContrasena, correo });
+      
+      if (result.rowsAffected === 0) {
+        throw new Error('No se pudo actualizar la contraseña. Usuario no encontrado.');
+      }
+
+      await connection.commit();
+      
+      // Limpiar el código usado
+      delete RESET_OTP_STORE[correo];
+
+      return { status: 'OK', mensaje: 'Contraseña actualizada exitosamente' };
     } catch (err) {
       if (connection) await connection.rollback();
       throw err;
