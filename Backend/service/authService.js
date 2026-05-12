@@ -187,6 +187,15 @@ class AuthService {
         [cedula],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
+      const date = persona.FECHANACIMIENTO ? new Date(persona.FECHANACIMIENTO) : null;
+      let fechaNacimientoStr = '';
+      if (date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        fechaNacimientoStr = `${day}/${month}/${year}`;
+      }
+
       return {
         status: 'OK',
         cedula: persona.NDOCUMENTO,
@@ -194,7 +203,7 @@ class AuthService {
         apellido: persona.APELLIDOS,
         correo: persona.CORREO,
         telefono: persona.TELEFONO,
-        fechaNacimiento: persona.FECHANACIMIENTO ? new Date(persona.FECHANACIMIENTO).toLocaleDateString('es-ES') : '',
+        fechaNacimiento: fechaNacimientoStr,
         licenciaConduccion: clienteRes.rows.length > 0 ? clienteRes.rows[0].LICENCIACONDUCCION : 'N',
         faceIdEnabled: persona.FACE_ID_ENABLED === 'Y'
       };

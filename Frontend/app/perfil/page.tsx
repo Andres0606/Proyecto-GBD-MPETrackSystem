@@ -94,9 +94,12 @@ export default function PerfilPage() {
   // Convertir fecha de DD/MM/YYYY a YYYY-MM-DD para input date
   const convertirFechaParaInput = (fechaStr: string): string => {
     if (!fechaStr) return '';
-    const partes = fechaStr.split('/');
+    const partes = fechaStr.split('/'); // DD/MM/YYYY
     if (partes.length === 3) {
-      return `${partes[2]}-${partes[1]}-${partes[0]}`;
+      const d = partes[0].padStart(2, '0');
+      const m = partes[1].padStart(2, '0');
+      const y = partes[2];
+      return `${y}-${m}-${d}`; // YYYY-MM-DD
     }
     return fechaStr;
   };
@@ -157,7 +160,19 @@ export default function PerfilPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'nombres' || name === 'apellido') {
+      // Solo letras, máximo 25 caracteres
+      const cleanValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 25);
+      setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else if (name === 'telefono') {
+      // Solo números, máximo 10 caracteres
+      const cleanValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData(prev => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
     setError('');
     setSuccess('');
   };
@@ -183,16 +198,26 @@ const handleSubmit = async (e: React.FormEvent) => {
   setError('');
   setSuccess('');
 
-  if (formData.contrasena && formData.contrasena !== formData.confirmarContrasena) {
-    setError('Las contraseñas no coinciden');
+  if (formData.telefono && formData.telefono.length !== 10) {
+    setError('El teléfono debe tener exactamente 10 dígitos');
     desbloquearEnvio();
     return;
   }
 
-  if (formData.contrasena && formData.contrasena.length < 6) {
-    setError('La contraseña debe tener al menos 6 caracteres');
-    desbloquearEnvio();
-    return;
+  if (formData.contrasena) {
+    if (formData.contrasena !== formData.confirmarContrasena) {
+      setError('Las contraseñas no coinciden');
+      desbloquearEnvio();
+      return;
+    }
+
+    // Mínimo 8 caracteres, una minúscula, una mayúscula, un número y un carácter especial
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(formData.contrasena)) {
+      setError('La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial');
+      desbloquearEnvio();
+      return;
+    }
   }
 
   const updateData: Record<string, unknown> = {
@@ -515,7 +540,7 @@ const handleFaceCapture = async (descriptor: number[], imageBase64: string) => {
                         type="password" name="contrasena"
                         value={formData.contrasena}
                         onChange={handleChange}
-                        placeholder="Mínimo 6 caracteres"
+                        placeholder="Mínimo 8 caracteres + requisitos"
                       />
                     </div>
                   </div>
