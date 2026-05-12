@@ -38,6 +38,21 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [age, setAge] = useState<number | null>(null);
+
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    if (isNaN(birth.getTime())) return null;
+    
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   // Estados para Biometría
   const [useFaceId, setUseFaceId] = useState(false);
@@ -62,6 +77,11 @@ export default function RegistroPage() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+
+    if (name === 'fechaNacimiento') {
+      setAge(calculateAge(value));
+    }
+
     setError('');
   };
 
@@ -114,6 +134,11 @@ export default function RegistroPage() {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     if (!passwordRegex.test(formData.contrasena)) {
       setError('La contraseña debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial');
+      return;
+    }
+
+    if (age !== null && age < 16) {
+      setError('Debes tener al menos 16 años para registrarte');
       return;
     }
 
@@ -222,10 +247,21 @@ export default function RegistroPage() {
             </div>
             <div className={styles.field}>
               <label>Fecha de nacimiento *</label>
-              <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} />
+              <input 
+                type="date" 
+                name="fechaNacimiento" 
+                value={formData.fechaNacimiento} 
+                onChange={handleChange} 
+                className={formData.fechaNacimiento ? (age !== null && age >= 16 ? styles.inputValid : styles.inputInvalid) : ''}
+              />
+              {formData.fechaNacimiento && age !== null && (
+                <span className={`${styles.ageHint} ${age >= 16 ? styles.ageValid : styles.ageInvalid}`}>
+                  {age >= 16 ? `Edad: ${age} años (Válido)` : `No se puede registrar porque no tiene 16 años`}
+                </span>
+              )}
             </div>
             <div className={styles.field}>
-              <label>Teléfono</label>
+              <label>Teléfono *</label>
               <input type="tel" name="telefono" value={formData.telefono} onChange={handleChange} />
             </div>
             <div className={styles.field} style={{ gridColumn: 'span 2' }}>
@@ -234,11 +270,28 @@ export default function RegistroPage() {
             </div>
             <div className={styles.field}>
               <label>Contraseña *</label>
-              <input type="password" name="contrasena" value={formData.contrasena} onChange={handleChange} />
+              <input 
+                type="password" 
+                name="contrasena" 
+                value={formData.contrasena} 
+                onChange={handleChange} 
+                className={formData.contrasena && formData.confirmarContrasena ? (formData.contrasena === formData.confirmarContrasena ? styles.inputValid : styles.inputInvalid) : ''}
+              />
             </div>
             <div className={styles.field}>
               <label>Confirmar contraseña *</label>
-              <input type="password" name="confirmarContrasena" value={formData.confirmarContrasena} onChange={handleChange} />
+              <input 
+                type="password" 
+                name="confirmarContrasena" 
+                value={formData.confirmarContrasena} 
+                onChange={handleChange} 
+                className={formData.contrasena && formData.confirmarContrasena ? (formData.contrasena === formData.confirmarContrasena ? styles.inputValid : styles.inputInvalid) : ''}
+              />
+              {formData.contrasena && formData.confirmarContrasena && (
+                <span className={`${styles.ageHint} ${formData.contrasena === formData.confirmarContrasena ? styles.ageValid : styles.ageInvalid}`}>
+                  {formData.contrasena === formData.confirmarContrasena ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden'}
+                </span>
+              )}
             </div>
 
             {/* FACE ID OPTION */}
