@@ -105,6 +105,52 @@ router.post('/solicitar', async (req, res) => {
   }
 });
 
+// Cotizar tarifa dinámica de trámite
+router.get('/cotizar/:cedula/:idTramite', async (req, res) => {
+  const { cedula, idTramite } = req.params;
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    
+    const resCliente = await connection.execute(
+      'SELECT IDCLIENTE FROM CLIENTE WHERE NDOCUMENTO = :1',
+      [cedula],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (resCliente.rows.length === 0) {
+      return res.status(404).json({ status: 'ERROR', mensaje: 'Cliente no encontrado' });
+    }
+
+    const idCliente = resCliente.rows[0].IDCLIENTE;
+
+    const sql = `
+      BEGIN
+        :ret := "ADMIN"."FN_CALCULAR_TARIFA"(:idCliente, :idTramite);
+      END;
+    `;
+    
+    const result = await connection.execute(sql, {
+      idCliente: idCliente,
+      idTramite: parseInt(idTramite),
+      ret: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
+    });
+
+    const respuestaStr = result.outBinds.ret;
+    if (respuestaStr.includes('error')) {
+      return res.status(400).json({ status: 'ERROR', mensaje: 'No se pudo cotizar el trámite' });
+    }
+
+    const cotizacion = JSON.parse(respuestaStr);
+    res.json({ status: 'OK', cotizacion });
+  } catch (err) { 
+    console.error('Error cotizando trámite:', err);
+    res.status(500).json({ status: 'ERROR', mensaje: err.message }); 
+  } finally { 
+    if (connection) await connection.close(); 
+  }
+});
+
 // Obtener citas ACTIVAS de un cliente específico (Que aún no son trámites)
 router.get('/cliente/:cedula', async (req, res) => {
   const { cedula } = req.params;
