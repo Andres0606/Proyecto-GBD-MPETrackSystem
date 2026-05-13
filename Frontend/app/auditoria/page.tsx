@@ -126,7 +126,7 @@ export default function AuditoriaPage() {
                   <th>ID</th>
                   <th>Tabla</th>
                   <th>Acción</th>
-                  <th>Usuario</th>
+                  <th>Responsable / Cédula</th>
                   <th>Fecha</th>
                   <th>Detalles del Cambio</th>
                 </tr>
