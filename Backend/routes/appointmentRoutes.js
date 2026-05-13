@@ -140,22 +140,43 @@ router.get('/pendientes/:cedulaAsesor', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
+    
+    // 1. Primero obtenemos la sede del asesor para solo mostrarle lo que le corresponde
+    const resAsesor = await connection.execute(
+      'SELECT IDSEDE FROM ASESOR WHERE NDOCUMENTO = :1',
+      [req.params.cedulaAsesor],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (resAsesor.rows.length === 0) {
+      return res.status(404).json({ status: 'ERROR', mensaje: 'Asesor no encontrado' });
+    }
+
+    const idSedeAsesor = resAsesor.rows[0].IDSEDE;
+
+    // 2. Buscamos citas de SU SEDE que NO tengan asesor asignado y estén PENDIENTES
     const sql = `
       SELECT 
-        t.idCita as "idCita",
-        t.cliente as "cliente",
-        t.tipoTramite as "tipoTramite",
-        t.sede as "sede",
-        t.valor as "valorBase",
-        t.fechaSolicitud as "fechaSolicitud",
+        c.idCita as "idCita",
+        p.nombres || ' ' || p.apellidos as "cliente",
+        tt.nombre as "tipoTramite",
+        s.nombreSede as "sede",
+        tt.valorBase as "valorBase",
+        c.fechaHoraSolicitud as "fechaSolicitud",
         1 as "esSuEspecialidad"
-      FROM TABLE(fn_get_citas_asesor_coll(:1)) t
-      JOIN CITA c ON t.idCita = c.idCita
-      WHERE c.ESTADOCITA = 'PENDIENTE'
-      ORDER BY t.fechaSolicitud ASC
+      FROM CITA c
+      JOIN CLIENTE cl ON c.idCliente = cl.idCliente
+      JOIN PERSONA p ON cl.nDocumento = p.nDocumento
+      JOIN TIPOTRAMITE tt ON c.tipoTramite = tt.idTipoTramite
+      JOIN SEDE s ON c.idSede = s.idSede
+      WHERE c.idSede = :1 
+        AND c.idAsesor IS NULL 
+        AND c.ESTADOCITA = 'PENDIENTE'
+        AND c.idCita NOT IN (SELECT idCita FROM TRAMITE)
+      ORDER BY c.fechaHoraSolicitud ASC
     `;
-    // Enviamos la cédula del asesor para filtrar por su sede/especialidad
-    const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+    const result = await connection.execute(sql, [idSedeAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
   } catch (err) {
     console.error('Error en pendientes:', err);
