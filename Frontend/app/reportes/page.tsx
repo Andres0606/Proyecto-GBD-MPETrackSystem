@@ -151,6 +151,26 @@ export default function ReportesPage() {
   const totalIngresos = data.ingresos.reduce((acc, curr) => acc + curr.total, 0);
   const palette = ['#1565C0', '#F57C00', '#2E7D32', '#C62828', '#6366f1'];
 
+  // Cálculos consolidados para el resumen general (Basado en Mayo 2026)
+  const biMayo = data.biAnalytics?.filter(i => i.PERIODO === '2026-05') || [];
+  const totalVentasMayo = biMayo.reduce((acc, curr) => acc + curr.VENTAS_MES, 0);
+  const totalVentasAbril = biMayo.reduce((acc, curr) => acc + (curr.VENTAS_MES_ANTERIOR || 0), 0);
+  const crecimientoGlobal = totalVentasAbril > 0 ? (((totalVentasMayo - totalVentasAbril) / totalVentasAbril) * 100).toFixed(1) : '0';
+  
+  const totalCitasMayo = biMayo.reduce((acc, curr) => {
+    return acc + (curr.VILLAVO || 0) + (curr.RESTREPO || 0) + (curr.ACACIAS || 0) + (curr.GRANADA || 0) + (curr.PTO_LOPEZ || 0) + (curr.GUAMAL || 0);
+  }, 0);
+
+  const sedesTotales = {
+    Villavicencio: biMayo.reduce((acc, curr) => acc + (curr.VILLAVO || 0), 0),
+    Restrepo: biMayo.reduce((acc, curr) => acc + (curr.RESTREPO || 0), 0),
+    Acacías: biMayo.reduce((acc, curr) => acc + (curr.ACACIAS || 0), 0),
+    Granada: biMayo.reduce((acc, curr) => acc + (curr.GRANADA || 0), 0),
+    'Puerto López': biMayo.reduce((acc, curr) => acc + (curr.PTO_LOPEZ || 0), 0),
+    Guamal: biMayo.reduce((acc, curr) => acc + (curr.GUAMAL || 0), 0),
+  };
+  const sedeEstrella = Object.entries(sedesTotales).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+
   return (
     <div className={styles.container}>
       <div className={styles.grid} aria-hidden />
@@ -200,6 +220,43 @@ export default function ReportesPage() {
               <p>Vehículos</p>
             </div>
           </div>
+        </div>
+
+        {/* ── SECCIÓN: CONSOLIDADO GENERAL ── */}
+        <div className={styles.chartCardFull} style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)' }}>
+           <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>Consolidado General de Operaciones</h3>
+                <p className={styles.cardDesc}>Vista unificada de todas las sedes y municipios del departamento.</p>
+              </div>
+           </div>
+           
+           <div className={styles.summaryGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
+              <div className={styles.summaryItem}>
+                 <div className={styles.summaryIcon} style={{ background: '#e0f2fe', color: '#0369a1' }}><DollarIcon /></div>
+                 <div>
+                    <span className={styles.summaryLabel}>Recaudación Mayo</span>
+                    <h4 className={styles.summaryVal}>${totalVentasMayo.toLocaleString()}</h4>
+                    <span className={styles.growthBadgePos} style={{ fontSize: '0.75rem' }}>▲ {crecimientoGlobal}% vs Abril</span>
+                 </div>
+              </div>
+              <div className={styles.summaryItem}>
+                 <div className={styles.summaryIcon} style={{ background: '#f0fdf4', color: '#15803d' }}><BarChartIcon /></div>
+                 <div>
+                    <span className={styles.summaryLabel}>Trámites Totales</span>
+                    <h4 className={styles.summaryVal}>{totalCitasMayo} citas</h4>
+                    <small style={{ color: '#64748b' }}>Todas las sedes</small>
+                 </div>
+              </div>
+              <div className={styles.summaryItem}>
+                 <div className={styles.summaryIcon} style={{ background: '#fff7ed', color: '#c2410c' }}><UsersIcon /></div>
+                 <div>
+                    <span className={styles.summaryLabel}>Sede Líder</span>
+                    <h4 className={styles.summaryVal}>{sedeEstrella}</h4>
+                    <small style={{ color: '#64748b' }}>Máxima demanda actual</small>
+                 </div>
+              </div>
+           </div>
         </div>
 
         <div className={styles.chartsGrid}>
@@ -375,6 +432,44 @@ export default function ReportesPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Matriz de Distribución por Sede (Comparativa) */}
+          <div className={styles.chartCardFull}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>Distribución Geográfica de Trámites</h3>
+                <p className={styles.cardDesc}>Comparativa directa de la demanda de cada trámite entre los diferentes municipios (Mayo 2026).</p>
+              </div>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.biTable}>
+                <thead>
+                  <tr>
+                    <th>Trámite</th>
+                    <th style={{ textAlign: 'center' }}>Villavo</th>
+                    <th style={{ textAlign: 'center' }}>Restrepo</th>
+                    <th style={{ textAlign: 'center' }}>Acacías</th>
+                    <th style={{ textAlign: 'center' }}>Granada</th>
+                    <th style={{ textAlign: 'center' }}>Pto. López</th>
+                    <th style={{ textAlign: 'center' }}>Guamal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {biMayo.map((item, idx) => (
+                    <tr key={idx}>
+                      <td><strong>{item.TRAMITE_DESC}</strong></td>
+                      <td className={item.VILLAVO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.VILLAVO || 0}</td>
+                      <td className={item.RESTREPO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.RESTREPO || 0}</td>
+                      <td className={item.ACACIAS > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.ACACIAS || 0}</td>
+                      <td className={item.GRANADA > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GRANADA || 0}</td>
+                      <td className={item.PTO_LOPEZ > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.PTO_LOPEZ || 0}</td>
+                      <td className={item.GUAMAL > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GUAMAL || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 

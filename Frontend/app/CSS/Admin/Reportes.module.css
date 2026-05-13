@@ -454,15 +454,45 @@
 }
 .itemBad span { color: #b91c1c; }
 
-.oldVal {
-  color: #94a3b8;
-  font-style: italic;
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.colSedes {
-  text-align: center !important;
+.summaryIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.summaryLabel {
+  display: block;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+
+.summaryVal {
+  font-size: 1.4rem;
   font-weight: 800;
-  color: #1565C0;
+  color: #1e293b;
+  margin: 0;
+}
+
+.activeCell {
+  background: #eff6ff !important;
+  color: #1565C0 !important;
+  font-weight: 700 !important;
 }
 
 .bottleneckInfo strong {
