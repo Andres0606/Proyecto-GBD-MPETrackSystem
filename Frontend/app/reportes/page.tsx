@@ -112,6 +112,7 @@ export default function ReportesPage() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.grid} aria-hidden />
       <div className={styles.inner}>
 
         {/* ── Header ── */}
