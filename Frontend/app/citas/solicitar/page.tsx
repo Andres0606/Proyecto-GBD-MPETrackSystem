@@ -184,7 +184,8 @@ const seleccionarTipoTramite = async (tipo: TipoTramite) => {
   setFormData(prev => ({
     ...prev,
     idTipoTramite: idTipo,
-    idVehiculo: ''
+    // Si NO requiere vehículo, limpiamos el idVehiculo para que no se envíe basura
+    idVehiculo: tipo.requiereVehiculo === 'N' ? '' : prev.idVehiculo
   }));
 
   setValorTramite(tipo.valorBase);
