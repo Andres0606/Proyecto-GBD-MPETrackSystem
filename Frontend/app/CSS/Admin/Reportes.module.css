@@ -75,18 +75,32 @@
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.6rem;
+  padding: 0.5rem 1.2rem;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  color: #1e293b;
-  font-size: 0.8rem;
+  border-radius: 50px;
+  color: #475569;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.75rem;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-.backBtn:hover { border-color: #1565C0; color: #1565C0; }
+.backBtn svg {
+  width: 16px; height: 16px;
+  transition: transform 0.2s;
+}
+.backBtn:hover {
+  border-color: #1565C0;
+  color: #1565C0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(21, 101, 192, 0.1);
+}
+.backBtn:hover svg {
+  transform: translateX(-3px);
+}
 
 /* ── KPIs Horizontales (Estilo Citas) ── */
 .kpiGrid {
