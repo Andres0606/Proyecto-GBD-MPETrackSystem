@@ -17,6 +17,7 @@ const clientRoutes = require('./routes/clientRoutes');
 const biometricRoutes = require('./routes/biometricRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const sedesRoutes = require('./routes/sedesRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 const NotificationService = require('./service/notificationService');
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/clientes', clientRoutes);
 app.use('/api/biometric', biometricRoutes);
 app.use('/api/reportes', reportRoutes);
 app.use('/api/sedes', sedesRoutes);
+app.use('/api/auditoria', auditRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'TransMeta Backend API is running' });
