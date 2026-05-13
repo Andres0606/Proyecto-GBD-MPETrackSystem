@@ -206,8 +206,8 @@ export default function ReportesPage() {
           <div className={styles.titleArea}>
             <div className={styles.iconBox}><BarChartIcon /></div>
             <div>
-              <h1>Reportes de Gestión</h1>
-              <p>MPE System · Dashboard Administrativo</p>
+              <h1>{selectedSede === 'General' ? 'Análisis Corporativo Global' : `Gestión de Sede: ${selectedSede}`}</h1>
+              <p>MPE System · Control de Operaciones en su Totalidad</p>
             </div>
           </div>
           <Link href="/dashboard-admin" className={styles.backBtn}>
@@ -386,8 +386,12 @@ export default function ReportesPage() {
           <div className={styles.chartCardFull}>
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
-                <h3>Rendimiento Estratégico por Municipio</h3>
-                <p className={styles.cardDesc}>Análisis comparativo de servicios y crecimiento mensual de ingresos en las diferentes sedes.</p>
+                <h3>{selectedSede === 'General' ? 'Rendimiento Corporativo Global' : `Rendimiento Estratégico: ${selectedSede}`}</h3>
+                <p className={styles.cardDesc}>
+                  {selectedSede === 'General' 
+                    ? 'Análisis del desempeño financiero y operativo de la empresa en su totalidad (Todas las sedes).'
+                    : `Análisis comparativo de servicios y crecimiento mensual de ingresos en la sede de ${selectedSede}.`}
+                </p>
               </div>
             </div>
 
