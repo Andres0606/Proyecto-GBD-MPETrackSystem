@@ -369,7 +369,8 @@
 .btnAtender:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(21, 101, 192, 0.4); }
 
 .btnCompletar,
-.btnCancelarCita {
+.btnCancelarCita,
+.btnInasistencia {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -458,8 +459,20 @@
   transform: none;
 }
 
+.btnInasistencia {
+  background: rgba(230, 81, 0, 0.10);
+  color: #c04000;
+}
+
+.btnInasistencia:hover {
+  background: rgba(230, 81, 0, 0.16);
+  color: #a03000;
+  transform: none;
+}
+
 .btnCompletar svg,
-.btnCancelarCita svg {
+.btnCancelarCita svg,
+.btnInasistencia svg {
   width: 13px;
   height: 13px;
   flex-shrink: 0;
