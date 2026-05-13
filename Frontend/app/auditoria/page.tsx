@@ -9,7 +9,9 @@ interface AuditLog {
   id: number;
   tabla: string;
   operacion: string;
-  usuario: string;
+  usuarioID: string;
+  responsable: string;
+  cargo: string;
   fecha: string;
   idRegistro: number;
   detalle: string;
@@ -50,7 +52,8 @@ export default function AuditoriaPage() {
       result = result.filter(log => 
         log.tabla.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.detalle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.usuario.toLowerCase().includes(searchTerm.toLowerCase())
+        log.responsable.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.usuarioID.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     setFilteredLogs(result);
@@ -110,7 +113,7 @@ export default function AuditoriaPage() {
             <label>Buscador Inteligente</label>
             <input 
               type="text" 
-              placeholder="Buscar por tabla, usuario o descripción..." 
+              placeholder="Buscar por tabla, nombre o cédula..." 
               className={styles.input}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -126,7 +129,7 @@ export default function AuditoriaPage() {
                   <th>ID</th>
                   <th>Tabla</th>
                   <th>Acción</th>
-                  <th>Responsable / Cédula</th>
+                  <th>Responsable</th>
                   <th>Fecha</th>
                   <th>Detalles del Cambio</th>
                 </tr>
@@ -144,9 +147,18 @@ export default function AuditoriaPage() {
                         {log.operacion}
                       </span>
                     </td>
-                    <td>{log.usuario}</td>
+                    <td>
+                      <div className={styles.userInfo}>
+                        <strong className={styles.userName}>{log.responsable}</strong>
+                        <span className={styles.userRole}>{log.cargo}</span>
+                      </div>
+                    </td>
                     <td className={styles.fecha}>{log.fecha}</td>
-                    <td className={styles.detalle} title={log.detalle}>{log.detalle}</td>
+                    <td className={styles.detalle}>
+                      <div className={styles.detalleContent} title={log.detalle}>
+                        {log.detalle}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
