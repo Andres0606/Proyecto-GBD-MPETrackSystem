@@ -95,7 +95,7 @@ router.post('/solicitar', async (req, res) => {
     console.error('Error en solicitar cita:', err.message);
     
     const msg = err.message.includes('ORA-20') 
-      ? err.message.split('\n')[0].split(': ')[1] 
+      ? err.message.split('\n')[0].replace(/ORA-\d+:\s*/, '')
       : 'Error interno al procesar la cita: ' + err.message;
       
     res.status(500).json({ status: 'ERROR', mensaje: msg });
