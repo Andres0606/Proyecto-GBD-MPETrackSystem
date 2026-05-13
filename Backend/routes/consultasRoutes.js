@@ -6,11 +6,11 @@ const { oracledb } = require('../config/db');
 oracledb.fetchAsString = [oracledb.CLOB];
 
 // 1. Crear una nueva consulta (Cliente)
-router.post('/solicitar', async (req, res) => {
+router.post('/', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
-    const { cedula, asunto, mensaje } = req.body;
+    const { nDocumento: cedula, asunto, mensaje } = req.body;
 
     if (!cedula || !asunto || !mensaje) {
       return res.status(400).json({ status: 'ERROR', mensaje: 'Faltan campos obligatorios' });
