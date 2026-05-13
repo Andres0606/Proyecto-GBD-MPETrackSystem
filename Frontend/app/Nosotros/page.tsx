@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '../Inicio/Sidebar';
 import Footer from '../Inicio/Footer';
@@ -22,11 +22,6 @@ const ChevronIcon = () => (
     <polyline points="6 9 12 15 18 9"/>
   </svg>
 );
-const StarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-  </svg>
-);
 const ShieldIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -45,16 +40,6 @@ const HeartIcon = () => (
 const TargetIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-  </svg>
-);
-const ChevronLeftIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="15 18 9 12 15 6"/>
-  </svg>
-);
-const ChevronRightIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"/>
   </svg>
 );
 const MapPinIcon = () => (
@@ -94,22 +79,9 @@ const TIMELINE = [
   },
   {
     year: 'Actualmente',
-    title: '10 agentes',
-    desc: 'Hoy somos un equipo de 10 agentes distribuidos en el Meta, con más de 500 trámites gestionados y un 98% de satisfacción entre nuestros clientes.',
+    title: 'Red Consolidada',
+    desc: 'Hoy somos un equipo sólido distribuido en el Meta, con más de 500 trámites gestionados y un 98% de satisfacción entre nuestros clientes.',
   },
-];
-
-const AGENTES = [
-  { nombre: 'Carmen R.',   cargo: 'Fundadora · Villavicencio', exp: '20+ años',  iniciales: 'CR', sede: 'Villavicencio' },
-  { nombre: 'Luis M.',     cargo: 'Agente · Villavicencio',    exp: '3 años',    iniciales: 'LM', sede: 'Villavicencio' },
-  { nombre: 'Patricia V.', cargo: 'Agente · Villavicencio',    exp: '2 años',    iniciales: 'PV', sede: 'Villavicencio' },
-  { nombre: 'Jorge S.',    cargo: 'Agente · Restrepo',         exp: '3 años',    iniciales: 'JS', sede: 'Restrepo' },
-  { nombre: 'Sandra T.',   cargo: 'Agente · Restrepo',         exp: '2 años',    iniciales: 'ST', sede: 'Restrepo' },
-  { nombre: 'Laura G.',    cargo: 'Agente · Acacias',          exp: '4 años',    iniciales: 'LG', sede: 'Acacias' },
-  { nombre: 'Héctor P.',   cargo: 'Agente · Acacias',          exp: '2 años',    iniciales: 'HP', sede: 'Acacias' },
-  { nombre: 'Rosario M.',  cargo: 'Agente · Guamal',           exp: '2 años',    iniciales: 'RM', sede: 'Guamal' },
-  { nombre: 'María T.',    cargo: 'Agente · Granada',          exp: '3 años',    iniciales: 'MT', sede: 'Granada' },
-  { nombre: 'Andrés R.',   cargo: 'Agente · Puerto López',     exp: '2 años',    iniciales: 'AR', sede: 'Puerto López' },
 ];
 
 const FAQS = [
@@ -130,23 +102,15 @@ const SEDES = [
   { ciudad: 'Puerto López',  agentes: 1, color: 'dorado' },
 ];
 
-const VISIBLE_CARDS = 5;
-
 export default function NosotrosPage() {
   const router = useRouter();
-  const [visible, setVisible]   = useState(false);
-  const [openFaq, setOpenFaq]   = useState<number | null>(null);
-  const [agentIdx, setAgentIdx] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
-
-  const prevAgent = () => setAgentIdx(i => Math.max(0, i - 1));
-  const nextAgent = () => setAgentIdx(i => Math.min(AGENTES.length - VISIBLE_CARDS, i + 1));
-  const canPrev = agentIdx > 0;
-  const canNext = agentIdx < AGENTES.length - VISIBLE_CARDS;
 
   return (
     <div className={styles.pg}>
@@ -206,7 +170,7 @@ export default function NosotrosPage() {
           <div className={styles.sectionHead}>
             <span className={styles.eyebrow2}>Nuestra historia</span>
             <h2 className={styles.sectionH2}>4 años transformando trámites</h2>
-            <p className={styles.sectionDesc}>De una pensionada con vocación de servicio a una red de 10 agentes en el Meta.</p>
+            <p className={styles.sectionDesc}>De una pensionada con vocación de servicio a una red de agentes en el Meta.</p>
           </div>
           <div className={styles.tlList}>
             {TIMELINE.map((item, i) => (
@@ -251,77 +215,6 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {/* ── AGENTES ── */}
-      <section className={styles.agentesSection}>
-        <div className={styles.agentesBg} aria-hidden />
-        <div className={styles.inner}>
-          <div className={styles.sectionHead}>
-            <span className={styles.eyebrow2}>Nuestro equipo</span>
-            <h2 className={styles.sectionH2}>Los agentes que hacen posible todo</h2>
-            <p className={styles.sectionDesc}>10 agentes distribuidos en 6 municipios del Meta, listos para atenderte.</p>
-          </div>
-
-          <div className={styles.carouselWrap}>
-            <button
-              className={`${styles.carouselBtn} ${!canPrev ? styles.carouselBtnDisabled : ''}`}
-              onClick={prevAgent}
-              disabled={!canPrev}
-              aria-label="Anterior"
-            >
-              <ChevronLeftIcon />
-            </button>
-
-            <div className={styles.carouselTrack}>
-              <div
-                className={styles.carouselInner}
-                style={{ transform: `translateX(calc(-${agentIdx} * (100% / ${VISIBLE_CARDS})))` }}
-              >
-                {AGENTES.map((a, i) => (
-                  <div key={a.nombre} className={styles.agenteCard} style={{ animationDelay: `${i * 0.05}s` }}>
-                    <div className={styles.agenteAvatar}>{a.iniciales}</div>
-                    <div className={styles.agenteRating}>
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <StarIcon key={j} />
-                      ))}
-                    </div>
-                    <h3 className={styles.agenteNombre}>{a.nombre}</h3>
-                    <p className={styles.agenteCargo}>{a.cargo}</p>
-                    <div className={styles.agenteMeta}>
-                      <div className={styles.agenteMetaItem}>
-                        <strong>{a.exp}</strong>
-                        <span>Experiencia</span>
-                      </div>
-                  
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              className={`${styles.carouselBtn} ${!canNext ? styles.carouselBtnDisabled : ''}`}
-              onClick={nextAgent}
-              disabled={!canNext}
-              aria-label="Siguiente"
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
-
-          {/* Dots */}
-          <div className={styles.carouselDots}>
-            {Array.from({ length: AGENTES.length - VISIBLE_CARDS + 1 }).map((_, i) => (
-              <button
-                key={i}
-                className={`${styles.dot} ${agentIdx === i ? styles.dotActive : ''}`}
-                onClick={() => setAgentIdx(i)}
-                aria-label={`Ir a agente ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
       <section id="faq" className={styles.faqSection}>
         <div className={styles.inner} style={{ maxWidth: 800 }}>
@@ -360,7 +253,7 @@ export default function NosotrosPage() {
           <button className={styles.btnWhite} onClick={() => router.push('/registro')}>
             Crear cuenta gratis <ArrowIcon />
           </button>
-          <a href="tel:+573100000000" className={styles.btnGhostW}>
+          <a href="tel:+573114691980" className={styles.btnGhostW}>
             <PhoneIcon /> Llamar ahora
           </a>
         </div>
