@@ -264,20 +264,20 @@ export default function DashboardAdminPage() {
           </div>
 
           <div className={styles.card}>
+            <div className={styles.cardIcon}><UsersIcon /></div>
+            <h3>Consultar Clientes</h3>
+            <p>Gestiona y consulta la lista completa de clientes registrados</p>
+            <Link href="/listar-clientes" className={styles.cardBtn}>
+              Ver Clientes <ArrowIcon />
+            </Link>
+          </div>
+
+          <div className={styles.card}>
             <div className={styles.cardIcon}><BarChartIcon /></div>
             <h3>Reportes</h3>
             <p>Genera y consulta reportes de actividad y gestión del sistema</p>
             <Link href="/reportes" className={styles.cardBtn}>
               Ver Reportes <ArrowIcon />
-            </Link>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardIcon}><UsersIcon /></div>
-            <h3>Ver Clientes</h3>
-            <p>Gestiona y consulta la lista completa de clientes registrados</p>
-            <Link href="/listar-clientes" className={styles.cardBtn}>
-              Ver Clientes <ArrowIcon />
             </Link>
           </div>
 
