@@ -286,6 +286,26 @@
   display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.2rem;
 }
 
+/* Diseño 3 arriba, 2 abajo */
+.gridCustom {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.5rem;
+  animation: fadeUp 0.5s ease 0.28s both;
+}
+
+.cardSpan2 { grid-column: span 2; }
+.cardSpan3 { grid-column: span 3; }
+
+@media (max-width: 900px) {
+  .gridCustom { grid-template-columns: repeat(2, 1fr); }
+  .cardSpan2, .cardSpan3 { grid-column: span 1; }
+}
+
+@media (max-width: 600px) {
+  .gridCustom { grid-template-columns: 1fr; }
+}
+
 .card {
   position:relative; overflow:hidden;
   background:rgba(255,255,255,0.72);
