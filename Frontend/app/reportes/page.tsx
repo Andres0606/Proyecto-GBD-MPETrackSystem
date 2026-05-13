@@ -310,49 +310,45 @@ export default function ReportesPage() {
               <table className={styles.biTable}>
                 <thead>
                   <tr>
-                    <th>Mes</th>
                     <th>Trámite</th>
-                    <th>Ventas</th>
+                    <th>Abril (Ant.)</th>
+                    <th>Mayo (Act.)</th>
                     <th>Crecimiento</th>
-                    <th className={styles.colVillavo}>Villavo</th>
-                    <th className={styles.colRestrepo}>Restrepo</th>
-                    <th className={styles.colAcacias}>Acacías</th>
-                    <th className={styles.colGranada}>Granada</th>
-                    <th className={styles.colLopez}>Pto. López</th>
-                    <th className={styles.colGuamal}>Guamal</th>
+                    <th className={styles.colSedes}>Sedes (Total)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.biAnalytics && data.biAnalytics.map((item, idx) => {
-                    const diff = item.VENTAS_MES - (item.VENTAS_MES_ANTERIOR || 0);
-                    const pct = item.VENTAS_MES_ANTERIOR 
-                      ? ((diff / item.VENTAS_MES_ANTERIOR) * 100).toFixed(1) 
-                      : 'N/A';
-                    const isPositive = !item.VENTAS_MES_ANTERIOR || diff >= 0;
+                  {/* Agrupamos por trámite para comparar meses directamente */}
+                  {data.biAnalytics && data.biAnalytics
+                    .filter(item => item.PERIODO === '2026-05') // Tomamos los de este mes
+                    .map((item, idx) => {
+                      const diff = item.VENTAS_MES - (item.VENTAS_MES_ANTERIOR || 0);
+                      const pct = item.VENTAS_MES_ANTERIOR 
+                        ? ((diff / item.VENTAS_MES_ANTERIOR) * 100).toFixed(1) 
+                        : 'N/A';
+                      const isPositive = !item.VENTAS_MES_ANTERIOR || diff >= 0;
+                      const totalSedes = (item.VILLAVO || 0) + (item.RESTREPO || 0) + (item.ACACIAS || 0) + (item.GRANADA || 0) + (item.PTO_LOPEZ || 0) + (item.GUAMAL || 0);
 
-                    return (
-                      <tr key={idx}>
-                        <td><strong>{item.PERIODO}</strong></td>
-                        <td>{item.TRAMITE_DESC}</td>
-                        <td className={styles.incomeVal}>${item.VENTAS_MES.toLocaleString()}</td>
-                        <td>
-                          {item.VENTAS_MES_ANTERIOR ? (
-                            <span className={isPositive ? styles.growthBadgePos : styles.growthBadgeNeg}>
-                              {isPositive ? '▲' : '▼'} {pct}%
-                            </span>
-                          ) : (
-                            <span className={styles.growthBadgeNone}>N/A</span>
-                          )}
-                        </td>
-                        <td className={item.VILLAVO > 0 ? styles.activeCell : ''}>{item.VILLAVO || 0}</td>
-                        <td className={styles.colRestrepo}>{item.RESTREPO || 0}</td>
-                        <td className={styles.colAcacias}>{item.ACACIAS || 0}</td>
-                        <td className={styles.colGranada}>{item.GRANADA || 0}</td>
-                        <td className={styles.colLopez}>{item.PTO_LOPEZ || 0}</td>
-                        <td className={styles.colGuamal}>{item.GUAMAL || 0}</td>
-                      </tr>
-                    );
-                  })}
+                      return (
+                        <tr key={idx}>
+                          <td><strong>{item.TRAMITE_DESC}</strong></td>
+                          <td className={styles.oldVal}>
+                            {item.VENTAS_MES_ANTERIOR ? `$${item.VENTAS_MES_ANTERIOR.toLocaleString()}` : '-'}
+                          </td>
+                          <td className={styles.incomeVal}>${item.VENTAS_MES.toLocaleString()}</td>
+                          <td>
+                            {item.VENTAS_MES_ANTERIOR ? (
+                              <span className={isPositive ? styles.growthBadgePos : styles.growthBadgeNeg}>
+                                {isPositive ? '▲' : '▼'} {pct}%
+                              </span>
+                            ) : (
+                              <span className={styles.growthBadgeNone}>Nuevo</span>
+                            )}
+                          </td>
+                          <td className={styles.colSedes}>{totalSedes}</td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
@@ -368,15 +364,13 @@ export default function ReportesPage() {
             </div>
             <div className={styles.bottleneckList}>
               {data.bottlenecks && data.bottlenecks.map((item, i) => (
-                <div key={i} className={styles.bottleneckItem}>
+                <div key={i} className={`${styles.bottleneckItem} ${item.DIAS_PROMEDIO_ESPERA > 3 ? styles.itemBad : styles.itemGood}`}>
                   <div className={styles.bottleneckInfo}>
                     <strong>{item.NOMBRESEDE}</strong>
                     <p>{item.NOMBREMUNICIPIO}</p>
                   </div>
                   <div className={styles.bottleneckValue}>
-                    <span className={item.DIAS_PROMEDIO_ESPERA > 3 ? styles.negative : styles.positive}>
-                      {item.DIAS_PROMEDIO_ESPERA} días
-                    </span>
+                    <span>{item.DIAS_PROMEDIO_ESPERA} días</span>
                     <small>Promedio</small>
                   </div>
                 </div>
@@ -402,7 +396,7 @@ export default function ReportesPage() {
                   <div className={styles.barTrack}>
                     <div 
                       className={styles.barFill} 
-                      style={{ width: `${item.PORCENTAJE_CARGA}%`, background: '#6366f1' }}
+                      style={{ width: `${item.PORCENTAJE_CARGA}%`, background: 'linear-gradient(90deg, #1565C0, #1E88E5)' }}
                     />
                   </div>
                 </div>
