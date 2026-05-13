@@ -14,15 +14,11 @@ async function initialize() {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       connectString: process.env.DB_CONNECTION_STRING,
-
-      // Wallet Oracle Cloud
       configDir: process.env.WALLET_PATH,
-
       poolMin: 1,
       poolMax: 10,
       poolIncrement: 1
     });
-
     console.log('Oracle Connection Pool initialized');
   } catch (err) {
     console.error(err);
@@ -34,8 +30,17 @@ async function close() {
   await oracledb.getPool().close(0);
 }
 
+// Helper para obtener conexión con identidad de usuario
+const getConnection = async (userCedula = 'SISTEMA') => {
+  const conn = await oracledb.getConnection();
+  // Seteamos el identificador para que el TRIGGER de auditoría lo capture
+  conn.clientIdentifier = userCedula;
+  return conn;
+};
+
 module.exports = {
   initialize,
   close,
-  oracledb
+  oracledb,
+  getConnection
 };

@@ -240,6 +240,7 @@ const generarHorasDisponibles = () => {
         body: JSON.stringify({
           idCita: parseInt(idCita),
           idAsesor: parseInt(cedulaAsesor!),
+          userCedula: cedulaAsesor, // Enviamos la cédula para la auditoría
           fechaProgramada,
         }),
       });

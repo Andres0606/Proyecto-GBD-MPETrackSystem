@@ -188,7 +188,10 @@ const confirmarCancelacionCita = async () => {
     const response = await fetch(`${BACKEND_URL}/api/citas/cancelar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idCita: citaParaCancelar.idCita }),
+      body: JSON.stringify({ 
+        idCita: citaParaCancelar.idCita,
+        userCedula: cedulaAsesor // Para la auditoría
+      }),
     });
 
     const data = await response.json();
@@ -220,7 +223,10 @@ const confirmarInasistenciaCita = async () => {
     const response = await fetch(`${BACKEND_URL}/api/citas/inasistencia`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idCita: citaParaInasistencia.idCita }),
+      body: JSON.stringify({ 
+        idCita: citaParaInasistencia.idCita,
+        userCedula: cedulaAsesor // Para la auditoría
+      }),
     });
 
     const data = await response.json();

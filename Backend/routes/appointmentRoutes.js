@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { oracledb } = require('../config/db');
+const { oracledb, getConnection } = require('../config/db');
 
 // Solicitar nueva cita
 router.post('/solicitar', async (req, res) => {
@@ -264,8 +264,8 @@ router.get('/agendadas/:cedulaAsesor', async (req, res) => {
 router.post('/cancelar', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection();
-    const { idCita } = req.body;
+    const { idCita, userCedula } = req.body;
+    connection = await getConnection(userCedula);
     await connection.execute(
       "UPDATE CITA SET FECHAHORAPROGRAMADA = NULL, IDASESOR = NULL WHERE IDCITA = :1",
       [idCita]
@@ -284,8 +284,8 @@ router.post('/cancelar', async (req, res) => {
 router.post('/atender', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection();
-    const { idCita, fechaProgramada, idAsesor } = req.body;
+    const { idCita, fechaProgramada, idAsesor, userCedula } = req.body;
+    connection = await getConnection(userCedula || idAsesor);
 
     // 1. Obtener ID real del asesor a partir de la cédula
     let idAsesorReal = null;
@@ -332,8 +332,8 @@ router.put('/agendar', async (req, res) => {
 router.post('/completar', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection();
-    const { idCita } = req.body;
+    const { idCita, userCedula } = req.body;
+    connection = await getConnection(userCedula);
     
     await connection.execute(
       "UPDATE CITA SET ESTADOCITA = 'Atendida' WHERE IDCITA = :1",
