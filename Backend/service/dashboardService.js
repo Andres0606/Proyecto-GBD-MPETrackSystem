@@ -26,10 +26,10 @@ class DashboardService {
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
-      // 3. Contar vehículos únicos asociados a sus citas
+      // 3. Contar vehículos vinculados usando la vista oficial
       const vehiculosRes = await connection.execute(
-        'SELECT COUNT(DISTINCT placaVehiculo) as TOTAL FROM CITA WHERE idCliente = :1 AND placaVehiculo IS NOT NULL',
-        [idCliente],
+        'SELECT COUNT(*) as TOTAL FROM VW_DETALLE_VEHICULOS WHERE TRIM(CEDULA_CLIENTE) = TRIM(:1)',
+        [cedula],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
