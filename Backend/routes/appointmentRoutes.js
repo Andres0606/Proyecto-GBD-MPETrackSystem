@@ -137,11 +137,23 @@ router.get('/cotizar/:cedula/:idTramite', async (req, res) => {
     });
 
     const respuestaStr = result.outBinds.ret;
+    
+    if (!respuestaStr) {
+      return res.status(500).json({ status: 'ERROR', mensaje: 'La función de Oracle retornó un valor nulo o hubo un error interno en la BD' });
+    }
+
     if (respuestaStr.includes('error')) {
       return res.status(400).json({ status: 'ERROR', mensaje: 'No se pudo cotizar el trámite' });
     }
 
-    const cotizacion = JSON.parse(respuestaStr);
+    let cotizacion;
+    try {
+      cotizacion = JSON.parse(respuestaStr);
+    } catch (parseError) {
+      console.error('Error parseando JSON de Oracle:', respuestaStr);
+      return res.status(500).json({ status: 'ERROR', mensaje: 'Error procesando la respuesta del cotizador' });
+    }
+    
     res.json({ status: 'OK', cotizacion });
   } catch (err) { 
     console.error('Error cotizando trámite:', err);
