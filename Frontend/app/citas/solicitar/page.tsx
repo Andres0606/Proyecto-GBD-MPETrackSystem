@@ -56,8 +56,6 @@ const [validandoLicencia, setValidandoLicencia] = useState(false);
   const tipoDropdownRef = useRef<HTMLDivElement>(null);
 
   const [tipoTramiteSeleccionado, setTipoTramiteSeleccionado] = useState<string>('');
-  const [cotizacion, setCotizacion] = useState<{ precioOriginal: number, descuentoPct: number, precioFinal: number, nivel: string } | null>(null);
-  const [cotizando, setCotizando] = useState(false);
 
     const [esDuenioRegistrado, setEsDuenioRegistrado] = useState<boolean>(true);
     const [esDestinatarioRegistrado, setEsDestinatarioRegistrado] = useState<boolean>(true);
@@ -177,49 +175,30 @@ const cargarLicenciaCliente = async () => {
       console.error('Error cargando sedes:', error);
     }
   };
+  const seleccionarTipoTramite = (tipo: TipoTramite) => {
+    const idTipo = tipo.id.toString();
 
-const seleccionarTipoTramite = async (tipo: TipoTramite) => {
-  const idTipo = tipo.id.toString();
+    setFormData(prev => ({
+      ...prev,
+      idTipoTramite: idTipo,
+      idVehiculo: ''
+    }));
 
-  setFormData(prev => ({
-    ...prev,
-    idTipoTramite: idTipo,
-    idVehiculo: ''
-  }));
+    setValorTramite(tipo.valorBase);
+    setTipoTramiteSeleccionado(tipo.nombre);
+    setRequiereVehiculo(
+      tipo.requiereVehiculo === 'S' && tipo.nombre !== 'Traspaso'
+    );
+    setEsDuenioRegistrado(true);
+    setDuenioActual({
+      cedula: '',
+      nombres: '',
+      apellido: ''
+    });
 
-  setValorTramite(tipo.valorBase);
-  setTipoTramiteSeleccionado(tipo.nombre);
-setRequiereVehiculo(
-  tipo.requiereVehiculo === 'S' && tipo.nombre !== 'Traspaso'
-);
-  setEsDuenioRegistrado(true);
-  setDuenioActual({
-    cedula: '',
-    nombres: '',
-    apellido: ''
-  });
-
-  setTipoDropdownOpen(false);
-  setError('');
-
-  if (idCliente) {
-    try {
-      setCotizando(true);
-      setCotizacion(null);
-      const res = await fetch(`${BACKEND_URL}/api/citas/cotizar/${idCliente}/${idTipo}`);
-      const data = await res.json();
-      if (data.status === 'OK' && data.cotizacion) {
-        setCotizacion(data.cotizacion);
-        setValorTramite(data.cotizacion.precioFinal);
-      }
-    } catch (err) {
-      console.error('Error cotizando trámite', err);
-    } finally {
-      setCotizando(false);
-    }
-  }
-};
-
+    setTipoDropdownOpen(false);
+    setError('');
+  };
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -536,20 +515,7 @@ const bloquearDuplicadoLicencia =
     </div>
   )}
 </div>
-              {cotizando ? (
-                <div className={styles.valorAviso}>
-                  <p style={{ color: '#1565C0' }}>⏳ Calculando tu tarifa personalizada...</p>
-                </div>
-              ) : cotizacion && cotizacion.descuentoPct > 0 ? (
-                <div className={styles.valorAviso} style={{ background: 'rgba(46, 125, 50, 0.1)', borderColor: 'rgba(46, 125, 50, 0.3)', padding: '1rem' }}>
-                  <p style={{ color: '#2E7D32', fontWeight: 800, fontSize: '0.95rem' }}>
-                    ⭐ ¡Felicidades! Por ser Cliente {cotizacion.nivel}, tienes un {cotizacion.descuentoPct}% de descuento.
-                  </p>
-                  <p style={{ textDecoration: 'line-through', color: '#7a92ae', fontSize: '0.85rem', marginTop: '0.3rem' }}>Precio original: ${cotizacion.precioOriginal.toLocaleString()}</p>
-                  <p style={{ color: '#1B5E20', fontSize: '1.15rem', fontWeight: 800 }}>Tu precio: ${cotizacion.precioFinal.toLocaleString()}</p>
-                  <small style={{ color: '#2E7D32', marginTop: '0.4rem', display: 'block' }}>El valor final puede variar según conceptos adicionales al momento del pago</small>
-                </div>
-              ) : valorTramite && (
+              {valorTramite && (
                 <div className={styles.valorAviso}>
                   <p> Valor base: ${valorTramite.toLocaleString()}</p>
                   <small> El valor puede variar según conceptos adicionales</small>
