@@ -110,7 +110,8 @@ router.get('/cliente/:cedula', async (req, res) => {
         CEDULA_CLIENTE as "cedulaCliente",
         NUMEROVIN as "numeroVin",
         COMBUSTIBLE as "combustible"
-      FROM TABLE(fn_get_vehiculos_cliente(:1))
+      FROM VW_DETALLE_VEHICULOS
+      WHERE TRIM(CEDULA_CLIENTE) = TRIM(:1)
     `;
     const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', vehiculos: result.rows });
