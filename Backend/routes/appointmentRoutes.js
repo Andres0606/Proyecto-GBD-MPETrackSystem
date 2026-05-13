@@ -141,13 +141,23 @@ router.get('/pendientes/:cedulaAsesor', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT * FROM vw_gestion_citas_asesor
-      WHERE "fechaProgramada" IS NULL
-      ORDER BY "fechaSolicitud" ASC
+      SELECT 
+        idCita as "idCita",
+        cliente as "cliente",
+        tipoTramite as "tipoTramite",
+        sede as "sede",
+        valor as "valorBase",
+        fechaSolicitud as "fechaSolicitud",
+        1 as "esSuEspecialidad"
+      FROM TABLE(fn_get_citas_asesor_coll(:1))
+      WHERE fechaProgramada IS NULL
+      ORDER BY fechaSolicitud ASC
     `;
-    const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    // Enviamos la cédula del asesor para filtrar por su sede/especialidad
+    const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
   } catch (err) {
+    console.error('Error en pendientes:', err);
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
   } finally {
     if (connection) await connection.close();
@@ -168,6 +178,7 @@ router.get('/agendadas/:cedulaAsesor', async (req, res) => {
         valor as "valorBase",
         fechaSolicitud as "fechaProgramada"
       FROM TABLE(fn_get_citas_asesor_coll(:1))
+      WHERE fechaSolicitud IS NOT NULL
       ORDER BY fechaSolicitud ASC
     `;
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
