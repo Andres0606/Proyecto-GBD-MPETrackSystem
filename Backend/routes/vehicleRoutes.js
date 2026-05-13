@@ -101,12 +101,15 @@ router.get('/cliente/:cedula', async (req, res) => {
         LINEA as "linea",
         COLOR as "color",
         MODELO as "modelo",
-        clase as "clase",
-        numMotor as "numMotor",
-        numChasis as "numChasis",
-        tipoServicio as "tipoServicio",
+        CLASE as "clase",
+        NUMMOTOR as "numMotor",
+        NUMCHASIS as "numChasis",
+        TIPOSERVICIO as "tipoServicio",
         PRENDADO as "prendado",
-        ESTADO as "estado"
+        ESTADO as "estado",
+        CEDULA_CLIENTE as "cedulaCliente",
+        NUMEROVIN as "numeroVin",
+        COMBUSTIBLE as "combustible"
       FROM TABLE(fn_get_vehiculos_cliente(:1))
     `;
     const result = await connection.execute(sql, [cedula], { outFormat: oracledb.OUT_FORMAT_OBJECT });
