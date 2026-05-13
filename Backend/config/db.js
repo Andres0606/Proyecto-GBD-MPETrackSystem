@@ -33,8 +33,14 @@ async function close() {
 // Helper para obtener conexión con identidad de usuario
 const getConnection = async (userCedula = 'SISTEMA') => {
   const conn = await oracledb.getConnection();
-  // Seteamos el identificador para que el TRIGGER de auditoría lo capture
-  conn.clientIdentifier = userCedula;
+  
+  // Ejecutamos el comando directo de Oracle para setear la identidad
+  // Esto es más robusto que la propiedad clientIdentifier
+  await conn.execute(
+    `BEGIN DBMS_SESSION.SET_IDENTIFIER(:id); END;`,
+    { id: userCedula.toString() }
+  );
+  
   return conn;
 };
 

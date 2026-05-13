@@ -178,11 +178,12 @@ const cargarLicenciaCliente = async () => {
   const seleccionarTipoTramite = (tipo: TipoTramite) => {
     const idTipo = tipo.id.toString();
 
-    setFormData(prev => ({
-      ...prev,
-      idTipoTramite: idTipo,
-      idVehiculo: ''
-    }));
+  setFormData(prev => ({
+    ...prev,
+    idTipoTramite: idTipo,
+    // Si NO requiere vehículo, limpiamos el idVehiculo para que no se envíe basura
+    idVehiculo: tipo.requiereVehiculo === 'N' ? '' : prev.idVehiculo
+  }));
 
     setValorTramite(tipo.valorBase);
     setTipoTramiteSeleccionado(tipo.nombre);
