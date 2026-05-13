@@ -92,6 +92,11 @@ const EmptyIcon = () => (
     <line x1="16" y1="2" x2="16" y2="6"/>
   </svg>
 );
+const AlertIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+);
 
 interface CitaPendiente {
   idCita: number;
@@ -123,7 +128,9 @@ export default function AsesorCitasPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [citaParaCancelar, setCitaParaCancelar] = useState<CitaAgendada | null>(null);
-const [cancelando, setCancelando] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
+  const [citaParaInasistencia, setCitaParaInasistencia] = useState<CitaAgendada | null>(null);
+  const [marcandoInasistencia, setMarcandoInasistencia] = useState(false);
 
   useEffect(() => {
   const tabUrl = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('tab');
@@ -196,6 +203,38 @@ const confirmarCancelacionCita = async () => {
     setError('Error de conexión con el servidor');
   } finally {
     setCancelando(false);
+  }
+};
+
+const marcarInasistenciaCita = (cita: CitaAgendada) => {
+  setError('');
+  setCitaParaInasistencia(cita);
+};
+
+const confirmarInasistenciaCita = async () => {
+  if (!citaParaInasistencia || marcandoInasistencia) return;
+
+  try {
+    setMarcandoInasistencia(true);
+
+    const response = await fetch(`${BACKEND_URL}/api/citas/inasistencia`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idCita: citaParaInasistencia.idCita }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'OK') {
+      setCitaParaInasistencia(null);
+      await cargarCitas();
+    } else {
+      setError(data.mensaje || 'Error al marcar inasistencia');
+    }
+  } catch {
+    setError('Error de conexión con el servidor');
+  } finally {
+    setMarcandoInasistencia(false);
   }
 };
 
@@ -417,6 +456,13 @@ const confirmarCancelacionCita = async () => {
                   >
                     Cancelar cita
                   </button>
+                  
+                  <button
+                    className={styles.btnInasistencia}
+                    onClick={() => marcarInasistenciaCita(cita)}
+                  >
+                    <AlertIcon /> No Asistió
+                  </button>
                   </div>
                 </div>
                   </div>
@@ -484,6 +530,51 @@ const confirmarCancelacionCita = async () => {
                 disabled={cancelando}
               >
                 {cancelando ? 'Cancelando...' : 'Cancelar cita'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {citaParaInasistencia && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <div className={styles.modalHeader}>
+              <h3>Marcar como Inasistencia</h3>
+              <p>
+                El cliente recibirá un "strike". Si acumula 3, su cuenta será bloqueada. ¿Confirmas que el cliente no se presentó a su cita?
+              </p>
+            </div>
+
+            <div className={styles.modalInfo}>
+              <div>
+                <span>Cliente</span>
+                <strong>{citaParaInasistencia.cliente}</strong>
+              </div>
+              <div>
+                <span>Trámite</span>
+                <strong>{citaParaInasistencia.tipoTramite}</strong>
+              </div>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.modalBtnVolver}
+                onClick={() => setCitaParaInasistencia(null)}
+                disabled={marcandoInasistencia}
+              >
+                Volver
+              </button>
+
+              <button
+                type="button"
+                className={styles.modalBtnCancelar}
+                style={{ background: 'rgba(230, 81, 0, 0.1)', color: '#c04000' }}
+                onClick={confirmarInasistenciaCita}
+                disabled={marcandoInasistencia}
+              >
+                {marcandoInasistencia ? 'Marcando...' : 'Sí, no asistió'}
               </button>
             </div>
           </div>

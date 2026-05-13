@@ -95,7 +95,7 @@ router.post('/solicitar', async (req, res) => {
     console.error('Error en solicitar cita:', err.message);
     
     const msg = err.message.includes('ORA-20') 
-      ? err.message.split('\n')[0].split(': ')[1] 
+      ? err.message.split('\n')[0].replace(/ORA-\d+:\s*/, '')
       : 'Error interno al procesar la cita: ' + err.message;
       
     res.status(500).json({ status: 'ERROR', mensaje: msg });
@@ -252,6 +252,50 @@ router.post('/completar', async (req, res) => {
     await connection.commit();
     
     res.json({ status: 'OK', mensaje: 'Cita marcada como atendida' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ status: 'ERROR', mensaje: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// Marcar cita como No_Asistio (Inasistencia manual por parte del asesor)
+router.post('/inasistencia', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const { idCita } = req.body;
+    
+    // Ejecutamos un bloque PL/SQL para hacer todo de forma atómica en la BD
+    const sql = `
+      DECLARE
+        v_id_cliente NUMBER;
+        v_strikes NUMBER;
+      BEGIN
+        UPDATE CITA 
+        SET ESTADOCITA = 'No_Asistio' 
+        WHERE IDCITA = :1
+        RETURNING IDCLIENTE INTO v_id_cliente;
+        
+        UPDATE CLIENTE
+        SET STRIKES = NVL(STRIKES, 0) + 1
+        WHERE IDCLIENTE = v_id_cliente
+        RETURNING STRIKES INTO v_strikes;
+        
+        IF v_strikes >= 3 THEN
+           UPDATE CLIENTE
+           SET FECHA_DESBLOQUEO = SYSDATE + 30,
+               STRIKES = 0
+           WHERE IDCLIENTE = v_id_cliente;
+        END IF;
+      END;
+    `;
+    
+    await connection.execute(sql, [idCita]);
+    await connection.commit();
+    
+    res.json({ status: 'OK', mensaje: 'Cita marcada como inasistencia. Se ha sumado 1 strike al cliente.' });
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ status: 'ERROR', mensaje: err.message });
