@@ -94,10 +94,11 @@ interface ReportData {
   ingresos: { tipo: string; total: number }[];
   asesores: { asesor: string; citasAtendidas: number }[];
   general: {
+    citasPendientes: number;
     totalVehiculos: number;
     totalClientes: number;
-    citasPendientes: number;
   };
+  biAnalytics: any[];
 }
 
 export default function ReportesPage() {
@@ -265,6 +266,56 @@ export default function ReportesPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Analítica Avanzada por Municipios (NUEVO) */}
+          <div className={styles.chartCardFull}>
+            <h3>Inteligencia Operativa por Municipio (Analítica PL/SQL)</h3>
+            <div className={styles.tableWrapper}>
+              <table className={styles.biTable}>
+                <thead>
+                  <tr>
+                    <th>Mes</th>
+                    <th>Trámite</th>
+                    <th>Ventas</th>
+                    <th>Crecimiento</th>
+                    <th className={styles.colVillavo}>Villavo</th>
+                    <th className={styles.colRestrepo}>Restrepo</th>
+                    <th className={styles.colAcacias}>Acacías</th>
+                    <th className={styles.colGranada}>Granada</th>
+                    <th className={styles.colLopez}>Pto. López</th>
+                    <th className={styles.colGuamal}>Guamal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.biAnalytics && data.biAnalytics.map((item, idx) => {
+                    const diff = item.VENTAS_MES - (item.VENTAS_MES_ANTERIOR || 0);
+                    const pct = item.VENTAS_MES_ANTERIOR 
+                      ? ((diff / item.VENTAS_MES_ANTERIOR) * 100).toFixed(1) 
+                      : 'N/A';
+                    const isPositive = !item.VENTAS_MES_ANTERIOR || diff >= 0;
+
+                    return (
+                      <tr key={idx}>
+                        <td><strong>{item.PERIODO}</strong></td>
+                        <td>{item.TRAMITE_DESC}</td>
+                        <td className={styles.incomeVal}>${item.VENTAS_MES.toLocaleString()}</td>
+                        <td className={isPositive ? styles.positive : styles.negative}>
+                          {item.VENTAS_MES_ANTERIOR ? (isPositive ? '▲ ' : '▼ ') : ''}
+                          {pct}{item.VENTAS_MES_ANTERIOR ? '%' : ''}
+                        </td>
+                        <td className={styles.colVillavo}>{item.VILLAVO || 0}</td>
+                        <td className={styles.colRestrepo}>{item.RESTREPO || 0}</td>
+                        <td className={styles.colAcacias}>{item.ACACIAS || 0}</td>
+                        <td className={styles.colGranada}>{item.GRANADA || 0}</td>
+                        <td className={styles.colLopez}>{item.PTO_LOPEZ || 0}</td>
+                        <td className={styles.colGuamal}>{item.GUAMAL || 0}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 

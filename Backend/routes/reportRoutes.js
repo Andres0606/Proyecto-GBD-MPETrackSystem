@@ -42,6 +42,13 @@ router.get('/stats', async (req, res) => {
       FROM DUAL
     `, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
+    // NUEVO: Analítica avanzada por municipios (BI View)
+    const resBI = await connection.execute(
+      'SELECT * FROM VW_INTELIGENCIA_OPERATIVA FETCH FIRST 10 ROWS ONLY', 
+      [], 
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
     res.json({
       status: 'OK',
       data: {
@@ -50,7 +57,8 @@ router.get('/stats', async (req, res) => {
         tipos: resTipos.rows,
         citasEstado: resCitasEstado.rows,
         asesores: resAsesores.rows,
-        general: resGeneral.rows[0]
+        general: resGeneral.rows[0],
+        biAnalytics: resBI.rows
       }
     });
   } catch (err) {
