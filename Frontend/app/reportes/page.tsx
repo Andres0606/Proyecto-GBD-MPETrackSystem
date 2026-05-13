@@ -6,7 +6,7 @@ import Link from 'next/link';
 import styles from '../CSS/Admin/Reportes.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
-/* ── Technical Icons ── */
+/* ── Icons ── */
 const BarChartIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
@@ -94,13 +94,12 @@ export default function ReportesPage() {
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const userRole = sessionStorage.getItem('userRol'); // Corregido key de sessionStorage
+    const userRole = sessionStorage.getItem('userRol');
 
     if (!isLoggedIn || userRole !== '3') {
       router.push('/login');
       return;
     }
-    
     cargarReportes();
   }, []);
 
@@ -121,12 +120,10 @@ export default function ReportesPage() {
     }
   };
 
-  if (loading) return <div className={styles.loading}>Cargando analítica del sistema...</div>;
+  if (loading) return <div className={styles.loading}>Cargando analítica...</div>;
   if (!data) return <div className={styles.loading}>{error}</div>;
 
   const totalIngresos = data.ingresos.reduce((acc, curr) => acc + curr.total, 0);
-
-  // Colores para las gráficas
   const palette = ['#1565C0', '#F57C00', '#2E7D32', '#C62828', '#6366f1'];
 
   return (
@@ -173,8 +170,6 @@ export default function ReportesPage() {
         </div>
 
         <div className={styles.chartsGrid}>
-          
-          {/* ── Distribución de Trámites (Doughnut) ── */}
           <div className={styles.chartCard}>
             <h3>Distribución de Trámites</h3>
             <DoughnutChart 
@@ -183,16 +178,14 @@ export default function ReportesPage() {
             />
           </div>
 
-          {/* ── Distribución de Citas (Doughnut) ── */}
           <div className={styles.chartCard}>
             <h3>Estado de Citas</h3>
             <DoughnutChart 
               data={data.citasEstado.map(e => ({ label: e.estado, value: e.cantidad }))} 
-              colors={['#10b981', '#f59e0b', '#6366f1', '#ef4444', '#94a3b8']}
+              colors={['#2E7D32', '#F57C00', '#1565C0', '#C62828', '#94a3b8']}
             />
           </div>
 
-          {/* ── Trámites por Tipo (Technical Bars) ── */}
           <div className={styles.chartCard}>
             <h3>Trámites por Servicio</h3>
             <div className={styles.barList}>
@@ -216,7 +209,6 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* ── Ingresos por Tipo ── */}
           <div className={styles.chartCard}>
             <h3>Ingresos por Trámite</h3>
             <div className={styles.incomeList}>
@@ -235,7 +227,6 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* ── Rendimiento de Asesores ── */}
           <div className={styles.chartCardFull}>
             <h3>Productividad de Asesores</h3>
             <div className={styles.asesorGrid}>
@@ -253,7 +244,6 @@ export default function ReportesPage() {
               ))}
             </div>
           </div>
-
         </div>
 
       </div>

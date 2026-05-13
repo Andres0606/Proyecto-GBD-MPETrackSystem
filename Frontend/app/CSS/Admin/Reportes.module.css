@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
-   Reportes.module.css — MPE SYSTEM · Technical Glass BI
-   Integración de Estética Identitaria con Analítica Seria
+   Reportes.module.css — MPE SYSTEM · Tipografía "Gestión"
+   Inspirado en la fuerza visual de Poppins del ejemplo
 ═══════════════════════════════════════════════════════ */
 
 .container {
@@ -11,18 +11,8 @@
   padding: 3rem 1.5rem;
   position: relative;
   overflow: hidden;
-  /* El color del resto: gradiente identitario */
   background: linear-gradient(145deg, #dce8ff 0%, #eaf3ff 25%, #e2f0e8 60%, #fdf6e3 100%);
-}
-
-/* ── Fondo Técnico Sutil ── */
-.container::before {
-  content: '';
-  position: absolute;
-  top: -5%; left: -5%;
-  width: 40%; height: 40%;
-  background: radial-gradient(circle, rgba(21, 101, 192, 0.1) 0%, transparent 70%);
-  z-index: 0;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 .grid {
@@ -48,38 +38,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Header Serio ── */
+/* ── Header Estilo "Gestión" (Letra Fuerte) ── */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 3rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  align-items: flex-start;
+  margin-bottom: 3.5rem;
   padding-bottom: 2rem;
-}
-
-.backBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 12px;
-  color: #1a2b45;
-  font-family: var(--ffb, 'DM Sans', sans-serif);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-.backBtn:hover {
-  background: rgba(255, 255, 255, 0.85);
-  transform: translateX(-4px);
-  color: #1565C0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 .titleArea {
@@ -89,79 +55,93 @@
 }
 
 .iconBox {
-  width: 56px; height: 56px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #42A5F5, #1565C0);
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  background: #1565C0;
   display: grid; place-items: center;
   color: #fff;
-  box-shadow: 0 6px 15px rgba(21, 101, 192, 0.2);
 }
-.iconBox svg { width: 28px; height: 28px; }
+.iconBox svg { width: 26px; height: 26px; }
 
 .titleArea h1 {
-  font-family: var(--ff, 'Sora', sans-serif);
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #0d1f36;
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 2rem;
+  font-weight: 900; /* Letra extra fuerte como el ejemplo */
+  color: #1a2b45;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 .titleArea p {
-  font-family: var(--ffb, 'DM Sans', sans-serif);
-  font-size: 1rem;
-  color: #64748b;
-  margin-top: 0.3rem;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.95rem;
+  color: #7a92ae;
+  margin-top: 0.2rem;
+  font-weight: 500;
 }
 
-/* ── KPIs Glass ── */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #1a2b45;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* ── KPIs (Letra como el ejemplo) ── */
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .kpiCard {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 24px;
+  background: #fff;
+  border-radius: 20px;
   padding: 1.8rem;
-  box-shadow: 0 10px 30px rgba(21, 101, 192, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .kpiCard p {
-  font-family: var(--ffb, 'DM Sans', sans-serif);
+  font-family: var(--font-geist-sans), sans-serif;
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 700;
   color: #7a92ae;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
-}
-
-.kpiCard h3 {
-  font-family: var(--ff, 'Sora', sans-serif);
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #1a2b45;
   margin: 0;
 }
 
-.kpiCard span {
-  font-family: var(--ffb, 'DM Sans', sans-serif);
-  font-size: 0.8rem;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 1rem;
+.kpiCard h3 {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900; /* Súper bold como el ejemplo */
+  color: #1a2b45;
+  margin: 0;
+  letter-spacing: -0.03em;
 }
 
-.trend { color: #2e7d32 !important; font-weight: 700; }
-.warning { color: #f57c00 !important; font-weight: 700; }
+.kpiCard span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
 
-/* ── Charts Grid Glass ── */
+.trend { color: #2e7d32; }
+.warning { color: #f57c00; }
+
+/* ── Charts Grid ── */
 .chartsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -169,160 +149,90 @@
 }
 
 .chartCard, .chartCardFull {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
   padding: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.05);
 }
 .chartCardFull { grid-column: span 2; }
 
 .chartCard h3, .chartCardFull h3 {
-  font-family: var(--ff, 'Sora', sans-serif);
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900; /* Títulos de sección fuertes */
   color: #1a2b45;
   margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-.chartCard h3::before {
-  content: '';
-  width: 4px; height: 18px;
-  background: #1565C0;
-  border-radius: 4px;
+  letter-spacing: -0.02em;
 }
 
-/* ── Custom Doughnut Technical ── */
-.chartFlex {
-  display: flex;
-  align-items: center;
-  gap: 3rem;
-}
-
-.doughnutContainer {
-  position: relative;
-  width: 180px; height: 180px;
-  flex-shrink: 0;
-}
-
-.doughnutSvg { width: 100%; height: 100%; }
-.doughnutSegment { transition: stroke-dashoffset 1s ease-out; }
-
-.doughnutCenter {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-.doughnutCenter span {
-  display: block;
-  font-size: 0.75rem;
-  color: #7a92ae;
-  text-transform: uppercase;
-  font-weight: 800;
-}
+/* Doughnut Center */
 .doughnutCenter strong {
-  font-family: var(--ff, 'Sora', sans-serif);
-  font-size: 1.6rem;
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
   color: #1a2b45;
 }
 
-/* Legend */
-.legend {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-}
 .legendItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--ffb, 'DM Sans', sans-serif);
-  font-size: 0.9rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid rgba(0,0,0,0.03);
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
-.legendLabel { display: flex; align-items: center; gap: 0.8rem; color: #475569; }
-.dot { width: 10px; height: 10px; border-radius: 50%; }
-.legendValue { font-weight: 800; color: #1a2b45; }
+.legendValue { font-weight: 900; color: #1a2b45; }
 
-/* ── Bars ── */
-.barList { display: flex; flex-direction: column; gap: 1.5rem; }
-.barItem { display: flex; flex-direction: column; gap: 0.6rem; }
+/* Bars */
 .barLabel {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-.barTrack {
-  height: 8px;
-  background: rgba(226, 232, 240, 0.6);
-  border-radius: 100px;
-}
-.barFill {
-  height: 100%;
-  border-radius: 100px;
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a2b45;
 }
 
-/* Income List Glass */
-.incomeList { display: flex; flex-direction: column; gap: 1rem; }
-.incomeItem {
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  transition: all 0.3s;
+/* Income List */
+.incomeItem strong {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #7a92ae;
 }
-.incomeItem:hover {
-  transform: scale(1.02) translateX(5px);
-  background: #fff;
+.incomeInfo p {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1a2b45;
 }
-.incomeIcon {
-  width: 44px; height: 44px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  display: grid; place-items: center;
-  color: #2e7d32;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+.percentage {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 900;
 }
-.incomeInfo { flex: 1; }
-.incomeInfo strong { font-size: 0.9rem; color: #7a92ae; }
-.incomeInfo p { font-family: var(--ff, 'Sora', sans-serif); font-size: 1.2rem; font-weight: 800; color: #1a2b45; }
-.percentage { font-size: 0.8rem; font-weight: 800; color: #1565C0; background: #e0f2fe; padding: 0.3rem 0.6rem; border-radius: 8px; }
 
 /* Asesores */
-.asesorGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.2rem;
-}
 .asesorCard {
-  background: rgba(255, 255, 255, 0.5);
-  padding: 1.8rem;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: #fff;
+  border: 1px solid #f1f5f9;
 }
-.asesorInfo strong { display: block; font-size: 1.1rem; color: #1a2b45; }
-.asesorInfo p { font-size: 0.85rem; color: #7a92ae; }
-.miniStat { text-align: right; }
-.miniStat strong { font-family: var(--ff, 'Sora', sans-serif); font-size: 1.6rem; color: #1565C0; }
+.asesorInfo strong {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a2b45;
+}
+.miniStat strong {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #1565C0;
+}
+
+/* Loading */
+.loading {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+}
 
 @media (max-width: 1024px) {
   .kpiGrid { grid-template-columns: repeat(2, 1fr); }
   .chartsGrid { grid-template-columns: 1fr; }
-  .chartFlex { flex-direction: column; gap: 2rem; }
 }
