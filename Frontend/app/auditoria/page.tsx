@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../CSS/Admin/Auditoria.module.css';
+import { BACKEND_URL } from '@/lib/config';
 
 interface AuditLog {
   id: number;
@@ -27,7 +28,7 @@ export default function AuditoriaPage() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/auditoria/logs');
+      const res = await fetch(`${BACKEND_URL}/api/auditoria/logs`);
       const data = await res.json();
       if (data.status === 'OK') {
         setLogs(data.logs);
