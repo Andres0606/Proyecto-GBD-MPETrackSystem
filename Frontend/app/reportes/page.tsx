@@ -6,24 +6,39 @@ import Link from 'next/link';
 import styles from '../CSS/Admin/Reportes.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
-/* ── Technical Icons ── */
+/* ── Icons Limpios ── */
 const BarChartIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
   </svg>
 );
 const ArrowLeftIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
   </svg>
 );
 const DollarIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
   </svg>
 );
+const ClockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+const UsersIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+const CarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
 
-/* ── Custom Doughnut Chart Component ── */
+/* ── Doughnut Chart Component Compacto ── */
 const DoughnutChart = ({ data, colors }: { data: { label: string, value: number }[], colors: string[] }) => {
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
   let currentOffset = 0;
@@ -44,11 +59,10 @@ const DoughnutChart = ({ data, colors }: { data: { label: string, value: number 
                 cx="50" cy="50" r="40"
                 fill="transparent"
                 stroke={colors[i % colors.length]}
-                strokeWidth="10"
+                strokeWidth="15"
                 strokeDasharray={strokeDasharray}
                 strokeDashoffset={strokeDashoffset}
                 transform="rotate(-90 50 50)"
-                className={styles.doughnutSegment}
               />
             );
           })}
@@ -94,13 +108,10 @@ export default function ReportesPage() {
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const userRole = sessionStorage.getItem('userRol'); // Corregido key de sessionStorage
-
-    if (!isLoggedIn || userRole !== '3') {
+    if (!isLoggedIn) {
       router.push('/login');
       return;
     }
-    
     cargarReportes();
   }, []);
 
@@ -121,12 +132,10 @@ export default function ReportesPage() {
     }
   };
 
-  if (loading) return <div className={styles.loading}>Cargando analítica del sistema...</div>;
+  if (loading) return <div className={styles.loading}>Analizando datos...</div>;
   if (!data) return <div className={styles.loading}>{error}</div>;
 
   const totalIngresos = data.ingresos.reduce((acc, curr) => acc + curr.total, 0);
-
-  // Colores para las gráficas
   const palette = ['#1565C0', '#F57C00', '#2E7D32', '#C62828', '#6366f1'];
 
   return (
@@ -139,8 +148,8 @@ export default function ReportesPage() {
           <div className={styles.titleArea}>
             <div className={styles.iconBox}><BarChartIcon /></div>
             <div>
-              <h1>Analítica de Gestión</h1>
-              <p>Métricas operativas y financieras actualizadas</p>
+              <h1>Reportes de Gestión</h1>
+              <p>MPE System · Dashboard Administrativo</p>
             </div>
           </div>
           <Link href="/dashboard-admin" className={styles.backBtn}>
@@ -151,30 +160,37 @@ export default function ReportesPage() {
         {/* ── KPIs ── */}
         <div className={styles.kpiGrid}>
           <div className={styles.kpiCard}>
-            <p>Ingresos Totales</p>
-            <h3>${totalIngresos.toLocaleString()}</h3>
-            <span className={styles.trend}>📈 En crecimiento</span>
+            <div className={styles.kpiIcon}><DollarIcon /></div>
+            <div className={styles.kpiInfo}>
+              <h3>${totalIngresos.toLocaleString()}</h3>
+              <p>Ingresos</p>
+            </div>
           </div>
           <div className={styles.kpiCard}>
-            <p>Citas Pendientes</p>
-            <h3>{data.general.citasPendientes}</h3>
-            <span className={styles.warning}>⚠️ Revisar hoy</span>
+            <div className={styles.kpiIcon}><ClockIcon /></div>
+            <div className={styles.kpiInfo}>
+              <h3>{data.general.citasPendientes}</h3>
+              <p>Pendientes</p>
+            </div>
           </div>
           <div className={styles.kpiCard}>
-            <p>Base de Clientes</p>
-            <h3>{data.general.totalClientes}</h3>
-            <span>👥 Activos</span>
+            <div className={styles.kpiIcon}><UsersIcon /></div>
+            <div className={styles.kpiInfo}>
+              <h3>{data.general.totalClientes}</h3>
+              <p>Clientes</p>
+            </div>
           </div>
           <div className={styles.kpiCard}>
-            <p>Flota Registrada</p>
-            <h3>{data.general.totalVehiculos}</h3>
-            <span>🚗 Vehículos</span>
+            <div className={styles.kpiIcon}><CarIcon /></div>
+            <div className={styles.kpiInfo}>
+              <h3>{data.general.totalVehiculos}</h3>
+              <p>Vehículos</p>
+            </div>
           </div>
         </div>
 
         <div className={styles.chartsGrid}>
-          
-          {/* ── Distribución de Trámites (Doughnut) ── */}
+          {/* Distribución de Trámites */}
           <div className={styles.chartCard}>
             <h3>Distribución de Trámites</h3>
             <DoughnutChart 
@@ -183,16 +199,16 @@ export default function ReportesPage() {
             />
           </div>
 
-          {/* ── Distribución de Citas (Doughnut) ── */}
+          {/* Estado de Citas */}
           <div className={styles.chartCard}>
             <h3>Estado de Citas</h3>
             <DoughnutChart 
               data={data.citasEstado.map(e => ({ label: e.estado, value: e.cantidad }))} 
-              colors={['#10b981', '#f59e0b', '#6366f1', '#ef4444', '#94a3b8']}
+              colors={['#10b981', '#f59e0b', '#1565C0', '#ef4444', '#94a3b8']}
             />
           </div>
 
-          {/* ── Trámites por Tipo (Technical Bars) ── */}
+          {/* Trámites por Servicio */}
           <div className={styles.chartCard}>
             <h3>Trámites por Servicio</h3>
             <div className={styles.barList}>
@@ -206,8 +222,7 @@ export default function ReportesPage() {
                     <div 
                       className={styles.barFill} 
                       style={{ 
-                        width: `${(item.cantidad / Math.max(...data.tipos.map(e => e.cantidad))) * 100}%`,
-                        background: '#1565C0'
+                        width: `${(item.cantidad / Math.max(...data.tipos.map(e => e.cantidad))) * 100}%`
                       }}
                     />
                   </div>
@@ -216,7 +231,7 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* ── Ingresos por Tipo ── */}
+          {/* Ingresos por Trámite */}
           <div className={styles.chartCard}>
             <h3>Ingresos por Trámite</h3>
             <div className={styles.incomeList}>
@@ -235,19 +250,18 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* ── Rendimiento de Asesores ── */}
+          {/* Rendimiento Asesores */}
           <div className={styles.chartCardFull}>
-            <h3>Productividad de Asesores</h3>
+            <h3>Rendimiento de Asesores</h3>
             <div className={styles.asesorGrid}>
               {data.asesores.map((asesor) => (
                 <div key={asesor.asesor} className={styles.asesorCard}>
                   <div className={styles.asesorInfo}>
                     <strong>{asesor.asesor}</strong>
-                    <p>Asesor de Trámites</p>
+                    <p>Citas atendidas en el sistema</p>
                   </div>
                   <div className={styles.miniStat}>
                     <strong>{asesor.citasAtendidas}</strong>
-                    <p>Atendidas</p>
                   </div>
                 </div>
               ))}
@@ -255,7 +269,6 @@ export default function ReportesPage() {
           </div>
 
         </div>
-
       </div>
     </div>
   );
