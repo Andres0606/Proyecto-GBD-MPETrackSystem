@@ -48,16 +48,38 @@ router.get('/clases', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const result = await connection.execute(
-      'SELECT IDCLASE as "id", NOMBRECLASE as "nombre" FROM CLASEVEHICULO ORDER BY NOMBRECLASE',
+      'SELECT ID_CLASE as "id", NOMBRE as "nombre" FROM CLASE_VEHICULO ORDER BY NOMBRE',
       [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
     res.json({ status: 'OK', data: result.rows });
-  } catch (err) { 
-    try {
-      const fallback = await connection.execute('SELECT DISTINCT CLASE as "nombre" FROM VEHICULO WHERE CLASE IS NOT NULL ORDER BY CLASE', [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
-      res.json({ status: 'OK', data: fallback.rows.map(r => ({ id: r.nombre, nombre: r.nombre })) });
-    } catch (e) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
-  }
+  } catch (err) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
+  finally { if (connection) await connection.close(); }
+});
+
+router.get('/marcas', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      'SELECT ID_MARCA as "id", NOMBRE as "nombre" FROM MARCA_VEHICULO ORDER BY NOMBRE',
+      [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    res.json({ status: 'OK', data: result.rows });
+  } catch (err) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
+  finally { if (connection) await connection.close(); }
+});
+
+router.get('/lineas/:idMarca', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+    const { idMarca } = req.params;
+    const result = await connection.execute(
+      'SELECT ID_LINEA as "id", NOMBRE as "nombre" FROM LINEA_VEHICULO WHERE ID_MARCA = :1 ORDER BY NOMBRE',
+      [idMarca], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    res.json({ status: 'OK', data: result.rows });
+  } catch (err) { res.status(500).json({ status: 'ERROR', mensaje: err.message }); }
   finally { if (connection) await connection.close(); }
 });
 
@@ -192,7 +214,7 @@ router.post('/register', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const v = req.body;
-    const sqlVehiculo = `INSERT INTO VEHICULO (PLACA, MARCA, LINEA, MODELO, CLASE, NUMMOTOR, NUMCHASIS, COMBUSTIBLE, NUMEROVIN, TIPOSERVICIO, COLOR, ESTADO, PRENDADO) VALUES (:placa, :marca, :linea, :modelo, :clase, :motor, :chasis, :comb, :vin, :serv, :color, 'ACTIVO', :prendado)`;
+    const sqlVehiculo = `INSERT INTO VEHICULO (PLACA, ID_MARCA, ID_LINEA, MODELO, ID_CLASE, NUMMOTOR, NUMCHASIS, COMBUSTIBLE, NUMEROVIN, TIPOSERVICIO, COLOR, ESTADO, PRENDADO) VALUES (:placa, :marca, :linea, :modelo, :clase, :motor, :chasis, :comb, :vin, :serv, :color, 'ACTIVO', :prendado)`;
     await connection.execute(sqlVehiculo, { placa: v.placa, marca: v.marca, linea: v.linea, modelo: v.modelo, clase: v.clase, motor: v.numMotor, chasis: v.numChasis, comb: v.combustible, vin: v.numeroVin, serv: v.tipoServicio, color: v.color, prendado: v.prendado || 'N' });
     if (v.idTramite) {
       await connection.execute(`UPDATE CITA SET PLACAVEHICULO = :placa WHERE IDCITA = (SELECT IDCITA FROM TRAMITE WHERE IDTRAMITE = :idTramite)`, { placa: v.placa, idTramite: v.idTramite });
