@@ -13,11 +13,16 @@ router.get('/logs', async (req, res) => {
         a.nombreTabla as "tabla",
         a.operacion as "operacion",
         a.usuarioBD as "usuarioID",
-        NVL(p.nombres || ' ' || p.apellidos, a.usuarioBD) as "responsable",
         CASE 
-          WHEN a.usuarioBD = 'ADMIN' THEN 'SISTEMA / DB'
-          WHEN a.usuarioBD = 'CLIENTE_EXTERNO' THEN 'CLIENTE (Externo)'
-          ELSE 'OPERADOR (Cédula: ' || a.usuarioBD || ')'
+          WHEN p.nombres IS NOT NULL THEN p.nombres || ' ' || p.apellidos
+          WHEN a.usuarioBD = 'ADMIN' THEN 'SISTEMA AUTOMÁTICO'
+          WHEN a.usuarioBD = 'CLIENTE_EXTERNO' THEN 'USUARIO EXTERNO'
+          ELSE 'OPERADOR: ' || a.usuarioBD
+        END as "responsable",
+        CASE 
+          WHEN a.usuarioBD = 'ADMIN' THEN 'ADMINISTRADOR DB'
+          WHEN a.usuarioBD = 'CLIENTE_EXTERNO' THEN 'CLIENTE (SIN CUENTA)'
+          ELSE 'GESTIÓN MANUAL'
         END as "cargo",
         TO_CHAR(a.fecha, 'DD/MM/YYYY HH24:MI:SS') as "fecha",
         a.idRegistroAfectado as "idRegistro",

@@ -201,15 +201,18 @@
 }
 
 .userName {
-  color: #1e293b;
-  font-size: 0.9rem;
+  color: #0f172a; /* Azul casi negro para máximo contraste */
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: block;
 }
 
 .userRole {
-  font-size: 0.7rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #475569; /* Gris oscuro para que se lea bien */
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .detalle {
