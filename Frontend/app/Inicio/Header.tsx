@@ -4,14 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../CSS/Header.module.css';
+import Logo from '../components/Logo';
 
 /* ── Icons ── */
-const CarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
-    <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="17.5" r="2.5" />
-  </svg>
-);
 const UserIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
@@ -70,7 +65,7 @@ export default function Header({ onLoginClick, textoBoton = 'Ingresar' }: Header
       {/* Logo */}
       <Link href="/" className={styles.logo}>
         <span className={styles.logoMark}>
-          <CarIcon />
+          <Logo size={28} />
         </span>
         <span className={styles.logoText}>
           MPE <strong>SYSTEM</strong>

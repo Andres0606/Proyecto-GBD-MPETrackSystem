@@ -3,14 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from '../CSS/Sidebar.module.css';
+import Logo from '../components/Logo';
 
-const CarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
-    <circle cx="7.5" cy="17.5" r="2.5" />
-    <circle cx="16.5" cy="17.5" r="2.5" />
-  </svg>
-);
 
 const HomeIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -65,7 +59,7 @@ export default function Sidebar() {
     <aside className={styles.sidebar}>
       <Link href="/" className={styles.logo}>
         <span className={styles.logoMark}>
-          <CarIcon />
+          <Logo size={28} />
         </span>
         <span className={styles.logoText}>
           MPE <strong>SYSTEM</strong>
