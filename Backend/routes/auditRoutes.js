@@ -2,22 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { oracledb } = require('../config/db');
 
-// Obtener todos los registros de auditoría
+// Obtener todos los registros de auditoría con detalles del responsable
 router.get('/logs', async (req, res) => {
   let connection;
   try {
     connection = await oracledb.getConnection();
     const sql = `
       SELECT 
-        idAuditoria as "id",
-        nombreTabla as "tabla",
-        operacion as "operacion",
-        usuarioBD as "usuario",
-        TO_CHAR(fecha, 'DD/MM/YYYY HH24:MI:SS') as "fecha",
-        idRegistroAfectado as "idRegistro",
-        detalleCambio as "detalle"
-      FROM AUDITORIA
-      ORDER BY fecha DESC
+        a.idAuditoria as "id",
+        a.nombreTabla as "tabla",
+        a.operacion as "operacion",
+        a.usuarioBD as "usuarioID",
+        NVL(p.nombres || ' ' || p.apellidos, a.usuarioBD) as "responsable",
+        CASE 
+          WHEN a.usuarioBD = 'ADMIN' THEN 'SISTEMA / DB'
+          WHEN a.usuarioBD = 'CLIENTE_EXTERNO' THEN 'CLIENTE (Externo)'
+          ELSE 'OPERADOR (Cédula: ' || a.usuarioBD || ')'
+        END as "cargo",
+        TO_CHAR(a.fecha, 'DD/MM/YYYY HH24:MI:SS') as "fecha",
+        a.idRegistroAfectado as "idRegistro",
+        a.detalleCambio as "detalle"
+      FROM AUDITORIA a
+      LEFT JOIN PERSONA p ON a.usuarioBD = TO_CHAR(p.nDocumento)
+      ORDER BY a.fecha DESC
     `;
     const result = await connection.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', logs: result.rows });
