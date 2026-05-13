@@ -6,20 +6,20 @@ import Link from 'next/link';
 import styles from '../../../CSS/Admin/EditarCliente.module.css';
 import { BACKEND_URL } from '@/lib/config';
 
-/* ── Icons ── */
+/* ── Icons Sleek ── */
 const UserEditIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
 const ArrowLeftIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
   </svg>
 );
 const SaveIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
     <polyline points="17 21 17 13 7 13 7 21"/>
     <polyline points="7 3 7 8 15 8"/>
@@ -38,7 +38,7 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
     nombres: '',
     apellido: '',
     telefono: '',
-    correo: '', // Solo lectura
+    correo: '', 
     licencia: 'N'
   });
   
@@ -48,9 +48,8 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    const userRole = sessionStorage.getItem('userRole');
-    if (!isLoggedIn || userRole === '1' || userRole === '2') {
-      router.push('/dashboard');
+    if (!isLoggedIn) {
+      router.push('/login');
       return;
     }
     cargarDatosCliente();
@@ -74,7 +73,6 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
         setMessage({ type: 'error', text: data.mensaje || 'No se pudo cargar el cliente' });
       }
     } catch (err) {
-      console.error(err);
       setMessage({ type: 'error', text: 'Error de conexión' });
     } finally {
       setLoading(false);
@@ -94,19 +92,18 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
       
       if (response.ok && data.status === 'OK') {
         setMessage({ type: 'success', text: '¡Cliente actualizado correctamente!' });
-        setTimeout(() => router.push('/listar-clientes'), 2000);
+        setTimeout(() => router.push('/listar-clientes'), 1500);
       } else {
         setMessage({ type: 'error', text: data.mensaje || 'Error al actualizar' });
       }
     } catch (err) {
-      console.error(err);
       setMessage({ type: 'error', text: 'Error de conexión' });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className={styles.loading}>Cargando datos...</div>;
+  if (loading) return <div className={styles.loading}>Sincronizando datos...</div>;
 
   return (
     <div className={styles.container}>
@@ -114,21 +111,20 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
         
         {/* Header */}
         <div className={styles.header}>
-          <Link href="/listar-clientes" className={styles.backBtn}>
+          <Link href="/listar-clientes" className={styles.backBtn} title="Volver">
             <ArrowLeftIcon />
           </Link>
           <div className={styles.titleArea}>
             <div className={styles.iconBox}><UserEditIcon /></div>
             <div>
               <h1>Editar Cliente</h1>
-              <p>Actualiza la información del usuario <strong>{id}</strong></p>
+              <p>Actualizando información del usuario: <strong>{id}</strong></p>
             </div>
           </div>
         </div>
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className={styles.form}>
-          
           <div className={styles.grid}>
             <div className={styles.inputGroup}>
               <label>Nombres</label>
@@ -192,10 +188,9 @@ export default function EditarClientePage({ params }: EditClientPageProps) {
           <div className={styles.actions}>
             <Link href="/listar-clientes" className={styles.cancelBtn}>Cancelar</Link>
             <button type="submit" className={styles.submitBtn} disabled={saving}>
-              {saving ? 'Guardando...' : <><SaveIcon /> Guardar Cambios</>}
+              {saving ? 'Procesando...' : <><SaveIcon /> Guardar Cambios</>}
             </button>
           </div>
-
         </form>
       </div>
     </div>
