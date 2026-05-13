@@ -125,8 +125,39 @@ router.get('/cotizar/:cedula/:idTramite', async (req, res) => {
     const idCliente = resCliente.rows[0].IDCLIENTE;
 
     const sql = `
+      DECLARE
+        v_valor_base NUMBER;
+        v_citas_historicas NUMBER;
+        v_descuento_pct NUMBER := 0;
+        v_precio_final NUMBER;
+        v_nivel VARCHAR2(50) := 'Estándar';
       BEGIN
-        :ret := "ADMIN"."FN_CALCULAR_TARIFA"(:idCliente, :idTramite);
+        SELECT VALORBASE INTO v_valor_base
+        FROM "ADMIN"."TIPOTRAMITE"
+        WHERE IDTIPOTRAMITE = :idTramite;
+
+        SELECT COUNT(*) INTO v_citas_historicas
+        FROM "ADMIN"."CITA"
+        WHERE IDCLIENTE = :idCliente
+        AND ESTADOCITA IN ('Atendida', 'Finalizado');
+
+        IF v_citas_historicas >= 10 THEN
+            v_nivel := 'Diamante';
+            v_descuento_pct := 15;
+        ELSIF v_citas_historicas >= 6 THEN
+            v_nivel := 'Oro';
+            v_descuento_pct := 10;
+        ELSIF v_citas_historicas >= 3 THEN
+            v_nivel := 'Plata';
+            v_descuento_pct := 5;
+        END IF;
+
+        v_precio_final := v_valor_base - (v_valor_base * (v_descuento_pct / 100));
+
+        :ret := '{"precioOriginal": ' || v_valor_base || ', "descuentoPct": ' || v_descuento_pct || ', "precioFinal": ' || v_precio_final || ', "nivel": "' || v_nivel || '"}';
+      EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            :ret := '{"error": "Trámite no encontrado"}';
       END;
     `;
     
