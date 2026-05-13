@@ -33,12 +33,6 @@ const MailIcon = () => (
     <polyline points="22,6 12,13 2,6"/>
   </svg>
 );
-const WhatsappIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.136 1.535 5.874L.057 23.215a.5.5 0 0 0 .63.63l5.34-1.478A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.95 0-3.77-.525-5.33-1.44l-.38-.226-3.938 1.09 1.09-3.938-.226-.38A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-  </svg>
-);
 const StarIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -70,7 +64,7 @@ const SEDES = [
     short: 'Sede central con atención presencial. Todos los trámites vehiculares disponibles en un solo lugar.',
     direccion: 'Calle 3C #29-21 Barrio Coralina',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 6:00 pm · Sáb 8:00 am – 1:00 pm',
     mapsUrl: 'https://maps.app.goo.gl/miNucAYGVjiu7AqT6',
     servicios: [
@@ -85,10 +79,10 @@ const SEDES = [
     tipo: 'cobertura',
     tag: 'Zona de Cobertura',
     color: 'verde',
-    short: 'Gestión asistida para trámites que deben realizarse en Restrepo. Un agente te orienta, revisa tus documentos y coordina el trámite para reducir desplazamientos innecesarios.',
-    direccion: null,
+    short: 'Gestión asistida para trámites que deben realizarse en Restrepo. Un agente te orienta, revisa tus documentos y coordina el trámite.',
+    direccion: 'Restrepo, Meta (Atención Digital/Remota)',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 5:00 pm',
     mapsUrl: 'https://maps.google.com/?q=Restrepo+Meta+Colombia',
     servicios: [
@@ -100,20 +94,21 @@ const SEDES = [
   },
   {
     id: 'acacias',
-    nombre: 'Acacias',
+    nombre: 'Acacías',
     tipo: 'cobertura',
     tag: 'Zona de Cobertura',
     color: 'verde',
-    short: 'Gestión asistida para trámites que deben realizarse en Acacías. Un agente te orienta, revisa tus documentos y coordina el proceso.',    direccion: null,
+    short: 'Gestión asistida para trámites que deben realizarse en Acacías. Un agente te orienta y coordina el proceso.',
+    direccion: 'Acacías, Meta (Atención Digital/Remota)',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 5:00 pm',
     mapsUrl: 'https://maps.google.com/?q=Acacias+Meta+Colombia',
     servicios: [
       'Acompañamiento personalizado',
       'Revisión previa de documentos',
       'Coordinación de firmas o huellas cuando aplique',
-      'Gestión del trámite en Acacias',
+      'Gestión del trámite en Acacías',
     ],
   },
   {
@@ -122,9 +117,10 @@ const SEDES = [
     tipo: 'cobertura',
     tag: 'Zona de Cobertura',
     color: 'verde',
-    short: 'Acompañamiento para trámites que deben gestionarse en Guamal. Revisamos tus documentos y te guiamos en cada paso.',    direccion: null,
+    short: 'Acompañamiento para trámites que deben gestionarse en Guamal. Revisamos tus documentos y te guiamos en cada paso.',
+    direccion: 'Guamal, Meta (Atención Digital/Remota)',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 5:00 pm',
     mapsUrl: 'https://maps.google.com/?q=Guamal+Meta+Colombia',
     servicios: [
@@ -140,9 +136,10 @@ const SEDES = [
     tipo: 'cobertura',
     tag: 'Zona de Cobertura',
     color: 'verde',
-    short: 'Gestión asistida para trámites que deben realizarse en Granada. Un agente coordina el proceso y evita desplazamientos innecesarios.',    direccion: null,
+    short: 'Gestión asistida para trámites que deben realizarse en Granada. Un agente coordina el proceso para ti.',
+    direccion: 'Granada, Meta (Atención Digital/Remota)',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 5:00 pm',
     mapsUrl: 'https://maps.google.com/?q=Granada+Meta+Colombia',
     servicios: [
@@ -158,9 +155,10 @@ const SEDES = [
     tipo: 'cobertura',
     tag: 'Zona de Cobertura',
     color: 'verde',
-    short: 'Acompañamiento para trámites que deben gestionarse en Puerto López. Un agente te orienta durante todo el proceso.',    direccion: null,
+    short: 'Acompañamiento para trámites que deben gestionarse en Puerto López. Un agente te orienta durante todo el proceso.',
+    direccion: 'Puerto López, Meta (Atención Digital/Remota)',
     telefono: '+57 311 469 1980',
-    correo: 'transmeta@hotmail.com',
+    correo: 'asesoriastramitesmpe@gmail.com',
     horario: 'Lun – Vie · 8:00 am – 5:00 pm',
     mapsUrl: 'https://maps.google.com/?q=Puerto+Lopez+Meta+Colombia',
     servicios: [
@@ -253,7 +251,6 @@ export default function SedesPage() {
                 <h2 className={styles.panelName}>{sede.nombre}</h2>
                 <p className={styles.panelDesc}>{sede.short}</p>
               </div>
-      
             </div>
 
             {/* Aviso cobertura remota */}
@@ -273,15 +270,13 @@ export default function SedesPage() {
               <div className={styles.panelLeft}>
                 <h4 className={styles.blockTitle}>Información de contacto</h4>
                 <ul className={styles.infoList}>
-                  {sede.direccion && (
-                    <li>
-                      <span className={`${styles.infoIco} ${styles[`ico_${sede.color}`]}`}><MapPinIcon /></span>
-                      <div>
-                        <span className={styles.infoLabel}>Dirección</span>
-                        <span className={styles.infoVal}>{sede.direccion}</span>
-                      </div>
-                    </li>
-                  )}
+                  <li>
+                    <span className={`${styles.infoIco} ${styles[`ico_${sede.color}`]}`}><MapPinIcon /></span>
+                    <div>
+                      <span className={styles.infoLabel}>Ubicación</span>
+                      <span className={styles.infoVal}>{sede.direccion}</span>
+                    </div>
+                  </li>
                   <li>
                     <span className={`${styles.infoIco} ${styles[`ico_${sede.color}`]}`}><PhoneIcon /></span>
                     <div>
@@ -304,12 +299,6 @@ export default function SedesPage() {
                     </div>
                   </li>
                 </ul>
-
-                <div className={styles.statsRow}>
-                 
-            
-           
-                </div>
               </div>
 
               {/* Columna derecha — servicios + acciones */}
@@ -327,7 +316,6 @@ export default function SedesPage() {
                 </ul>
 
                 <div className={styles.cardActions}>
-                 
                   {sede.tipo === 'oficina' ? (
                     <a
                       href={sede.mapsUrl}
@@ -347,17 +335,17 @@ export default function SedesPage() {
             </div>
 
             {/* Mapa embed — solo para oficina física */}
-{sede.tipo === 'oficina' && (
-  <div className={styles.mapEmbed}>
-    <iframe
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5091324028444!2d-73.62613299999997!3d4.119712000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3e2e41bbc16f37%3A0x55c6b23b03518b2e!2sCl.%203c%20%23%2029-21%2C%20Villavicencio%2C%20Meta!5e0!3m2!1ses!2sco!4v1777617932539!5m2!1ses!2sco"
-      allowFullScreen
-      loading="lazy"
-      referrerPolicy="no-referrer-when-downgrade"
-      title="Ubicación oficina Villavicencio"
-    />
-  </div>
-)}
+            {sede.tipo === 'oficina' && (
+              <div className={styles.mapEmbed}>
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3979.5091324028444!2d-73.62613299999997!3d4.119712000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3e2e41bbc16f37%3A0x55c6b23b03518b2e!2sCl.%203c%20%23%2029-21%2C%20Villavicencio%2C%20Meta!5e0!3m2!1ses!2sco!4v1777617932539!5m2!1ses!2sco"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Ubicación oficina Villavicencio"
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -372,7 +360,7 @@ export default function SedesPage() {
           <button className={styles.btnWhite} onClick={() => router.push('/registro')}>
             Crear cuenta gratis <ArrowIcon />
           </button>
-          <a href="tel:+573100000000" className={styles.btnGhostW}>
+          <a href="tel:+573114691980" className={styles.btnGhostW}>
             <PhoneIcon /> Llamar ahora
           </a>
         </div>

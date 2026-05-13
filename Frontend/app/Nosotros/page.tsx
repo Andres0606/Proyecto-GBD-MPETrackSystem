@@ -74,8 +74,8 @@ const VALORES = [
 const TIMELINE = [
   {
     year: '2022',
-    title: 'Nace TransMeta en Villavicencio',
-    desc: 'Una señora con más de 20 años de experiencia trabajando en tránsito decide pensionarse y fundar TransMeta, una empresa familiar para ayudar a los ciudadanos del Meta a gestionar sus trámites vehiculares sin filas.',
+    title: 'Nace MPE SYSTEM en Villavicencio',
+    desc: 'Una señora con más de 20 años de experiencia trabajando en tránsito decide pensionarse y fundar MPE SYSTEM, una empresa familiar para ayudar a los ciudadanos del Meta a gestionar sus trámites vehiculares sin filas.',
   },
   {
     year: '2023',
@@ -113,12 +113,12 @@ const AGENTES = [
 ];
 
 const FAQS = [
-  { q: '¿Cuánto cuesta usar TransMeta?',                     a: 'Nuestros honorarios dependen del tipo de trámite. Siempre te informamos el costo total antes de empezar. No hay cobros ocultos ni sorpresas.' },
+  { q: '¿Cuánto cuesta usar MPE SYSTEM?',                     a: 'Nuestros honorarios dependen del tipo de trámite. Siempre te informamos el costo total antes de empezar. No hay cobros ocultos ni sorpresas.' },
   { q: '¿Tengo que ir personalmente a las oficinas?',        a: 'Depende del trámite. Te ayudamos a reducir desplazamientos, pero si se requieren firmas, huellas o validaciones presenciales, te indicamos cuándo y dónde realizarlas.' },
   { q: '¿Cómo hago seguimiento a mi trámite?',              a: 'Una vez creada tu cuenta, puedes ver el estado de tu trámite en tiempo real desde cualquier dispositivo a través de nuestra plataforma.' },
   { q: '¿Qué pasa si me rechazan el trámite?',              a: 'Si el trámite presenta observaciones, te informamos el motivo y te orientamos para corregirlo. En caso de documentos faltantes, errores o requisitos pendientes, coordinamos contigo los ajustes necesarios para continuar el proceso.' },
   { q: '¿Tienen sede en mi municipio?',                     a: 'Nuestra sede principal está en Villavicencio, pero contamos con agentes aliados en Restrepo, Acacias, Guamal, Granada y Puerto López que atienden localmente.' },
-  { q: '¿Es una empresa confiable?',                        a: 'TransMeta es una empresa familiar fundada por una ex funcionaria de tránsito con más de 20 años de experiencia. Cada agente es una persona de confianza, conocedora del proceso en su municipio.' },
+  { q: '¿Es una empresa confiable?',                        a: 'MPE SYSTEM es una empresa familiar fundada por una ex funcionaria de tránsito con más de 20 años de experiencia. Cada agente es una persona de confianza, conocedora del proceso en su municipio.' },
 ];
 
 const SEDES = [
