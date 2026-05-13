@@ -48,6 +48,9 @@ export default function RegistrarVehiculoPage() {
   const [colores, setColores] = useState<ReferenceItem[]>([]);
   const [combustibles, setCombustibles] = useState<ReferenceItem[]>([]);
   const [tiposServicio, setTiposServicio] = useState<ReferenceItem[]>([]);
+  const [marcas, setMarcas] = useState<ReferenceItem[]>([]);
+  const [lineas, setLineas] = useState<ReferenceItem[]>([]);
+  const [clases, setClases] = useState<ReferenceItem[]>([]);
 
   const [vehiculo, setVehiculo] = useState({
     placa: '',
@@ -81,26 +84,50 @@ export default function RegistrarVehiculoPage() {
 
   const cargarListas = async () => {
     try {
-      const [resCol, resComb, resServ] = await Promise.all([
+      const [resCol, resComb, resServ, resMarcas, resClases] = await Promise.all([
         fetch(`${BACKEND_URL}/api/vehiculos/colores`),
         fetch(`${BACKEND_URL}/api/vehiculos/combustibles`),
         fetch(`${BACKEND_URL}/api/vehiculos/tipos-servicio`),
+        fetch(`${BACKEND_URL}/api/vehiculos/marcas`),
+        fetch(`${BACKEND_URL}/api/vehiculos/clases`),
       ]);
 
       const dataCol = await resCol.json();
       const dataComb = await resComb.json();
       const dataServ = await resServ.json();
+      const dataMarcas = await resMarcas.json();
+      const dataClases = await resClases.json();
 
       if (dataCol.status === 'OK') setColores(dataCol.data);
       if (dataComb.status === 'OK') setCombustibles(dataComb.data);
       if (dataServ.status === 'OK') setTiposServicio(dataServ.data);
+      if (dataMarcas.status === 'OK') setMarcas(dataMarcas.data);
+      if (dataClases.status === 'OK') setClases(dataClases.data);
     } catch (err) {
       console.error('Error cargando listas:', err);
     }
   };
 
+  useEffect(() => {
+    if (vehiculo.marca) {
+      fetch(`${BACKEND_URL}/api/vehiculos/lineas/${vehiculo.marca}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'OK') setLineas(data.data);
+        })
+        .catch(err => console.error('Error cargando líneas:', err));
+    } else {
+      setLineas([]);
+    }
+  }, [vehiculo.marca]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setVehiculo({ ...vehiculo, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'marca') {
+      setVehiculo(prev => ({ ...prev, marca: value, linea: '' }));
+    } else {
+      setVehiculo(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -181,11 +208,25 @@ export default function RegistrarVehiculoPage() {
               </div>
               <div className={styles.formGroup}>
                 <label>Marca *</label>
-                <input type="text" name="marca" value={vehiculo.marca} onChange={handleChange} required />
+                <select name="marca" value={vehiculo.marca} onChange={handleChange} required>
+                  <option value="">Seleccionar Marca</option>
+                  {marcas.map((m: any, i) => (
+                    <option key={m.id || m.ID || i} value={m.id || m.ID}>
+                      {m.nombre || m.NOMBRE}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.formGroup}>
                 <label>Línea *</label>
-                <input type="text" name="linea" value={vehiculo.linea} onChange={handleChange} required />
+                <select name="linea" value={vehiculo.linea} onChange={handleChange} required disabled={!vehiculo.marca}>
+                  <option value="">{vehiculo.marca ? 'Seleccionar Línea' : 'Seleccione una Marca primero'}</option>
+                  {lineas.map((l: any, i) => (
+                    <option key={l.id || l.ID || i} value={l.id || l.ID}>
+                      {l.nombre || l.NOMBRE}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.formGroup}>
                 <label>Modelo (Año) *</label>
@@ -232,10 +273,11 @@ export default function RegistrarVehiculoPage() {
                 <label>Clase *</label>
                 <select name="clase" value={vehiculo.clase} onChange={handleChange} required>
                   <option value="">Seleccionar Clase</option>
-                  <option value="Automóvil">Automóvil</option>
-                  <option value="Camioneta">Camioneta</option>
-                  <option value="Motocicleta">Motocicleta</option>
-                  <option value="Camión">Camión</option>
+                  {clases.map((c: any, i) => (
+                    <option key={c.id || c.ID || i} value={c.id || c.ID}>
+                      {c.nombre || c.NOMBRE}
+                    </option>
+                  ))}
                 </select>
               </div>
 
