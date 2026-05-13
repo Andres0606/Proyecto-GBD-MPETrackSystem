@@ -150,7 +150,6 @@ router.get('/pendientes/:cedulaAsesor', async (req, res) => {
         fechaSolicitud as "fechaSolicitud",
         1 as "esSuEspecialidad"
       FROM TABLE(fn_get_citas_asesor_coll(:1))
-      WHERE fechaProgramada IS NULL
       ORDER BY fechaSolicitud ASC
     `;
     // Enviamos la cédula del asesor para filtrar por su sede/especialidad
