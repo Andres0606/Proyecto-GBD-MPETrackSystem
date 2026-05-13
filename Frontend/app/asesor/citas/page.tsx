@@ -97,6 +97,12 @@ const AlertIcon = () => (
     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
   </svg>
 );
+const LocationIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
 interface CitaPendiente {
   idCita: number;
@@ -106,8 +112,8 @@ interface CitaPendiente {
   vehiculo: string;
   tipoTramite: string;
   valorBase: number;
-  fechaSolicitud: string;
   esSuEspecialidad: number;
+  sede?: string;
 }
 
 interface CitaAgendada {
@@ -115,8 +121,8 @@ interface CitaAgendada {
   cliente: string;
   telefono: string;
   vehiculo: string;
-  tipoTramite: string;
   fechaProgramada: string;
+  sede?: string;
 }
 
 export default function AsesorCitasPage() {
@@ -386,6 +392,9 @@ const confirmarInasistenciaCita = async () => {
                         <VehicleIcon /><strong>Vehículo:</strong> {cita.vehiculo || 'No aplica'}
                       </div>
                       <div className={styles.infoRow}>
+                        <LocationIcon /><strong>Sede:</strong> {cita.sede || 'No asignada'}
+                      </div>
+                      <div className={styles.infoRow}>
                         <MoneyIcon /><strong>Valor base:</strong> ${cita.valorBase?.toLocaleString()}
                       </div>
                       <div className={styles.infoRow}>
@@ -438,6 +447,9 @@ const confirmarInasistenciaCita = async () => {
                       </div>
                       <div className={styles.infoRow}>
                         <VehicleIcon /><strong>Vehículo:</strong> {cita.vehiculo || 'No aplica'}
+                      </div>
+                      <div className={styles.infoRow}>
+                        <LocationIcon /><strong>Sede:</strong> {cita.sede || 'No asignada'}
                       </div>
                       <div className={`${styles.infoRow} ${styles.infoRowVerde}`}>
                         <CalendarIcon /><strong>Programada:</strong>{' '}
