@@ -455,42 +455,42 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* Matriz de Distribución por Sede (SOLO EN VISTA GENERAL) */}
+          {/* Ranking Comparativo de Sedes (REEMPLAZA A LA MATRIZ ANTERIOR) */}
           {selectedSede === 'General' && (
             <div className={styles.chartCardFull}>
               <div className={styles.cardHeader}>
                 <div className={styles.cardTitle}>
-                  <h3>Distribución Geográfica de Trámites</h3>
-                  <p className={styles.cardDesc}>Comparativa directa de la demanda de cada trámite entre los diferentes municipios (Mayo 2026).</p>
+                  <h3>Ranking Comparativo de Sedes</h3>
+                  <p className={styles.cardDesc}>Comparación visual del volumen de trámites procesados entre los 6 municipios (Mayo 2026).</p>
                 </div>
               </div>
-              <div className={styles.tableWrapper}>
-                <table className={styles.biTable}>
-                  <thead>
-                    <tr>
-                      <th>Trámite</th>
-                      <th style={{ textAlign: 'center' }}>Villavo</th>
-                      <th style={{ textAlign: 'center' }}>Restrepo</th>
-                      <th style={{ textAlign: 'center' }}>Acacías</th>
-                      <th style={{ textAlign: 'center' }}>Granada</th>
-                      <th style={{ textAlign: 'center' }}>Pto. López</th>
-                      <th style={{ textAlign: 'center' }}>Guamal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {biMayoRaw.map((item, idx) => (
-                      <tr key={idx}>
-                        <td><strong>{item.TRAMITE_DESC}</strong></td>
-                        <td className={item.VILLAVO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.VILLAVO || 0}</td>
-                        <td className={item.RESTREPO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.RESTREPO || 0}</td>
-                        <td className={item.ACACIAS > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.ACACIAS || 0}</td>
-                        <td className={item.GRANADA > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GRANADA || 0}</td>
-                        <td className={item.PTO_LOPEZ > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.PTO_LOPEZ || 0}</td>
-                        <td className={item.GUAMAL > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GUAMAL || 0}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              
+              <div className={styles.rankingGrid}>
+                {Object.entries(sedesTotales).map(([nombre, total], idx) => {
+                  const maxVal = Math.max(...Object.values(sedesTotales));
+                  const percentage = maxVal > 0 ? (total / maxVal) * 100 : 0;
+                  
+                  return (
+                    <div key={nombre} className={styles.rankingItem}>
+                      <div className={styles.rankingInfo}>
+                        <div className={styles.rankingName}>
+                           <span className={styles.rankNum}>{idx + 1}</span>
+                           <strong>{nombre}</strong>
+                        </div>
+                        <span className={styles.rankTotal}>{total} trámites</span>
+                      </div>
+                      <div className={styles.rankTrack}>
+                        <div 
+                          className={styles.rankFill} 
+                          style={{ 
+                            width: `${percentage}%`,
+                            background: `linear-gradient(90deg, ${palette[idx % palette.length]} 0%, #1565C0 100%)` 
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

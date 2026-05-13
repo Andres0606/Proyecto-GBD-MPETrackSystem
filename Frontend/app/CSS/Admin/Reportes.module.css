@@ -214,10 +214,10 @@
   grid-column: span 1;
 }
 
-.chartCard h3, .chartCardFull h3 {
+.chartCard h3, .chartCardFull h3, .chartCardHalf h3 {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #1e293b !important;
   margin: 0;
   display: flex;
   align-items: center;
@@ -574,6 +574,71 @@
   color: #94a3b8;
   text-transform: uppercase;
   font-weight: 700;
+}
+
+/* ── Ranking de Sedes ── */
+.rankingGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.rankingItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.rankingInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rankingName {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.rankNum {
+  width: 24px;
+  height: 24px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.rankingName strong {
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.rankTotal {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1565C0;
+  background: #eff6ff;
+  padding: 4px 10px;
+  border-radius: 50px;
+}
+
+.rankTrack {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.rankFill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .good { color: #10b981; }
