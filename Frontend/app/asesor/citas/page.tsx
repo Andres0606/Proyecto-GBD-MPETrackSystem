@@ -112,6 +112,7 @@ interface CitaPendiente {
   vehiculo: string;
   tipoTramite: string;
   valorBase: number;
+  fechaSolicitud: string;
   esSuEspecialidad: number;
   sede?: string;
 }
@@ -121,6 +122,7 @@ interface CitaAgendada {
   cliente: string;
   telefono: string;
   vehiculo: string;
+  tipoTramite: string;
   fechaProgramada: string;
   sede?: string;
 }
