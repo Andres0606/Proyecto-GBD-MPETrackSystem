@@ -368,8 +368,55 @@
 
 .incomeVal { font-weight: 800; color: #1e293b; }
 
-.positive { color: #10b981; font-weight: 800; display: flex; align-items: center; gap: 4px; }
-.negative { color: #ef4444; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+.biGuide {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px dashed #e2e8f0;
+}
+
+.guideItem {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.guideIcon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  color: #fff;
+}
+
+.bgBlue { background: #1565C0; }
+.bgGreen { background: #10b981; }
+.bgOrange { background: #f59e0b; }
+
+.guideItem strong { font-size: 0.8rem; color: #1e293b; display: block; }
+.guideItem p { font-size: 0.65rem; color: #64748b; margin: 0; }
+
+.growthBadgePos, .growthBadgeNeg, .growthBadgeNone {
+  padding: 4px 8px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.growthBadgePos { background: #ecfdf5; color: #10b981; }
+.growthBadgeNeg { background: #fef2f2; color: #ef4444; }
+.growthBadgeNone { background: #f1f5f9; color: #94a3b8; }
+
+.activeCell {
+  background: rgba(21, 101, 192, 0.05);
+  color: #1565C0 !important;
+  font-weight: 800;
+}
 
 .colVillavo, .colRestrepo, .colAcacias, .colGranada, .colLopez, .colGuamal {
   text-align: center !important;

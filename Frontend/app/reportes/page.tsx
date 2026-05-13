@@ -285,10 +285,27 @@ export default function ReportesPage() {
           <div className={styles.chartCardFull}>
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
-                <h3>Inteligencia Operativa por Municipio</h3>
-                <p className={styles.cardDesc}>Análisis matricial de ventas y crecimiento comparativo mensual procesado en tiempo real por PL/SQL.</p>
+                <h3>Rendimiento Estratégico por Municipio</h3>
+                <p className={styles.cardDesc}>Análisis comparativo de servicios y crecimiento mensual de ingresos en las diferentes sedes.</p>
               </div>
             </div>
+
+            {/* Guía de Lectura para el Usuario */}
+            <div className={styles.biGuide}>
+              <div className={styles.guideItem}>
+                <div className={`${styles.guideIcon} ${styles.bgBlue}`}><BarChartIcon /></div>
+                <div><strong>Ventas</strong><p>Total recaudado este mes</p></div>
+              </div>
+              <div className={styles.guideItem}>
+                <div className={`${styles.guideIcon} ${styles.bgGreen}`}><TrendIcon /></div>
+                <div><strong>Crecimiento</strong><p>Comparación vs mes anterior</p></div>
+              </div>
+              <div className={styles.guideItem}>
+                <div className={`${styles.guideIcon} ${styles.bgOrange}`}><UsersIcon /></div>
+                <div><strong>Sedes</strong><p>Cantidad de citas por municipio</p></div>
+              </div>
+            </div>
+
             <div className={styles.tableWrapper}>
               <table className={styles.biTable}>
                 <thead>
@@ -318,11 +335,16 @@ export default function ReportesPage() {
                         <td><strong>{item.PERIODO}</strong></td>
                         <td>{item.TRAMITE_DESC}</td>
                         <td className={styles.incomeVal}>${item.VENTAS_MES.toLocaleString()}</td>
-                        <td className={isPositive ? styles.positive : styles.negative}>
-                          {item.VENTAS_MES_ANTERIOR ? (isPositive ? '▲ ' : '▼ ') : ''}
-                          {pct}{item.VENTAS_MES_ANTERIOR ? '%' : ''}
+                        <td>
+                          {item.VENTAS_MES_ANTERIOR ? (
+                            <span className={isPositive ? styles.growthBadgePos : styles.growthBadgeNeg}>
+                              {isPositive ? '▲' : '▼'} {pct}%
+                            </span>
+                          ) : (
+                            <span className={styles.growthBadgeNone}>N/A</span>
+                          )}
                         </td>
-                        <td className={styles.colVillavo}>{item.VILLAVO || 0}</td>
+                        <td className={item.VILLAVO > 0 ? styles.activeCell : ''}>{item.VILLAVO || 0}</td>
                         <td className={styles.colRestrepo}>{item.RESTREPO || 0}</td>
                         <td className={styles.colAcacias}>{item.ACACIAS || 0}</td>
                         <td className={styles.colGranada}>{item.GRANADA || 0}</td>
