@@ -67,13 +67,17 @@ class BiometricService {
 
       const users = result.rows;
       let bestMatch = null;
-      let minDistance = 0.7;
+      let minDistance = 0.45; // Umbral más estricto para evitar falsos positivos (era 0.7)
+
+      console.log(`Comparando rostro. Registros con Face ID: ${users.length}`);
 
       for (const user of users) {
         if (!user.FACE_DESCRIPTOR) continue;
 
         const storedDescriptor = JSON.parse(user.FACE_DESCRIPTOR);
         const distance = this.euclideanDistance(descriptor, storedDescriptor);
+        
+        console.log(`- Distancia con ${user.CORREO}: ${distance.toFixed(4)}`);
 
         if (distance < minDistance) {
           minDistance = distance;
@@ -82,6 +86,7 @@ class BiometricService {
       }
 
       if (!bestMatch) {
+        console.log("No se encontró ninguna coincidencia válida bajo el umbral de 0.45");
         throw new Error('Rostro no reconocido. Por favor usa correo y contraseña.');
       }
 
