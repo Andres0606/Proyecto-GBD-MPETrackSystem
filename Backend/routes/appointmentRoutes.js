@@ -160,10 +160,15 @@ router.get('/agendadas/:cedulaAsesor', async (req, res) => {
   try {
     connection = await oracledb.getConnection();
     const sql = `
-      SELECT * FROM vw_gestion_citas_asesor
-      WHERE "cedula_asesor" = :1
-      AND "fechaProgramada" IS NOT NULL
-      ORDER BY "fechaProgramada" ASC
+      SELECT 
+        idCita as "idCita",
+        cliente as "cliente",
+        tipoTramite as "tipoTramite",
+        sede as "sede",
+        valor as "valorBase",
+        fechaSolicitud as "fechaProgramada"
+      FROM TABLE(fn_get_citas_asesor_coll(:1))
+      ORDER BY fechaSolicitud ASC
     `;
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
