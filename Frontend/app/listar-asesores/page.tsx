@@ -5,14 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../CSS/Admin/ListarAsesores.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import Logo from '../components/Logo';
 
 /* ── Icons ── */
-const CarIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
-    <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="17.5" r="2.5" />
-  </svg>
-);
 
 const EditIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -129,7 +124,7 @@ export default function ListarAsesoresPage() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.titleSection}>
-            <div className={styles.logoMark}><CarIcon /></div>
+            <div className={styles.logoMark}><Logo size={28} /></div>
             <h1 className={styles.title}>Lista de Asesores</h1>
           </div>
           <div className={styles.buttonGroup}>

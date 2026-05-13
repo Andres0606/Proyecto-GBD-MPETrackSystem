@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../CSS/Admin/ListarClientes.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import Logo from '../components/Logo';
 
 /* ── Icons ── */
 const UsersIcon = () => (
@@ -187,7 +188,7 @@ export default function ListarClientesPage() {
             Volver al Dashboard
           </Link>
           <div className={styles.headerTitle}>
-            <div className={styles.iconContainer}><UsersIcon /></div>
+            <div className={styles.iconContainer}><Logo size={32} /></div>
             <div>
               <h1>Gestión de Clientes</h1>
               <p>Visualiza y administra todos los clientes registrados</p>

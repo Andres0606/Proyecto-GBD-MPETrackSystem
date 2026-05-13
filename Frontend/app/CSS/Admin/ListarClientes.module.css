@@ -1,28 +1,62 @@
 .container {
   min-height: 100vh;
-  background: #f8fafc;
-  padding: 40px 20px;
+  padding: 2rem;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(145deg, #dce8ff 0%, #eaf3ff 25%, #e2f0e8 60%, #fdf6e3 100%);
+  font-family: var(--ffb, 'DM Sans', sans-serif);
+}
+
+.container::before,
+.container::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  animation: blobDrift ease-in-out infinite alternate;
+}
+.container::before {
+  width: 600px; height: 600px;
+  background: rgba(21, 101, 192, 0.13);
+  top: -200px; left: -180px;
+  animation-duration: 18s;
+}
+.container::after {
+  width: 450px; height: 450px;
+  background: rgba(46, 125, 50, 0.10);
+  bottom: -150px; right: -130px;
+  animation-duration: 22s; animation-delay: -7s;
+}
+@keyframes blobDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-20px, 25px) scale(0.95); }
+  100% { transform: translate(30px, -30px) scale(1.05); }
 }
 
 .inner {
-  max-width: 1200px;
-  margin: 0 auto;
+  position: relative; z-index: 2;
+  max-width: 1200px; margin: 0 auto;
 }
 
 /* ── Header ── */
 .header {
-  margin-bottom: 30px;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  margin-bottom: 1.6rem; padding: 1rem 1.4rem;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(21, 101, 192, 0.08);
 }
 
 .backButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #64748b;
-  text-decoration: none;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
-  transition: color 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
+  color: #1565C0; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+  padding: 0.6rem 1rem; border-radius: 12px;
+  background: rgba(21, 101, 192, 0.05); border: 1px solid rgba(21, 101, 192, 0.1);
+  transition: all 0.2s;
 }
 
 .backButton:hover {
@@ -41,20 +75,12 @@
 }
 
 .iconContainer {
-  width: 56px;
-  height: 56px;
-  background: #2563eb;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
-}
-
-.iconContainer svg {
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
 }
 
 .headerTitle h1 {
@@ -71,15 +97,16 @@
 
 /* ── Buscador ── */
 .searchBox {
-  background: white;
-  padding: 15px 25px;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  margin-bottom: 30px;
-  border: 1px solid #e2e8f0;
+  gap: 12px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .searchBox svg {
@@ -106,11 +133,12 @@
 
 /* ── Tabla ── */
 .tableWrapper {
-  background: white;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 .table {
