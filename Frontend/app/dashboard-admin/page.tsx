@@ -260,15 +260,6 @@ export default function DashboardAdminPage() {
         <div className={styles.grid}>
 
           <div className={styles.card}>
-            <div className={styles.cardIcon}><UserPlusIcon /></div>
-            <h3>Crear Asesor</h3>
-            <p>Registra nuevos asesores en el sistema con sus datos y permisos</p>
-            <Link href="/crear-asesor" className={styles.cardBtn}>
-              Crear Asesor <ArrowIcon />
-            </Link>
-          </div>
-
-          <div className={styles.card}>
             <div className={styles.cardIcon}><UsersIcon /></div>
             <h3>Ver Asesores</h3>
             <p>Lista completa de todos los asesores registrados en el sistema</p>
