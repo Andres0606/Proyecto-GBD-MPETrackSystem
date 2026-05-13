@@ -118,6 +118,9 @@ export default function ReportesPage() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedSede, setSelectedSede] = useState('General');
+
+  const sedesList = ['General', 'Villavicencio', 'Restrepo', 'Acacías', 'Granada', 'Puerto López', 'Guamal'];
 
   useEffect(() => {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -151,6 +154,48 @@ export default function ReportesPage() {
   const totalIngresos = data.ingresos.reduce((acc, curr) => acc + curr.total, 0);
   const palette = ['#1565C0', '#F57C00', '#2E7D32', '#C62828', '#6366f1'];
 
+  // Lógica de filtrado dinámico
+  const biMayoRaw = data.biAnalytics?.filter(i => i.PERIODO === '2026-05') || [];
+  
+  // Si hay sede seleccionada (distinta de General), filtramos los valores de la tabla
+  const biMayo = biMayoRaw.map(item => {
+    if (selectedSede === 'General') return item;
+    
+    // Si elegimos una sede, calculamos "VENTAS_MES" solo para esa sede 
+    // y "CANTIDAD_TOTAL" solo para esa sede
+    const key = selectedSede === 'Villavicencio' ? 'VILLAVO' :
+                selectedSede === 'Restrepo' ? 'RESTREPO' :
+                selectedSede === 'Acacías' ? 'ACACIAS' :
+                selectedSede === 'Granada' ? 'GRANADA' :
+                selectedSede === 'Puerto López' ? 'PTO_LOPEZ' : 'GUAMAL';
+    
+    const qty = item[key] || 0;
+    const itemPrice = item.VENTAS_MES / (item.CANTIDAD_TOTAL || 1); // Precio promedio
+    
+    return {
+      ...item,
+      VENTAS_MES: qty * itemPrice,
+      CANTIDAD_TOTAL: qty,
+      // Para la tabla simplificada, mantenemos los otros campos para que no rompa
+    };
+  }).filter(item => selectedSede === 'General' || item.CANTIDAD_TOTAL > 0);
+
+  const totalVentasMayo = biMayo.reduce((acc, curr) => acc + curr.VENTAS_MES, 0);
+  const totalVentasAbril = biMayo.reduce((acc, curr) => acc + (curr.VENTAS_MES_ANTERIOR || 0), 0);
+  const crecimientoGlobal = totalVentasAbril > 0 ? (((totalVentasMayo - totalVentasAbril) / totalVentasAbril) * 100).toFixed(1) : '0';
+  
+  const totalCitasMayo = biMayo.reduce((acc, curr) => acc + curr.CANTIDAD_TOTAL, 0);
+
+  const sedesTotales = {
+    Villavicencio: biMayo.reduce((acc, curr) => acc + (curr.VILLAVO || 0), 0),
+    Restrepo: biMayo.reduce((acc, curr) => acc + (curr.RESTREPO || 0), 0),
+    Acacías: biMayo.reduce((acc, curr) => acc + (curr.ACACIAS || 0), 0),
+    Granada: biMayo.reduce((acc, curr) => acc + (curr.GRANADA || 0), 0),
+    'Puerto López': biMayo.reduce((acc, curr) => acc + (curr.PTO_LOPEZ || 0), 0),
+    Guamal: biMayo.reduce((acc, curr) => acc + (curr.GUAMAL || 0), 0),
+  };
+  const sedeEstrella = Object.entries(sedesTotales).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+
   return (
     <div className={styles.container}>
       <div className={styles.grid} aria-hidden />
@@ -168,6 +213,19 @@ export default function ReportesPage() {
           <Link href="/dashboard-admin" className={styles.backBtn}>
             <ArrowLeftIcon /> Volver al Dashboard
           </Link>
+        </div>
+
+        {/* ── Mini Bar de Filtros ── */}
+        <div className={styles.filterBar}>
+          {sedesList.map(sede => (
+            <button 
+              key={sede}
+              className={`${styles.filterTab} ${selectedSede === sede ? styles.activeTab : ''}`}
+              onClick={() => setSelectedSede(sede)}
+            >
+              {sede}
+            </button>
+          ))}
         </div>
 
         {/* ── KPIs ── */}
@@ -200,6 +258,49 @@ export default function ReportesPage() {
               <p>Vehículos</p>
             </div>
           </div>
+        </div>
+
+        {/* ── SECCIÓN: CONSOLIDADO {selectedSede.toUpperCase()} ── */}
+        <div className={styles.chartCardFull} style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)' }}>
+           <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>{selectedSede === 'General' ? 'Consolidado General de Operaciones' : `Rendimiento Individual: ${selectedSede}`}</h3>
+                <p className={styles.cardDesc}>
+                  {selectedSede === 'General' 
+                    ? 'Vista unificada de todas las sedes y municipios del departamento.' 
+                    : `Análisis específico de la actividad operativa en la sede de ${selectedSede}.`}
+                </p>
+              </div>
+           </div>
+           
+           <div className={styles.summaryGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
+              <div className={styles.summaryItem}>
+                 <div className={styles.summaryIcon} style={{ background: '#e0f2fe', color: '#0369a1' }}><DollarIcon /></div>
+                 <div>
+                    <span className={styles.summaryLabel}>Recaudación Mayo</span>
+                    <h4 className={styles.summaryVal}>${totalVentasMayo.toLocaleString()}</h4>
+                    <span className={styles.growthBadgePos} style={{ fontSize: '0.75rem' }}>▲ {crecimientoGlobal}% vs Abril</span>
+                 </div>
+              </div>
+              <div className={styles.summaryItem}>
+                 <div className={styles.summaryIcon} style={{ background: '#f0fdf4', color: '#15803d' }}><BarChartIcon /></div>
+                 <div>
+                    <span className={styles.summaryLabel}>Trámites Procesados</span>
+                    <h4 className={styles.summaryVal}>{totalCitasMayo} citas</h4>
+                    <small style={{ color: '#64748b' }}>{selectedSede === 'General' ? 'Todas las sedes' : `Sede ${selectedSede}`}</small>
+                 </div>
+              </div>
+              {selectedSede === 'General' && (
+                <div className={styles.summaryItem}>
+                  <div className={styles.summaryIcon} style={{ background: '#fff7ed', color: '#c2410c' }}><UsersIcon /></div>
+                  <div>
+                      <span className={styles.summaryLabel}>Sede Líder</span>
+                      <h4 className={styles.summaryVal}>{sedeEstrella}</h4>
+                      <small style={{ color: '#64748b' }}>Máxima demanda actual</small>
+                  </div>
+                </div>
+              )}
+           </div>
         </div>
 
         <div className={styles.chartsGrid}>
@@ -354,53 +455,97 @@ export default function ReportesPage() {
             </div>
           </div>
 
-          {/* Cuellos de Botella (NUEVO) */}
-          <div className={styles.chartCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <h3>Cuellos de Botella <AlertIcon /></h3>
-                <p className={styles.cardDesc}>Tiempo promedio de espera desde que el cliente solicita la cita hasta que es atendido en la sede.</p>
+          {/* Matriz de Distribución por Sede (SOLO EN VISTA GENERAL) */}
+          {selectedSede === 'General' && (
+            <div className={styles.chartCardFull}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <h3>Distribución Geográfica de Trámites</h3>
+                  <p className={styles.cardDesc}>Comparativa directa de la demanda de cada trámite entre los diferentes municipios (Mayo 2026).</p>
+                </div>
+              </div>
+              <div className={styles.tableWrapper}>
+                <table className={styles.biTable}>
+                  <thead>
+                    <tr>
+                      <th>Trámite</th>
+                      <th style={{ textAlign: 'center' }}>Villavo</th>
+                      <th style={{ textAlign: 'center' }}>Restrepo</th>
+                      <th style={{ textAlign: 'center' }}>Acacías</th>
+                      <th style={{ textAlign: 'center' }}>Granada</th>
+                      <th style={{ textAlign: 'center' }}>Pto. López</th>
+                      <th style={{ textAlign: 'center' }}>Guamal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {biMayoRaw.map((item, idx) => (
+                      <tr key={idx}>
+                        <td><strong>{item.TRAMITE_DESC}</strong></td>
+                        <td className={item.VILLAVO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.VILLAVO || 0}</td>
+                        <td className={item.RESTREPO > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.RESTREPO || 0}</td>
+                        <td className={item.ACACIAS > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.ACACIAS || 0}</td>
+                        <td className={item.GRANADA > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GRANADA || 0}</td>
+                        <td className={item.PTO_LOPEZ > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.PTO_LOPEZ || 0}</td>
+                        <td className={item.GUAMAL > 0 ? styles.activeCell : ''} style={{ textAlign: 'center' }}>{item.GUAMAL || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div className={styles.bottleneckList}>
-              {data.bottlenecks && data.bottlenecks.map((item, i) => (
-                <div key={i} className={`${styles.bottleneckItem} ${item.DIAS_PROMEDIO_ESPERA > 3 ? styles.itemBad : styles.itemGood}`}>
-                  <div className={styles.bottleneckInfo}>
-                    <strong>{item.NOMBRESEDE}</strong>
-                    <p>{item.NOMBREMUNICIPIO}</p>
-                  </div>
-                  <div className={styles.bottleneckValue}>
-                    <span>{item.DIAS_PROMEDIO_ESPERA} días</span>
-                    <small>Promedio</small>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
-          {/* Demanda por Día (NUEVO) */}
-          <div className={styles.chartCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <h3>Distribución de Carga Semanal <TrendIcon /></h3>
-                <p className={styles.cardDesc}>Mapeo de saturación por día de la semana para optimizar la asignación de asesores.</p>
+          {/* Fila Inferior: Cuellos de Botella y Carga Semanal (PEGADOS) */}
+          <div className={styles.sideBySideRow}>
+            {/* Cuellos de Botella */}
+            <div className={styles.chartCardHalf}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <h3>Eficiencia por Sede <AlertIcon /></h3>
+                  <p className={styles.cardDesc}>Tiempos promedio de espera (días).</p>
+                </div>
+              </div>
+              <div className={styles.bottleneckList}>
+                {data.bottlenecks && data.bottlenecks
+                  .filter(item => selectedSede === 'General' || item.NOMBREMUNICIPIO === selectedSede)
+                  .map((item, i) => (
+                    <div key={i} className={`${styles.bottleneckItem} ${item.DIAS_PROMEDIO_ESPERA > 3 ? styles.itemBad : styles.itemGood}`}>
+                      <div className={styles.bottleneckInfo}>
+                        <strong>{item.NOMBRESEDE}</strong>
+                        <p>{item.NOMBREMUNICIPIO}</p>
+                      </div>
+                      <div className={styles.bottleneckValue}>
+                        <span>{item.DIAS_PROMEDIO_ESPERA} días</span>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
-            <div className={styles.barList}>
-              {data.dailyDemand && data.dailyDemand.map((item, i) => (
-                <div key={i} className={styles.barItem}>
-                  <div className={styles.barLabel}>
-                    <span style={{ textTransform: 'capitalize' }}>{item.DIA_SEMANA}</span>
-                    <span>{item.PORCENTAJE_CARGA}%</span>
-                  </div>
-                  <div className={styles.barTrack}>
-                    <div 
-                      className={styles.barFill} 
-                      style={{ width: `${item.PORCENTAJE_CARGA}%`, background: 'linear-gradient(90deg, #1565C0, #1E88E5)' }}
-                    />
-                  </div>
+
+            {/* Demanda por Día */}
+            <div className={styles.chartCardHalf}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <h3>Carga Semanal <TrendIcon /></h3>
+                  <p className={styles.cardDesc}>Saturación por día (General).</p>
                 </div>
-              ))}
+              </div>
+              <div className={styles.barList}>
+                {data.dailyDemand && data.dailyDemand.map((item, i) => (
+                  <div key={i} className={styles.barItem}>
+                    <div className={styles.barLabel}>
+                      <span style={{ textTransform: 'capitalize' }}>{item.DIA_SEMANA}</span>
+                      <span>{item.PORCENTAJE_CARGA}%</span>
+                    </div>
+                    <div className={styles.barTrack}>
+                      <div 
+                        className={styles.barFill} 
+                        style={{ width: `${item.PORCENTAJE_CARGA}%`, background: 'linear-gradient(90deg, #1565C0, #1E88E5)' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
