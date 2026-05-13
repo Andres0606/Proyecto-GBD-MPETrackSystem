@@ -142,15 +142,17 @@ router.get('/pendientes/:cedulaAsesor', async (req, res) => {
     connection = await oracledb.getConnection();
     const sql = `
       SELECT 
-        idCita as "idCita",
-        cliente as "cliente",
-        tipoTramite as "tipoTramite",
-        sede as "sede",
-        valor as "valorBase",
-        fechaSolicitud as "fechaSolicitud",
+        t.idCita as "idCita",
+        t.cliente as "cliente",
+        t.tipoTramite as "tipoTramite",
+        t.sede as "sede",
+        t.valor as "valorBase",
+        t.fechaSolicitud as "fechaSolicitud",
         1 as "esSuEspecialidad"
-      FROM TABLE(fn_get_citas_asesor_coll(:1))
-      ORDER BY fechaSolicitud ASC
+      FROM TABLE(fn_get_citas_asesor_coll(:1)) t
+      JOIN CITA c ON t.idCita = c.idCita
+      WHERE c.ESTADOCITA = 'PENDIENTE'
+      ORDER BY t.fechaSolicitud ASC
     `;
     // Enviamos la cédula del asesor para filtrar por su sede/especialidad
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -170,15 +172,16 @@ router.get('/agendadas/:cedulaAsesor', async (req, res) => {
     connection = await oracledb.getConnection();
     const sql = `
       SELECT 
-        idCita as "idCita",
-        cliente as "cliente",
-        tipoTramite as "tipoTramite",
-        sede as "sede",
-        valor as "valorBase",
-        fechaSolicitud as "fechaProgramada"
-      FROM TABLE(fn_get_citas_asesor_coll(:1))
-      WHERE fechaSolicitud IS NOT NULL
-      ORDER BY fechaSolicitud ASC
+        t.idCita as "idCita",
+        t.cliente as "cliente",
+        t.tipoTramite as "tipoTramite",
+        t.sede as "sede",
+        t.valor as "valorBase",
+        t.fechaSolicitud as "fechaProgramada"
+      FROM TABLE(fn_get_citas_asesor_coll(:1)) t
+      JOIN CITA c ON t.idCita = c.idCita
+      WHERE c.ESTADOCITA = 'Agendada'
+      ORDER BY t.fechaSolicitud ASC
     `;
     const result = await connection.execute(sql, [req.params.cedulaAsesor], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     res.json({ status: 'OK', citas: result.rows });
