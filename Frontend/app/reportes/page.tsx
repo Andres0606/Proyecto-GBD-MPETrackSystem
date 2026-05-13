@@ -170,7 +170,7 @@ export default function ReportesPage() {
                       className={styles.barFill} 
                       style={{ 
                         width: `${item.cantidad > 0 ? (item.cantidad / Math.max(...estadosVisualizar.map(e => e.cantidad))) * 100 : 0}%`,
-                        background: item.estado === 'PENDIENTE' ? '#f59e0b' : item.estado === 'ACTIVO' ? '#3b82f6' : '#10b981'
+                        background: item.estado === 'PENDIENTE' ? 'linear-gradient(90deg, #FFB74D, #F57C00)' : item.estado === 'ACTIVO' ? 'linear-gradient(90deg, #42A5F5, #1565C0)' : 'linear-gradient(90deg, #66BB6A, #2E7D32)'
                       }}
                     />
                   </div>
@@ -194,7 +194,7 @@ export default function ReportesPage() {
                       className={styles.barFill} 
                       style={{ 
                         width: `${item.cantidad > 0 ? (item.cantidad / Math.max(...citasVisualizar.map(e => e.cantidad))) * 100 : 0}%`,
-                        background: item.estado === 'ATENDIDA' ? '#10b981' : item.estado === 'CANCELADA' ? '#ef4444' : '#6366f1'
+                        background: item.estado === 'ATENDIDA' ? 'linear-gradient(90deg, #66BB6A, #2E7D32)' : item.estado === 'CANCELADA' ? 'linear-gradient(90deg, #EF5350, #C62828)' : 'linear-gradient(90deg, #6366f1, #4f46e5)'
                       }}
                     />
                   </div>
