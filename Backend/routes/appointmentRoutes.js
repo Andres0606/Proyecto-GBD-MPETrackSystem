@@ -75,8 +75,8 @@ router.post('/solicitar', async (req, res) => {
     if (c.esDueno === false || c.esDueno === 'N') esDuenoStr = 'N';
 
     const sql = `
-      INSERT INTO CITA (IDCITA, IDCLIENTE, PLACAVEHICULO, TIPOTRAMITE, ESTADOCITA, FECHAHORASOLICITUD, ESELDUENO, IDCLIENTEEXTERNO, IDCLIENTEDESTINO)
-      VALUES (seq_cita.NEXTVAL, :idCliente, :placa, :idTipo, 'PENDIENTE', CURRENT_TIMESTAMP, :esDueno, :idExterno, :idDestino)
+      INSERT INTO CITA (IDCITA, IDCLIENTE, PLACAVEHICULO, TIPOTRAMITE, ESTADOCITA, FECHAHORASOLICITUD, ESELDUENO, IDCLIENTEEXTERNO, IDCLIENTEDESTINO, IDSEDE)
+      VALUES (seq_cita.NEXTVAL, :idCliente, :placa, :idTipo, 'PENDIENTE', CURRENT_TIMESTAMP, :esDueno, :idExterno, :idDestino, :idSede)
     `;
     
     await connection.execute(sql, {
@@ -85,7 +85,8 @@ router.post('/solicitar', async (req, res) => {
       idTipo: c.idTipoTramite,
       esDueno: esDuenoStr,
       idExterno: idExternoReal,
-      idDestino: idDestinoReal
+      idDestino: idDestinoReal,
+      idSede: c.idSede
     });
 
     await connection.commit();

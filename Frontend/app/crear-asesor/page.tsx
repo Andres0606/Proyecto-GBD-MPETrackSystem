@@ -40,8 +40,10 @@ export default function CrearAsesorPage() {
     correo: '',
     contrasena: '',
     especialidadTramite: '',
-    sueldo: ''
+    sueldo: '',
+    idSede: ''
   });
+  const [sedes, setSedes] = useState<{ idSede: number, nombreSede: string, nombreMunicipio: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -61,6 +63,7 @@ export default function CrearAsesorPage() {
     }
 
     cargarTiposTramite();
+    cargarSedes();
   }, [router]);
 
   const cargarTiposTramite = async () => {
@@ -74,6 +77,18 @@ export default function CrearAsesorPage() {
       console.error('Error cargando tipos de trámite:', error);
     } finally {
       setLoadingTipos(false);
+    }
+  };
+
+  const cargarSedes = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/sedes`);
+      const data = await response.json();
+      if (data.status === 'OK' && data.sedes) {
+        setSedes(data.sedes);
+      }
+    } catch (error) {
+      console.error('Error cargando sedes:', error);
     }
   };
 
@@ -106,8 +121,8 @@ export default function CrearAsesorPage() {
     }
 
     // Validaciones
-    if (!formData.cedula || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.correo || !formData.contrasena || !formData.especialidadTramite || !formData.sueldo || !formData.telefono) {
-      setError('Todos los campos marcados con * son obligatorios');
+    if (!formData.cedula || !formData.nombres || !formData.apellido || !formData.fechaNacimiento || !formData.correo || !formData.contrasena || !formData.especialidadTramite || !formData.sueldo || !formData.telefono || !formData.idSede) {
+      setError('Todos los campos marcados con * son obligatorios (incluyendo la sede)');
       return;
     }
 
@@ -125,7 +140,8 @@ export default function CrearAsesorPage() {
           cedula: parseInt(formData.cedula),
           telefono: formData.telefono ? parseInt(formData.telefono) : null,
           fechaNacimiento: fechaFormateada,
-          sueldo: parseFloat(formData.sueldo)
+          sueldo: parseFloat(formData.sueldo),
+          idSede: parseInt(formData.idSede)
         }),
       });
 
@@ -287,6 +303,24 @@ export default function CrearAsesorPage() {
                 placeholder="Ej: 1500000"
                 className={styles.input}
               />
+            </div>
+
+            <div className={styles.field}>
+              <label>Sede de Trabajo *</label>
+              <select
+                name="idSede"
+                value={formData.idSede}
+                onChange={handleChange}
+                className={styles.select}
+                required
+              >
+                <option value="">Seleccione sede de asignación</option>
+                {sedes.map((sede) => (
+                  <option key={sede.idSede} value={sede.idSede}>
+                    {sede.nombreSede} ({sede.nombreMunicipio})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

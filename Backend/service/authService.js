@@ -257,10 +257,15 @@ class AuthService {
         contrasena: data.contrasena, fechaNacimiento: data.fechaNacimiento, telefono: data.telefono
       });
       const asesorSql = `
-        INSERT INTO ASESOR (idAsesor, nDocumento, especialidadTramite, estado, sueldo)
-        VALUES (seq_asesor.NEXTVAL, :nDocumento, :especialidad, 'Activo', :sueldo)
+        INSERT INTO ASESOR (idAsesor, nDocumento, especialidadTramite, estado, sueldo, idSede)
+        VALUES (seq_asesor.NEXTVAL, :nDocumento, :especialidad, 'Activo', :sueldo, :idSede)
       `;
-      await connection.execute(asesorSql, { nDocumento: data.cedula, especialidad: data.especialidadTramite, sueldo: data.sueldo });
+      await connection.execute(asesorSql, { 
+        nDocumento: data.cedula, 
+        especialidad: data.especialidadTramite, 
+        sueldo: data.sueldo,
+        idSede: data.idSede 
+      });
       await connection.commit();
 
       // --- Enviar correo al asesor ---

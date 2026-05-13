@@ -50,6 +50,7 @@ export default function SolicitarCitaPage() {
   const [tieneLicencia, setTieneLicencia] = useState<boolean | null>(null);
 const [validandoLicencia, setValidandoLicencia] = useState(false);
   const [valorTramite, setValorTramite] = useState<number | null>(null);
+  const [sedes, setSedes] = useState<{ idSede: number, nombreSede: string, nombreMunicipio: string }[]>([]);
   const [requiereVehiculo, setRequiereVehiculo] = useState<boolean>(false);
   const [tipoDropdownOpen, setTipoDropdownOpen] = useState(false);
   const tipoDropdownRef = useRef<HTMLDivElement>(null);
@@ -73,7 +74,8 @@ const [validandoLicencia, setValidandoLicencia] = useState(false);
   const [formData, setFormData] = useState({
     idVehiculo: '',
     idTipoTramite: '',
-    cedulaDestino: ''
+    cedulaDestino: '',
+    idSede: ''
   });
 
   const idCliente = typeof window !== 'undefined' ? sessionStorage.getItem('userCedula') : null;
@@ -116,6 +118,7 @@ const cargarLicenciaCliente = async () => {
     cargarVehiculos();
     cargarTiposTramite();
     cargarLicenciaCliente();
+    cargarSedes();
   }, []);
 
   useEffect(() => {
@@ -158,6 +161,18 @@ const cargarLicenciaCliente = async () => {
       console.error('Error cargando tipos de trámite:', error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const cargarSedes = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/sedes`);
+      const data = await response.json();
+      if (data.status === 'OK' && data.sedes) {
+        setSedes(data.sedes);
+      }
+    } catch (error) {
+      console.error('Error cargando sedes:', error);
     }
   };
 
@@ -209,6 +224,12 @@ setRequiereVehiculo(
 
     if (!formData.idTipoTramite) {
       setError('Seleccione un tipo de trámite');
+      desbloquearEnvio();
+      return;
+    }
+
+    if (!formData.idSede) {
+      setError('Seleccione la oficina (Sede) donde desea realizar el trámite');
       desbloquearEnvio();
       return;
     }
@@ -331,7 +352,8 @@ const citaData: any = {
       ? formData.cedulaDestino || (esDuenioRegistrado ? null : duenioActual.cedula)
       : null,
   
-  esDueno: tipoTramiteSeleccionado === 'Traspaso' ? (esDuenioRegistrado ? 'S' : 'N') : 'S'
+  esDueno: tipoTramiteSeleccionado === 'Traspaso' ? (esDuenioRegistrado ? 'S' : 'N') : 'S',
+  idSede: parseInt(formData.idSede)
 };
 
     let citaCreada = false;
@@ -501,6 +523,25 @@ const bloquearDuplicadoLicencia =
                   <small> El valor puede variar según conceptos adicionales</small>
                 </div>
               )}
+            </div>
+
+            {/* Sede/Oficina */}
+            <div className={styles.formGroup}>
+              <label>Oficina / Sede de Atención *</label>
+              <select
+                name="idSede"
+                value={formData.idSede}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione dónde desea ser atendido</option>
+                {sedes.map((sede) => (
+                  <option key={sede.idSede} value={sede.idSede}>
+                    {sede.nombreSede} ({sede.nombreMunicipio})
+                  </option>
+                ))}
+              </select>
+              <small className={styles.infoText}>Elija la sede más cercana a su ubicación</small>
             </div>
 
             {bloquearDuplicadoLicencia && (
