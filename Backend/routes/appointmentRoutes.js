@@ -6,7 +6,8 @@ const { oracledb, getConnection } = require('../config/db');
 router.post('/solicitar', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection();
+    const { userCedula } = req.body;
+    connection = await getConnection(userCedula || 'CLIENTE_EXTERNO');
     const c = req.body;
 
     // 1. Obtener el IDCLIENTE real a partir de la cédula (NDOCUMENTO)
