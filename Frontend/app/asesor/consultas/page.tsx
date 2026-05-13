@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from '../../CSS/Asesor/Consultas.module.css';
 import { BACKEND_URL } from '@/lib/config';
+import Logo from '../../components/Logo';
 
 /* ── Icons ── */
 const ArrowLeftIcon = () => (
@@ -20,11 +21,6 @@ const ReplyIcon = () => (
   </svg>
 );
 
-const CarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-    <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h12l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
-  </svg>
-);
 
 const MessageIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -187,7 +183,7 @@ export default function AsesorConsultasPage() {
         {/* ── Header ── */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <span className={styles.logoMark}><CarIcon /></span>
+            <span className={styles.logoMark}><Logo size={32} /></span>
             <span className={styles.logoText}>MPE <strong>SYSTEM</strong></span>
           </div>
           <Link href="/dashboard-asesor" className={styles.backButton}>
