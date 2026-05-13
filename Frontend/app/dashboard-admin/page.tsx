@@ -183,7 +183,7 @@ export default function DashboardAdminPage() {
         <p className={styles.sectionTitle}>Gestión del sistema</p>
         <div className={styles.grid}>
           <div className={styles.card}>
-            <div className={styles.cardIcon} style={{ background: '#6366f1', color: 'white' }}><BarChartIcon /></div>
+            <div className={styles.cardIcon} style={{ background: '#2563eb', color: 'white' }}><BarChartIcon /></div>
             <h3>Inteligencia de Negocio</h3>
             <p>Reportes avanzados y métricas de rendimiento por sede.</p>
             <Link href="/reportes" className={styles.cardBtn}>Ver Reportes <ArrowIcon /></Link>
