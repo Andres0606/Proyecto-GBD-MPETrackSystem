@@ -49,6 +49,18 @@ router.get('/stats', async (req, res) => {
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
     );
 
+    // NUEVO: Cuellos de botella
+    const resCuellos = await connection.execute(
+      'SELECT * FROM VW_CUELLOS_BOTELLA ORDER BY DIAS_PROMEDIO_ESPERA DESC',
+      [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    // NUEVO: Demanda diaria
+    const resDemanda = await connection.execute(
+      'SELECT * FROM VW_DEMANDA_DIARIA',
+      [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
     res.json({
       status: 'OK',
       data: {
@@ -58,7 +70,9 @@ router.get('/stats', async (req, res) => {
         citasEstado: resCitasEstado.rows,
         asesores: resAsesores.rows,
         general: resGeneral.rows[0],
-        biAnalytics: resBI.rows
+        biAnalytics: resBI.rows,
+        bottlenecks: resCuellos.rows,
+        dailyDemand: resDemanda.rows
       }
     });
   } catch (err) {

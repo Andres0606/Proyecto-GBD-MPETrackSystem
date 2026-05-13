@@ -33,8 +33,18 @@ const UsersIcon = () => (
   </svg>
 );
 const CarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
+const AlertIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+);
+const TrendIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
   </svg>
 );
 
@@ -99,6 +109,8 @@ interface ReportData {
     totalClientes: number;
   };
   biAnalytics: any[];
+  bottlenecks: { NOMBRESEDE: string; NOMBREMUNICIPIO: string; DIAS_PROMEDIO_ESPERA: number; CITAS_PROCESADAS: number }[];
+  dailyDemand: { DIA_SEMANA: string; TOTAL_CITAS: number; PORCENTAJE_CARGA: number }[];
 }
 
 export default function ReportesPage() {
@@ -316,6 +328,48 @@ export default function ReportesPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Cuellos de Botella (NUEVO) */}
+          <div className={styles.chartCard}>
+            <h3>Sedes con Mayor Tiempo de Espera <AlertIcon /></h3>
+            <div className={styles.bottleneckList}>
+              {data.bottlenecks && data.bottlenecks.map((item, i) => (
+                <div key={i} className={styles.bottleneckItem}>
+                  <div className={styles.bottleneckInfo}>
+                    <strong>{item.NOMBRESEDE}</strong>
+                    <p>{item.NOMBREMUNICIPIO}</p>
+                  </div>
+                  <div className={styles.bottleneckValue}>
+                    <span className={item.DIAS_PROMEDIO_ESPERA > 3 ? styles.negative : styles.positive}>
+                      {item.DIAS_PROMEDIO_ESPERA} días
+                    </span>
+                    <small>Promedio</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Demanda por Día (NUEVO) */}
+          <div className={styles.chartCard}>
+            <h3>Distribución de Carga Semanal <TrendIcon /></h3>
+            <div className={styles.barList}>
+              {data.dailyDemand && data.dailyDemand.map((item, i) => (
+                <div key={i} className={styles.barItem}>
+                  <div className={styles.barLabel}>
+                    <span style={{ textTransform: 'capitalize' }}>{item.DIA_SEMANA}</span>
+                    <span>{item.PORCENTAJE_CARGA}%</span>
+                  </div>
+                  <div className={styles.barTrack}>
+                    <div 
+                      className={styles.barFill} 
+                      style={{ width: `${item.PORCENTAJE_CARGA}%`, background: '#6366f1' }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
