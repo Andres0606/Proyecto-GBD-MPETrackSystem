@@ -28,7 +28,7 @@ const ClockIcon = () => (
   </svg>
 );
 const UsersIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
   </svg>
 );
@@ -38,12 +38,12 @@ const CarIcon = () => (
   </svg>
 );
 const AlertIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
   </svg>
 );
 const TrendIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
   </svg>
 );
@@ -283,7 +283,12 @@ export default function ReportesPage() {
 
           {/* Analítica Avanzada por Municipios (NUEVO) */}
           <div className={styles.chartCardFull}>
-            <h3>Inteligencia Operativa por Municipio (Analítica PL/SQL)</h3>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>Inteligencia Operativa por Municipio</h3>
+                <p className={styles.cardDesc}>Análisis matricial de ventas y crecimiento comparativo mensual procesado en tiempo real por PL/SQL.</p>
+              </div>
+            </div>
             <div className={styles.tableWrapper}>
               <table className={styles.biTable}>
                 <thead>
@@ -333,7 +338,12 @@ export default function ReportesPage() {
 
           {/* Cuellos de Botella (NUEVO) */}
           <div className={styles.chartCard}>
-            <h3>Sedes con Mayor Tiempo de Espera <AlertIcon /></h3>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>Cuellos de Botella <AlertIcon /></h3>
+                <p className={styles.cardDesc}>Tiempo promedio de espera desde que el cliente solicita la cita hasta que es atendido en la sede.</p>
+              </div>
+            </div>
             <div className={styles.bottleneckList}>
               {data.bottlenecks && data.bottlenecks.map((item, i) => (
                 <div key={i} className={styles.bottleneckItem}>
@@ -354,7 +364,12 @@ export default function ReportesPage() {
 
           {/* Demanda por Día (NUEVO) */}
           <div className={styles.chartCard}>
-            <h3>Distribución de Carga Semanal <TrendIcon /></h3>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardTitle}>
+                <h3>Distribución de Carga Semanal <TrendIcon /></h3>
+                <p className={styles.cardDesc}>Mapeo de saturación por día de la semana para optimizar la asignación de asesores.</p>
+              </div>
+            </div>
             <div className={styles.barList}>
               {data.dailyDemand && data.dailyDemand.map((item, i) => (
                 <div key={i} className={styles.barItem}>
