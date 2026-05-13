@@ -68,10 +68,8 @@
 .headerLeft  { display: flex; align-items: center; gap: .7rem; }
 
 .logoMark {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: linear-gradient(135deg, #42A5F5, #1565C0);
-  display: grid; place-items: center; color: #fff; flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.35);
+  width: 40px; height: 40px; border-radius: 10px;
+  display: grid; place-items: center; flex-shrink: 0;
 }
 .logoMark svg { width: 17px; height: 17px; }
 
@@ -444,15 +442,10 @@
 }
 
 .toggleActive {
-  background: linear-gradient(135deg, #42A5F5, #1565C0);
-  color: #fff;
-  border-color: transparent;
+  background: linear-gradient(135deg, #42A5F5, #1565C0) !important;
+  color: #fff !important;
+  border-color: transparent !important;
   box-shadow: 0 4px 16px rgba(21, 101, 192, 0.28);
-}
-
-.toggleActive:hover {
-  color: #fff;
-  background: linear-gradient(135deg, #42A5F5, #1565C0);
 }
 
 .formGrid {
@@ -496,14 +489,14 @@
 }
 
 .toggleActive {
-  background: #667eea;
-  border-color: #667eea;
-  color: white;
+  background: linear-gradient(135deg, #42A5F5, #1565C0) !important;
+  border-color: transparent !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(21, 101, 192, 0.3);
 }
 
 .toggleActive:hover {
-  background: #5a67d8;
-  border-color: #5a67d8;
+  filter: brightness(1.1);
 }
 
 .formGrid {
@@ -511,6 +504,45 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-top: 1rem;
+}
+
+/* ── Checkbox Group ── */
+.checkboxGroup {
+  display: flex; align-items: center; margin-top: 10px;
+}
+
+.checkboxLabel {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.78rem; font-weight: 700; color: #3a546e;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  cursor: pointer; user-select: none;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px; height: 18px;
+  border: 1.5px solid rgba(21, 101, 192, 0.3);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid; place-items: center;
+  transition: all 0.2s;
+}
+
+.checkboxLabel input[type="checkbox"]:checked {
+  background: #1565C0;
+  border-color: #1565C0;
+}
+
+.checkboxLabel input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: #fff; font-size: 0.7rem; font-weight: bold;
+}
+
+.checkboxLabel input[type="checkbox"]:hover {
+  border-color: #1565C0;
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
 }
 
 @media (max-width: 640px) {
